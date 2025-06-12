@@ -206,3 +206,4 @@ shule/
 __pycache__/
 *.pyc
 env/
+node-v20.17.0-linux-x64/
