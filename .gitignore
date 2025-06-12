@@ -202,3 +202,7 @@ shule/
 __pycache__/
 *.pyc
 env/
+shule/
+__pycache__/
+*.pyc
+env/
