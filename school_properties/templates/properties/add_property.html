@@ -1,0 +1,105 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 0 20px 0; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">Add Property</h3>
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container" style="width: 100%; margin: 0; padding: 0;">
+        <!-- Display messages -->
+        {% if messages %}
+            <div class="alert alert-success" role="alert" style="margin: 0 0 15px 0; padding: 10px; border-radius: 15px; width: 100%;">
+                {% for message in messages %}
+                    <p style="margin: 0;">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" id="property-form" style="width: 100%;">
+            {% csrf_token %}
+            {{ form.as_p }}  <!-- Renders form fields -->
+            <button type="submit" class="btn btn-success">Add Property</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    /* Form fields styling (iPhone-like, completely round, full width) */
+    #property-form input,
+    #property-form textarea,
+    #property-form select {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 50px; /* Completely round edges */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        box-sizing: border-box; /* Ensures padding doesn't affect width */
+        font-size: 16px;
+    }
+    #property-form input:focus,
+    #property-form textarea:focus,
+    #property-form select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    /* Form labels */
+    #property-form label {
+        color: green;
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+    /* Button styling */
+    .btn-success {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 50px;
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    /* Responsive design */
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        #property-form input,
+        #property-form textarea,
+        #property-form select,
+        .btn-success {
+            padding: 12px;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,316 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{{ title }}</h2>
+        <a href="{% url 'library_create' %}" class="add-btn" style="font-size: 24px; cursor: pointer; color: #fff; text-decoration: none;" title="Add New Book">+</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters mb-4 px-3">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Title, Author, or ISBN">
+            </div>
+            <div class="col-md-4">
+                <select id="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for value, label in category_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" id="shelfLocationFilter" class="form-control" placeholder="Filter by Shelf Location">
+            </div>
+        </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals mb-4 px-3">
+        <p><strong>Overall Total Copies:</strong> <span id="overallTotalCopies">0</span></p>
+        <p><strong>Overall Available Copies:</strong> <span id="overallAvailableCopies">0</span></p>
+    </div>
+
+    <!-- Tables -->
+    <div class="tables px-3">
+        {% for category_value, category_data in books_by_category.items %}
+            <div class="category-table mb-5">
+                <h3 class="category-title">{{ category_data.label }}</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>ISBN</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Total Copies</th>
+                                <th>Available Copies</th>
+                                <th>Is Digital</th>
+                                <th>Date Created</th>
+                                <th>Date Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="book-rows" data-category="{{ category_value }}">
+                            {% for book in category_data.books %}
+                                <tr class="book-row"
+                                    data-title="{{ book.title|lower }}"
+                                    data-author="{{ book.author|lower }}"
+                                    data-isbn="{{ book.isbn|default:''|lower }}"
+                                    data-category="{{ book.category }}"
+                                    data-shelf-location="{{ book.shelf_location|default:''|lower }}">
+                                    <td class="serial-number"></td>
+                                    <td>{{ book.isbn|default:"-" }}</td>
+                                    <td>{{ book.title }}</td>
+                                    <td>{{ book.author }}</td>
+                                    <td>{{ book.total_copies }}</td>
+                                    <td>{{ book.available_copies }}</td>
+                                    <td>
+                                        {% if book.is_digital %}
+                                            <span style="color: green;">✅✅</span>
+                                        {% else %}
+                                            <span style="color: red;">❌</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ book.date_created|date:"M d, Y" }}</td>
+                                    <td>{{ book.date_updated|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'library_update' book.pk %}" class="btn btn-sm btn-outline-purple rounded-pill me-1">✏️</a>
+                                        <a href="{% url 'library_book_detail' book.pk %}" class="btn btn-sm btn-outline-primary rounded-pill me-1">ℹ️</a>
+                                        <a href="{% url 'library_book_delete' book.pk %}" class="btn btn-sm btn-outline-danger rounded-pill">🗑️</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                                <td><strong><span class="category-total-copies">0</span></strong></td>
+                                <td><strong><span class="category-available-copies">0</span></strong></td>
+                                <td colspan="4"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #fff;
+}
+.filters, .totals, .tables {
+    padding: 0 15px;
+}
+.form-control, .form-select {
+    border: none;
+    outline: 1px solid #e5e7eb;
+    border-radius: 40px;
+    background: #fefefe;
+    padding: 10px 20px;
+    font-size: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+.form-control:focus, .form-select:focus {
+    outline: 2px solid #a855f7;
+}
+.category-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 20px 0 10px;
+    border-bottom: 2px solid #e5e7eb;
+}
+.table {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.table th, .table td {
+    padding: 12px;
+    vertical-align: middle;
+}
+.table thead {
+    background: linear-gradient(45deg, #6b7280, #a855f7);
+    color: #fff;
+}
+.table-bordered {
+    border: 1px solid #e5e7eb;
+}
+.table-striped tbody tr:nth-child(odd) {
+    background: #f9fafb;
+}
+.totals p {
+    font-size: 1.1rem;
+    margin: 5px 0;
+}
+.totals strong {
+    color: #6b7280;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+.btn-outline-purple {
+    border: 1px solid #6b46c1;
+    color: #6b46c1;
+    border-radius: 40px;
+}
+.btn-outline-purple:hover {
+    background: #6b46c1;
+    color: #fff;
+}
+.btn-outline-primary {
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    border-radius: 40px;
+}
+.btn-outline-primary:hover {
+    background: #3b82f6;
+    color: #fff;
+}
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    border-radius: 40px;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+.add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #a855f7;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    text-align: center;
+}
+.add-btn:hover {
+    background: #9333ea;
+}
+@media (max-width: 576px) {
+    .form-control, .form-select {
+        border-radius: 30px;
+        padding: 8px 15px;
+        font-size: 0.95rem;
+    }
+    .category-title {
+        font-size: 1.25rem;
+        margin: 15px 0 8px;
+    }
+    .table th, .table td {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    .totals p {
+        font-size: 1rem;
+    }
+    .btn-outline-purple, .btn-outline-primary, .btn-outline-danger {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+    .add-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const shelfLocationFilter = document.getElementById('shelfLocationFilter');
+    const bookRows = document.querySelectorAll('.book-row');
+    const tables = document.querySelectorAll('.category-table');
+
+    function updateDisplay() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value;
+        const shelfLocation = shelfLocationFilter.value.toLowerCase();
+
+        let overallTotalCopies = 0;
+        let overallAvailableCopies = 0;
+
+        tables.forEach(table => {
+            const category = table.querySelector('tbody').dataset.category;
+            const rows = table.querySelectorAll('.book-row');
+            let categoryTotalCopies = 0;
+            let categoryAvailableCopies = 0;
+            let visibleRows = 0;
+
+            rows.forEach((row, index) => {
+                const title = row.dataset.title;
+                const author = row.dataset.author;
+                const isbn = row.dataset.isbn;
+                const rowCategory = row.dataset.category;
+                const rowShelfLocation = row.dataset.shelfLocation;
+
+                const matchesSearch = (
+                    title.includes(searchTerm) ||
+                    author.includes(searchTerm) ||
+                    isbn.includes(searchTerm)
+                );
+                const matchesCategory = !selectedCategory || rowCategory === selectedCategory;
+                const matchesShelfLocation = !shelfLocation || rowShelfLocation.includes(shelfLocation);
+
+                if (matchesSearch && matchesCategory && matchesShelfLocation) {
+                    row.style.display = '';
+                    visibleRows++;
+                    const totalCopies = parseInt(row.querySelector('td:nth-child(5)').textContent);
+                    const availableCopies = parseInt(row.querySelector('td:nth-child(6)').textContent);
+                    categoryTotalCopies += totalCopies;
+                    categoryAvailableCopies += availableCopies;
+                    row.querySelector('.serial-number').textContent = visibleRows;
+                } else {
+                    row.style.display = 'none';
+                    row.querySelector('.serial-number').textContent = '';
+                }
+            });
+
+            table.style.display = visibleRows > 0 ? '' : 'none';
+            table.querySelector('.category-total-copies').textContent = categoryTotalCopies;
+            table.querySelector('.category-available-copies').textContent = categoryAvailableCopies;
+
+            overallTotalCopies += categoryTotalCopies;
+            overallAvailableCopies += categoryAvailableCopies;
+        });
+
+        document.getElementById('overallTotalCopies').textContent = overallTotalCopies;
+        document.getElementById('overallAvailableCopies').textContent = overallAvailableCopies;
+    }
+
+    searchInput.addEventListener('input', updateDisplay);
+    categoryFilter.addEventListener('change', updateDisplay);
+    shelfLocationFilter.addEventListener('input', updateDisplay);
+
+    updateDisplay(); // Initial display
+});
+</script>
+{% endblock %}

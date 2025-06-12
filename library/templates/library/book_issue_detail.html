@@ -1,0 +1,328 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+{{ recipient_type }} Book Issues - {{ recipient_name }}
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{{ recipient_type }}: {{ recipient_name }}</h2>
+        <a href="{% url 'library_book_issue_create' %}" class="create-btn" style="font-size: 24px; cursor: pointer; border: 2px solid #fff; border-radius: 50px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff;">➕</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content px-0 py-5">
+        <!-- Filter -->
+        <div class="filter-section mb-4" style="background: linear-gradient(135deg, #ff6f61, #ff9a8b); padding: 16px 0;">
+            <div class="row g-3 px-4">
+                <div class="col-12">
+                    <label for="book-search" class="form-label">Book Title</label>
+                    <input type="text" id="book-search" class="form-control rounded-field" placeholder="Search book title">
+                </div>
+            </div>
+        </div>
+        <hr class="section-divider mx-4 my-3">
+
+        <!-- Totals -->
+        <div class="totals-section mb-5" style="background: linear-gradient(135deg, #6b7280, #4b5563); color: #fff; padding: 16px 0;">
+            <div class="px-4">
+                <strong>Total Books Issued: </strong><span id="total-issued">{{ total_issued }}</span><br>
+                <strong>Total Returned Books: </strong><span id="total-returned">{{ total_returned }}</span><br>
+                <strong>Total Unreturned Books: </strong><span id="total-unreturned">{{ total_unreturned }}</span>
+            </div>
+        </div>
+        <hr class="section-divider mx-4 my-3">
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-hover" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Book Title (Category)</th>
+                        <th>Issue Date</th>
+                        <th>Return Date</th>
+                        <th>Book Number/Total Copies</th>
+                        <th>Is Returned</th>
+                        <th>Date Created</th>
+                        <th>Date Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="book-table-body">
+                    {% for issue in book_issues %}
+                        <tr data-book-title="{{ issue.book.title|lower }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ issue.book.title }} ({{ issue.book.get_category_display }})</td>
+                            <td>{{ issue.issue_date }}</td>
+                            <td>{{ issue.return_date|default:"-" }}</td>
+                            <td class="available-copies">{{ issue.book_number }}/{{ issue.book.total_copies }}</td>
+                            <td class="is-returned">
+                                {% if issue.is_returned %}
+                                    ✅✅
+                                {% else %}
+                                    ❌
+                                {% endif %}
+                            </td>
+                            <td>{{ issue.date_created|date:"M d, Y, H:i" }}</td>
+                            <td>{{ issue.date_updated|date:"M d, Y, H:i" }}</td>
+                            <td>
+                                <a href="{% url 'library_book_issue_update' pk=issue.pk %}" class="btn btn-sm rounded-button" title="Update">✏️</a>
+                                <a href="{% url 'library_book_issue_delete' pk=issue.pk %}" class="btn btn-sm rounded-button" title="Delete">🗑️</a>
+                                <a href="#" class="btn btn-sm rounded-button toggle-return" data-pk="{{ issue.pk }}" title="{% if issue.is_returned %}Mark as Unreturned{% else %}Mark as Returned{% endif %}">
+                                    {% if issue.is_returned %}
+                                        ✅
+                                    {% else %}
+                                        ❌
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No books issued to this {{ recipient_type|lower }}.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Meta Tag -->
+<meta name="csrf-token" content="{{ csrf_token }}">
+
+<!-- CSS and JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+    overflow-x: hidden;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #ffffff;
+    padding: 15px 20px;
+}
+.content {
+    padding: 32px 0;
+}
+.form-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 8px;
+}
+.form-control {
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+    border-color: #3a86ff Sketching-focus-state;
+    box-shadow: 0 0 0 3px rgba(58, 64, 255, 0.2);
+    outline: none;
+}
+.rounded-field {
+    border-radius: 25px !important;
+    padding: 12px 16px;
+    height: 40px;
+}
+.rounded-button {
+    border-radius: 25px !important;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 2px solid #3a86ff;
+    color: #3a86ff;
+    text-decoration: none;
+    margin-right: 5px;
+}
+.rounded-button:hover {
+    border-color: #3267d6;
+    color: #3267d6;
+}
+.toggle-return {
+    border: 2px solid #28a745;
+    color: #28a745;
+}
+.toggle-return:hover {
+    border-color: #218838;
+    color: #218838;
+}
+.create-btn:hover {
+    border-color: #ccc;
+    color: #ccc;
+}
+.table-responsive {
+    border: none;
+    overflow-x: auto;
+}
+.table {
+    background: linear-gradient(135deg, rgba(240, 249, 255, 0.8), rgba(219, 234, 254, 0.8));
+}
+.table th,
+.table td {
+    padding: 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+}
+.table th:not(:last-child),
+.table td:not(:last-child) {
+    border-right: 1px solid #dee2e6;
+}
+.section-divider {
+    border-top: 1px solid #d1d5db;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 24px 0;
+    }
+    .form-label {
+        font-size: 0.9rem;
+    }
+    .rounded-field {
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .rounded-button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    .table th:not(:last-child),
+    .table td:not(:last-child) {
+        border-right: none;
+    }
+    .filter-section,
+    .totals-section {
+        padding: 12px 0;
+    }
+    .table {
+        min-width: 1000px;
+    }
+    .create-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+// Update totals based on visible rows
+function updateTotals() {
+    let totalIssued = 0;
+    let totalReturned = 0;
+    let totalUnreturned = 0;
+
+    $('#book-table-body tr:visible').each(function() {
+        totalIssued += 1;
+        const isReturned = $(this).find('.is-returned').text().includes('✅');
+        if (isReturned) {
+            totalReturned += 1;
+        } else {
+            totalUnreturned += 1;
+        }
+    });
+
+    $('#total-issued').text(totalIssued);
+    $('#total-returned').text(totalReturned);
+    $('#total-unreturned').text(totalUnreturned);
+}
+
+// Filter books
+function filterBooks() {
+    const search = $('#book-search').val().trim().toLowerCase();
+    
+    $('#book-table-body tr').each(function() {
+        const row = $(this);
+        const bookTitle = row.data('book-title') || '';
+        
+        // Skip rows without data attributes (e.g., empty message)
+        if (!bookTitle) {
+            row.hide();
+            return;
+        }
+        
+        row.toggle(!search || bookTitle.includes(search));
+    });
+    
+    updateTotals();
+}
+
+// Toggle return status
+$(document).ready(function() {
+    $('#book-search').on('input', filterBooks);
+    // Initial totals
+    updateTotals();
+
+    // Handle toggle return button click
+    $(document).on('click', '.toggle-return', function(e) {
+        e.preventDefault();
+        const button = $(this);
+        const pk = button.data('pk');
+        const row = button.closest('tr');
+        const isReturnedCell = row.find('.is-returned');
+        const availableCopiesCell = row.find('.available-copies');
+
+        $.ajax({
+            url: `/library/issue/${pk}/toggle-return/`,
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') || getCookie('csrftoken')
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Update is_returned cell
+                    isReturnedCell.text(response.is_returned ? '✅✅' : '❌');
+                    
+                    // Update button icon and title
+                    button.html(response.is_returned ? '✅' : '❌');
+                    button.attr('title', response.is_returned ? 'Mark as Unreturned' : 'Mark as Returned');
+                    
+                    // Update available copies
+                    const bookNumber = parseInt(availableCopiesCell.text().split('/')[0]);
+                    availableCopiesCell.text(`${bookNumber}/${response.available_copies}`);
+                    
+                    // Update totals
+                    updateTotals();
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                alert('An error occurred while toggling the return status.');
+            }
+        });
+    });
+
+    // Function to get CSRF token from cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

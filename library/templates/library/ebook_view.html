@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>View {{ document_name }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            margin: 0;
+            padding-top: 80px; /* Space for fixed topbar */
+            background-color: #f8f9fa;
+            color: #1c2526;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode {
+            background-color: #1c2526;
+            color: #ffffff;
+        }
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #2a8f44, #2b5cb8);
+        }
+        body.dark-mode .content code,
+        body.dark-mode .content pre {
+            background: #2e3a3b;
+        }
+        body.dark-mode .details p {
+            color: #ffffff;
+        }
+        body.dark-mode .translate-topbar {
+            background: #2e3a3b;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        .translate-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            padding: 12px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .header {
+            background: linear-gradient(135deg, #34c759, #3a86ff);
+            color: #ffffff;
+            padding: 20px 16px;
+            margin: 24px 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            overflow-wrap: break-word;
+        }
+        .back-btn {
+            font-size: 1.8rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: #ffffff;
+        }
+        .details {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            width: 100%;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+            margin-bottom: 2.5rem;
+        }
+        .details p {
+            margin: 0 0 1rem;
+            color: #1c2526;
+        }
+        .content {
+            font-size: 1.15rem;
+            line-height: 1.9;
+            width: 100%;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+            margin-bottom: 3rem;
+        }
+        .content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 3.5rem 0 2rem;
+        }
+        .content h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 3.5rem 0 2rem;
+        }
+        .content p {
+            margin: 0 0 2rem;
+        }
+        .content ul, .content ol {
+            padding-left: 28px;
+            margin: 0 0 2rem;
+        }
+        .content li {
+            margin-bottom: 1rem;
+        }
+        .content code {
+            background: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .content pre {
+            background: #f4f4f4;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .ai-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #3a86ff;
+            color: #ffffff;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2000;
+            transition: transform 0.2s;
+        }
+        .ai-icon:hover {
+            transform: scale(1.1);
+        }
+        .ai-button {
+            position: fixed;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 2000;
+            font-size: 1.5rem;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform: translateY(0) scale(0);
+            opacity: 0;
+        }
+        body.dark-mode .ai-button {
+            background: rgba(46, 58, 59, 0.95);
+        }
+        .ai-button.active {
+            display: flex;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .ai-button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+        body.dark-mode .ai-button:hover {
+            background: rgba(46, 58, 59, 1);
+        }
+        .ai-button span {
+            display: none; /* Emoji only for floating buttons */
+        }
+        #aiChatGPT { bottom: 140px; animation: slideIn 0.3s ease forwards; }
+        #aiDeepSeek { bottom: 220px; animation: slideIn 0.4s ease forwards; }
+        #aiGrok3 { bottom: 300px; animation: slideIn 0.5s ease forwards; }
+        #aiPrint { bottom: 380px; animation: slideIn 0.6s ease forwards; }
+        #aiTheme { bottom: 460px; animation: slideIn 0.7s ease forwards; }
+        #aiScroll { bottom: 540px; animation: slideIn 0.8s ease forwards; }
+        #aiAutoScroll { bottom: 620px; animation: slideIn 0.9s ease forwards; }
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        @media print {
+            .translate-topbar,
+            .ai-icon,
+            .ai-button,
+            .back-btn {
+                display: none !important;
+            }
+            body {
+                padding-top: 0;
+            }
+            .container {
+                padding: 0 20px;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .header {
+                margin: 24px 0;
+                padding: 20px 16px;
+                border-radius: 12px;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .details {
+                font-size: 1.15rem;
+                line-height: 1.7;
+                margin-bottom: 2.5rem;
+            }
+            .content {
+                font-size: 1.15rem;
+                line-height: 1.9;
+                margin-bottom: 3rem;
+            }
+            .content h1 {
+                font-size: 2rem;
+            }
+            .content h2 {
+                font-size: 1.8rem;
+            }
+        }
+        @media (max-width: 576px) {
+            body {
+                padding-top: 70px;
+            }
+            .container {
+                padding: 0 16px;
+            }
+            .translate-topbar {
+                padding: 10px 12px;
+            }
+            .header {
+                margin: 20px 0;
+                padding: 16px 12px;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .back-btn {
+                font-size: 1.5rem;
+            }
+            .details {
+                font-size: 1.05rem;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+            }
+            .content {
+                font-size: 1.05rem;
+                line-height: 1.8;
+                margin-bottom: 2.5rem;
+            }
+            .content h1 {
+                font-size: 1.8rem;
+                margin: 3rem 0 1.5rem;
+            }
+            .content h2 {
+                font-size: 1.6rem;
+                margin: 3rem 0 1.5rem;
+            }
+            .content ul, .content ol {
+                padding-left: 24px;
+            }
+            .ai-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.8rem;
+                bottom: 16px;
+                right: 16px;
+            }
+            .ai-button {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            #aiChatGPT { bottom: 120px; }
+            #aiDeepSeek { bottom: 190px; }
+            #aiGrok3 { bottom: 260px; }
+            #aiPrint { bottom: 330px; }
+            #aiTheme { bottom: 400px; }
+            #aiScroll { bottom: 470px; }
+            #aiAutoScroll { bottom: 540px; }
+        }
+        @media (max-width: 360px) {
+            .ai-button {
+                width: 46px;
+                height: 46px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Translate Topbar -->
+    <div class="translate-topbar">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <div class="container">
+        <!-- Document Header -->
+        <section class="header">
+            <a href="javascript:history.back()" class="back-btn">←</a>
+            <h1>{{ document_name }}</h1>
+            <span></span>
+        </section>
+
+        <!-- Document Metadata -->
+        <section class="details">
+            <p><strong>Book Title:</strong> {{ book_title }}</p>
+            <p><strong>Author:</strong> {{ book_author }}</p>
+            <p><strong>Category:</strong> {{ book_category }}</p>
+        </section>
+
+        <!-- Extracted Content -->
+        <section class="content">
+            {{ pdf_text_html|safe }}
+        </section>
+    </div>
+
+    <!-- AI Icon -->
+    <div class="ai-icon" id="aiIcon" title="Tools">
+        🚀
+    </div>
+
+    <!-- AI Floating Buttons -->
+    <button class="ai-button" id="aiChatGPT" onclick="openChatGPT()" title="Ask ChatGPT">
+        🤖 <span>ChatGPT</span>
+    </button>
+    <button class="ai-button" id="aiDeepSeek" onclick="openDeepSeek()" title="Ask DeepSeek">
+        🔍 <span>DeepSeek</span>
+    </button>
+    <button class="ai-button" id="aiGrok3" onclick="openGrok3()" title="Ask Grok3">
+        🌌 <span>Grok3</span>
+    </button>
+    <button class="ai-button" id="aiPrint" onclick="printContent()" title="Print">
+        🖨️ <span>Print</span>
+    </button>
+    <button class="ai-button" id="aiTheme" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        🌙 <span>Theme</span>
+    </button>
+    <button class="ai-button" id="aiScroll" onclick="toggleScroll()" title="Scroll to Bottom/Top">
+        ⬇️ <span>Scroll</span>
+    </button>
+    <button class="ai-button" id="aiAutoScroll" onclick="startAutoScroll()" title="Auto Scroll">
+        ↕️ <span>Auto Scroll</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+
+        // AI icon and buttons handling
+        const aiIcon = document.getElementById('aiIcon');
+        const aiButtons = [
+            document.getElementById('aiChatGPT'),
+            document.getElementById('aiDeepSeek'),
+            document.getElementById('aiGrok3'),
+            document.getElementById('aiPrint'),
+            document.getElementById('aiTheme'),
+            document.getElementById('aiScroll'),
+            document.getElementById('aiAutoScroll')
+        ];
+        let isMenuVisible = false;
+
+        aiIcon.addEventListener('click', () => {
+            isMenuVisible = !isMenuVisible;
+            aiButtons.forEach(button => {
+                button.classList.toggle('active', isMenuVisible);
+            });
+            console.log('AI buttons toggled:', isMenuVisible ? 'visible' : 'hidden');
+        });
+
+        // Hide buttons when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!aiIcon.contains(event.target) && !aiButtons.some(button => button.contains(event.target))) {
+                isMenuVisible = false;
+                aiButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+                console.log('AI buttons hidden due to click outside');
+            }
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Theme toggled:', isDark ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Scroll top/bottom
+        const scrollButton = document.getElementById('aiScroll');
+        let lastScrollTop = 0;
+        let isAtBottom = false;
+
+        function updateScrollIcon() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+            const isScrollingDown = scrollTop > lastScrollTop;
+            scrollButton.textContent = isAtBottom || !isScrollingDown ? '⬆️' : '⬇️';
+            scrollButton.title = isAtBottom || !isScrollingDown ? 'Scroll to Top' : 'Scroll to Bottom';
+            lastScrollTop = scrollTop;
+        }
+
+        function toggleScroll() {
+            if (isAtBottom || scrollButton.textContent === '⬆️') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            }
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Scrolled to:', isAtBottom || scrollButton.textContent === '⬆️' ? 'top' : 'bottom');
+        }
+
+        window.addEventListener('scroll', updateScrollIcon);
+        updateScrollIcon(); // Initial check
+
+        // Auto-scroll
+        let autoScrollInterval = null;
+
+        function startAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+                console.log('Auto-scroll stopped');
+                return;
+            }
+
+            const direction = window.confirm('Scroll up or down? Click OK for down, Cancel for up.');
+            const speed = 1; // 1px per step
+            const interval = 50; // 50ms per step
+
+            autoScrollInterval = setInterval(() => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight;
+                const clientHeight = document.documentElement.clientHeight;
+
+                if (direction) {
+                    // Scroll down
+                    if (scrollTop + clientHeight >= scrollHeight) {
+                        clearInterval(autoScrollInterval);
+                        autoScrollInterval = null;
+                        console.log('Auto-scroll stopped: reached bottom');
+                        return;
+                    }
+                    window.scrollBy(0, speed);
+                } else {
+                    // Scroll up
+                    if (scrollTop <= 0) {
+                        clearInterval(autoScrollInterval);
+                        autoScrollInterval = null;
+                        console.log('Auto-scroll stopped: reached top');
+                        return;
+                    }
+                    window.scrollBy(0, -speed);
+                }
+            }, interval);
+
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Auto-scroll started:', direction ? 'down' : 'up');
+        }
+
+        // Stop auto-scroll on user interaction
+        document.addEventListener('wheel', stopAutoScroll);
+        document.addEventListener('touchmove', stopAutoScroll);
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+                stopAutoScroll();
+            }
+        });
+
+        function stopAutoScroll() {
+            if (autoScrollInterval) {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+                console.log('Auto-scroll stopped by user interaction');
+            }
+        }
+
+        // Detect platform
+        function getPlatform() {
+            const ua = navigator.userAgent;
+            if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+            if (/Android/i.test(ua)) return 'android';
+            return 'desktop';
+        }
+
+        // Open URL with fallback
+        function openUrl(appUrl, webUrl) {
+            const start = Date.now();
+            window.location = appUrl;
+            setTimeout(() => {
+                if (Date.now() - start < 1000) {
+                    window.open(webUrl, '_blank');
+                    console.log('App not opened, fell back to:', webUrl);
+                }
+            }, 500);
+        }
+
+        // Open ChatGPT
+        function openChatGPT() {
+            const platform = getPlatform();
+            let appUrl, webUrl = 'https://chat.openai.com/';
+            if (platform === 'ios') {
+                appUrl = 'openai://';
+            } else if (platform === 'android') {
+                appUrl = 'intent://chat/#Intent;scheme=openai;package=com.openai.chatgpt;end';
+            } else {
+                appUrl = webUrl;
+            }
+            openUrl(appUrl, webUrl);
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Opened ChatGPT:', appUrl);
+        }
+
+        // Open DeepSeek
+        function openDeepSeek() {
+            const platform = getPlatform();
+            let appUrl, webUrl = 'https://chat.deepseek.com/';
+            if (platform === 'ios') {
+                appUrl = 'deepseek://';
+            } else if (platform === 'android') {
+                appUrl = 'intent://chat/#Intent;scheme=deepseek;package=com.deepseek.app;end';
+            } else {
+                appUrl = webUrl;
+            }
+            openUrl(appUrl, webUrl);
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Opened DeepSeek:', appUrl);
+        }
+
+        // Open Grok3
+        function openGrok3() {
+            const webUrl = 'https://grok.x.ai/';
+            window.open(webUrl, '_blank');
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Opened Grok3:', webUrl);
+        }
+
+        // Print content
+        function printContent() {
+            window.print();
+            isMenuVisible = false;
+            aiButtons.forEach(button => button.classList.remove('active'));
+            console.log('Print dialog triggered');
+        }
+    </script>
+</body>
+</html>

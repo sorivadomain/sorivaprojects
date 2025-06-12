@@ -1,0 +1,175 @@
+{% load static %}
+<section class="contact">
+    <h1 class="contact-main-title">Contact Us</h1>
+    <div class="contact-container">
+        <div class="contact-card">
+            <h2 class="contact-title">School Contacts</h2>
+            <ul class="contact-list">
+                <li class="contact-item">
+                    <svg class="contact-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.18 1.14.57 2.37.97 3.67 1.18.37.06.66.37.66.75v3.5c0 .55-.45 1-1 1C10.74 22 2 13.26 2 4.5c0-.55.45-1 1-1h3.5c.38 0 .69.29.75.66.21 1.3.61 2.53 1.18 3.67.18.35.09.75-.18 1.02l-2.2 2.2z"/>
+                    </svg>
+                    <a href="tel:+255763098990" class="contact-link">Call: +255763098990</a>
+                </li>
+                <li class="contact-item">
+                    <svg class="contact-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                        <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                    </svg>
+                    <a href="https://wa.me/25590987689" target="_blank" class="contact-link">WhatsApp: +25590987689</a>
+                </li>
+                <li class="contact-item">
+                    <svg class="contact-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    <a href="mailto:manusdei123@gmail.com" class="contact-link">Email: manusdei123@gmail.com</a>
+                </li>
+                <li class="contact-item">
+                    <svg class="contact-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <span>Location: Kibwigwa, Kigoma Tanzania. </span>
+                    <a href="{% url 'welcome' %}" class="contact-link">Press here</a> to view on map
+                </li>
+            </ul>
+        </div>
+        <div class="divider"></div>
+        <div class="developer-card">
+            <p class="developer-text">Developed by Soriva Company Limited, Dar es Salaam Tanzania</p>
+            <p class="developer-text">For more services like this, contact: 
+                <a href="https://wa.me/255741943155" target="_blank" class="contact-link">+255741943155</a> (WhatsApp/Call) or 
+                <a href="mailto:sorivacompany123@gmail.com" class="contact-link">sorivacompany123@gmail.com</a>
+            </p>
+            <p class="developer-text">Customer Care 24/7</p>
+        </div>
+    </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+.contact {
+    width: 100vw;
+    padding: 60px 0;
+    background: #000000; /* Black background */
+    text-align: center;
+}
+.contact-main-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #FFFFFF; /* White */
+    margin: 0 auto 40px;
+    border-bottom: 2px solid #F28C38; /* Carrot */
+    padding-bottom: 10px;
+    display: block;
+    width: fit-content;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.1s forwards;
+}
+.contact-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.contact-card {
+    background: rgba(30, 30, 30, 0.9); /* Dark gray card */
+    border: 1px solid #F28C38; /* Carrot border */
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+}
+.contact-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #F28C38; /* Carrot */
+    margin: 0 0 20px;
+    border-bottom: 1px solid #F28C38;
+    padding-bottom: 5px;
+}
+.contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #FFFFFF; /* White */
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+}
+.contact-icon {
+    width: 20px;
+    height: 20px;
+}
+.contact-link {
+    color: #FFFFFF; /* White */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+.contact-link:hover {
+    color: #F28C38; /* Carrot */
+}
+.divider {
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #F28C38, transparent);
+    margin: 30px auto;
+}
+.developer-card {
+    background: rgba(30, 30, 30, 0.9);
+    border: 1px solid #F28C38;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.3s forwards;
+}
+.developer-text {
+    color: #FFFFFF; /* White */
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.95rem;
+    margin: 10px 0;
+    text-align: center;
+}
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+    .contact {
+        padding: 40px 0;
+    }
+    .contact-main-title {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+    .contact-card, .developer-card {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .contact-title {
+        font-size: 1.4rem;
+    }
+    .contact-item {
+        font-size: 0.95rem;
+    }
+    .contact-icon {
+        width: 18px;
+        height: 18px;
+    }
+    .developer-text {
+        font-size: 0.9rem;
+    }
+    .divider {
+        width: 90%;
+    }
+}
+</style>

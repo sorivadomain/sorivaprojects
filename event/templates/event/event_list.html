@@ -1,0 +1,166 @@
+{% extends base_template %}
+{% load humanize %}
+
+{% block title %}Event List{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="m-0 flex-grow-1">Event List</h2>
+        {% if can_edit %}
+            <a href="{% url 'event_create' %}" class="btn btn-primary rounded-circle" style="font-size: 20px; padding: 10px; background: linear-gradient(45deg, #a855f7, #7e22ce);">➕</a>
+        {% endif %}
+    </div>
+
+    <!-- Events Container -->
+    <div class="events-container px-4">
+        {% for event in object_list %}
+            <div class="event-item">
+                <!-- Event Details -->
+                <div class="event-details">
+                    <!-- Core Info -->
+                    <h5 class="section-title">Event Overview</h5>
+                    <p>
+                        The event <em>{{ event.title }}</em> is a <em>{{ event.get_event_type_display }}</em> event 
+                        scheduled at <em>{{ event.location|default:"an unspecified location" }}</em>. 
+                        It starts on <em>{{ event.start_datetime|date:"Y-m-d H:i" }}</em> 
+                        and ends on <em>{{ event.end_datetime|date:"Y-m-d H:i" }}</em>.
+                    </p>
+
+                    <!-- Description -->
+                    <h5 class="section-title">Description</h5>
+                    <p>
+                        {{ event.description|default:"No description provided for this event." }}
+                    </p>
+
+                    <!-- Metadata -->
+                    <h5 class="section-title">Event History</h5>
+                    <p>
+                        Created by {{ event.created_by }} on {{ event.date_created|date:"Y-m-d H:i" }} 
+                        (<em>{{ event.date_created|naturaltime }}</em>). 
+                        Last updated on {{ event.date_updated|date:"Y-m-d H:i" }} 
+                        (<em>{{ event.date_updated|naturaltime }}</em>).
+                    </p>
+
+                    <!-- Statistics -->
+                    <h5 class="section-title">Engagement</h5>
+                    <p>
+                        This event has {{ event.files.count }} file{{ event.files.count|pluralize }} uploaded, 
+                        {% with participants=event.participants.first %}
+                            {% if participants %}
+                                {{ participants.staff.count|add:participants.parents.count }} participant{{ participants.staff.count|add:participants.parents.count|pluralize }}
+                            {% else %}
+                                0 participants
+                            {% endif %}
+                        {% endwith %}, 
+                        and {{ event.comments.count }} comment{{ event.comments.count|pluralize }}.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons d-flex flex-wrap gap-2 mt-3 mb-4">
+                    {% if can_edit %}
+                        <a href="{% url 'event_update_phase' event.pk 'phase1' %}" class="button update-btn">✅ Update</a>
+                        <a href="{% url 'event-delete' event.pk %}" class="button delete-btn">🗑️ Delete</a>
+                    {% endif %}
+                    <a href="{% url 'event-detail' event.pk %}" class="button detail-btn">🔍 View Details</a>
+                    <a href="{% url 'event-comment-add' event.pk %}" class="button comment-btn">💬 Comment</a>
+                </div>
+            </div>
+            {% if not forloop.last %}
+                <hr class="divider">
+            {% endif %}
+        {% empty %}
+            <p class="text-center text-muted">No events found.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 15px 0 10px;
+}
+.event-details p {
+    font-size: 0.95rem;
+    color: #1f2937;
+    line-height: 1.5;
+    margin: 5px 0;
+}
+.event-details p em {
+    font-style: italic;
+}
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.button:hover {
+    transform: scale(1.03);
+}
+.update-btn {
+    background: linear-gradient(45deg, #00eaff, #00b0ff);
+}
+.delete-btn {
+    background: linear-gradient(45deg, #ff6e40, #ff1744);
+}
+.detail-btn {
+    background: linear-gradient(45deg, #ffee58, #ffca28);
+}
+.comment-btn {
+    background: linear-gradient(45deg, #34c759, #10b981);
+}
+.btn-primary {
+    background: linear-gradient(45deg, #a855f7, #7e22ce);
+    border: none;
+}
+.divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 0 15px 20px;
+}
+.text-muted {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+@media (max-width: 576px) {
+    .header {
+        padding: 10px;
+    }
+    .header h2 {
+        font-size: 1.5rem;
+    }
+    .event-details p {
+        font-size: 0.85rem;
+    }
+    .button {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    .btn-primary {
+        font-size: 16px;
+        padding: 8px;
+    }
+}
+</style>
+{% endblock content %}

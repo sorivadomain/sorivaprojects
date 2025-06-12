@@ -1,0 +1,212 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{% if event.pk %}Update Participants{% else %}Add Participants{% endif %}</h2>
+        <span></span>
+    </div>
+
+    <!-- Form -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="section mb-5">
+            <h3 class="section-title">Select Participants</h3>
+            <div class="row">
+                <!-- Students Section -->
+                <div class="col-md-6">
+                    <h4>Students</h4>
+                    <div class="mb-3">
+                        <input type="checkbox" id="select-all-students" class="form-check-input">
+                        <label for="select-all-students" class="form-check-label ms-2">Select All Students</label>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="student-name-filter" class="form-control rounded-3" placeholder="Filter by Name">
+                    </div>
+                    <div class="mb-3">
+                        <select id="student-class-filter" class="form-select rounded-3">
+                            <option value="">All Classes</option>
+                            {% for class in classes %}
+                                <option value="{{ class.name }}">{{ class.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="participant-list" style="max-height: 400px; overflow-y: auto;">
+                        {% for student in students %}
+                            <div class="participant-item" data-name="{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}" data-class="{% if student.current_class %}{{ student.current_class.name }}{% endif %}">
+                                <input type="checkbox" name="students" value="{{ student.pk }}" class="form-check-input student-checkbox" {% if student in participants.parents.all %}checked{% endif %}>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% if student.passport %}{{ student.passport.url }}{% else %}{% static 'images/'|add:student.gender|lower|add:'.png' %}{% endif %}" alt="{{ student.firstname }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div>
+                                        <strong>{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}</strong><br>
+                                        Gender: {{ student.get_gender_display }} | Phone: {{ student.father_mobile_number|default:"N/A" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Staff Section -->
+                <div class="col-md-6">
+                    <h4>Staff</h4>
+                    <div class="mb-3">
+                        <input type="checkbox" id="select-all-staff" class="form-check-input">
+                        <label for="select-all-staff" class="form-check-label ms-2">Select All Staff</label>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" id="staff-name-filter" class="form-control rounded-3" placeholder="Filter by Name">
+                    </div>
+                    <div class="mb-3">
+                        <select id="staff-occupation-filter" class="form-select rounded-3">
+                            <option value="">All Occupations</option>
+                            {% for occupation in occupations %}
+                                <option value="{{ occupation }}">{{ occupation|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="participant-list" style="max-height: 400px; overflow-y: auto;">
+                        {% for staff in staff %}
+                            <div class="participant-item" data-name="{{ staff.firstname }} {{ staff.middle_name }} {{ staff.surname }}" data-occupation="{{ staff.occupation|default:'' }}">
+                                <input type="checkbox" name="staff" value="{{ staff.pk }}" class="form-check-input staff-checkbox" {% if staff in participants.staff.all %}checked{% endif %}>
+                                <div class="d-flex align-items-center">
+                                    <img src="{% if staff.passport_photo %}{{ staff.passport_photo.url }}{% else %}{% static 'images/'|add:staff.gender|lower|add:'.png' %}{% endif %}" alt="{{ staff.firstname }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div>
+                                        <strong>{{ staff.firstname }} {{ staff.middle_name }} {{ staff.surname }}</strong><br>
+                                        Gender: {{ staff.get_gender_display }} | Phone: {{ staff.mobile_number|default:"N/A" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-flex justify-content-end mb-4">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">💾 Save Participants</button>
+        </div>
+    </form>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+}
+.container-fluid {
+    padding: 0;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 20px 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+.participant-list {
+    padding: 0 15px;
+}
+.participant-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+.participant-item:last-child {
+    border-bottom: none;
+}
+.form-check-input {
+    margin-right: 10px;
+}
+.form-control, .form-select {
+    border: none;
+    outline: 1px solid #e5e7eb;
+    border-radius: 50px;
+    background: #fefefe;
+    padding: 8px 20px;
+    font-size: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.form-control:focus, .form-select:focus {
+    outline: 2px solid #a855f7;
+}
+.btn-primary {
+    background: linear-gradient(45deg, #6b7280, #a855f7);
+    border: none;
+    font-size: 1rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+}
+.btn-primary:hover {
+    background: linear-gradient(45deg, #5b6270, #9855e7);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Student Filters
+    const studentNameFilter = document.getElementById('student-name-filter');
+    const studentClassFilter = document.getElementById('student-class-filter');
+    const studentItems = document.querySelectorAll('.participant-item[data-name]');
+    const selectAllStudents = document.getElementById('select-all-students');
+
+    function filterStudents() {
+        const nameQuery = studentNameFilter.value.toLowerCase();
+        const classQuery = studentClassFilter.value;
+        studentItems.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const className = item.dataset.class || '';
+            const matchesName = name.includes(nameQuery);
+            const matchesClass = !classQuery || className === classQuery;
+            item.style.display = matchesName && matchesClass ? '' : 'none';
+        });
+    }
+
+    studentNameFilter.addEventListener('input', filterStudents);
+    studentClassFilter.addEventListener('change', filterStudents);
+
+    selectAllStudents.addEventListener('change', function() {
+        document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+            if (checkbox.closest('.participant-item').style.display !== 'none') {
+                checkbox.checked = this.checked;
+            }
+        });
+    });
+
+    // Staff Filters
+    const staffNameFilter = document.getElementById('staff-name-filter');
+    const staffOccupationFilter = document.getElementById('staff-occupation-filter');
+    const staffItems = document.querySelectorAll('.participant-item[data-occupation]');
+    const selectAllStaff = document.getElementById('select-all-staff');
+
+    function filterStaff() {
+        const nameQuery = staffNameFilter.value.toLowerCase();
+        const occupationQuery = staffOccupationFilter.value;
+        staffItems.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const occupation = item.dataset.occupation || '';
+            const matchesName = name.includes(nameQuery);
+            const matchesOccupation = !occupationQuery || occupation === occupationQuery;
+            item.style.display = matchesName && matchesOccupation ? '' : 'none';
+        });
+    }
+
+    staffNameFilter.addEventListener('input', filterStaff);
+    staffOccupationFilter.addEventListener('change', filterStaff);
+
+    selectAllStaff.addEventListener('change', function() {
+        document.querySelectorAll('.staff-checkbox').forEach(checkbox => {
+            if (checkbox.closest('.participant-item').style.display !== 'none') {
+                checkbox.checked = this.checked;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

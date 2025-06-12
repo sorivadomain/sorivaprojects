@@ -1,0 +1,213 @@
+{% extends base_template %}
+{% load humanize %}
+
+{% block title %}Event Details{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0 flex-grow-1">Event Details</h2>
+        <span></span>
+    </div>
+
+    <!-- Event Container -->
+    <div class="event-container px-4">
+        <div class="event-item">
+            <!-- Event Overview -->
+            <h5 class="section-title">Event Overview</h5>
+            <p>
+                The event <em>{{ object.title }}</em> is a <em>{{ object.get_event_type_display }}</em> event 
+                scheduled at <em>{{ object.location|default:"an unspecified location" }}</em>. 
+                It starts on <em>{{ object.start_datetime|date:"Y-m-d H:i" }}</em> 
+                and ends on <em>{{ object.end_datetime|date:"Y-m-d H:i" }}</em>.
+            </p>
+            <hr class="divider">
+
+            <!-- Description -->
+            <h5 class="section-title">Description</h5>
+            <p>
+                {{ object.description|default:"No description provided for this event." }}
+            </p>
+            <hr class="divider">
+
+            <!-- Event History -->
+            <h5 class="section-title">Event History</h5>
+            <p>
+                Created by {{ object.created_by }} on {{ object.date_created|date:"Y-m-d H:i" }} 
+                (<em>{{ object.date_created|naturaltime }}</em>). 
+                Last updated on {{ object.date_updated|date:"Y-m-d H:i" }} 
+                (<em>{{ object.date_updated|naturaltime }}</em>).
+            </p>
+            <hr class="divider">
+
+            <!-- Event Files -->
+            <h5 class="section-title">Files</h5>
+            {% if object.files.exists %}
+                <ul class="file-list">
+                    {% for file in object.files.all %}
+                        <li class="file-item">
+                            {% if file.file %}
+                                <a href="{{ file.file.url }}" target="_blank" class="button view-btn">👁️ View</a>
+                                <a href="{{ file.file.url }}" download class="button download-btn">⬇️ Download</a>
+                                {% if can_edit %}
+                                    <a href="{% url 'event-file-delete' event_pk=object.pk pk=file.pk %}" class="button delete-btn">🗑️ Delete</a>
+                                {% endif %}
+                            {% else %}
+                                <span>No file attached</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No files uploaded for this event.</p>
+            {% endif %}
+            <hr class="divider">
+
+            <!-- Participants -->
+            <h5 class="section-title">Participants</h5>
+            {% with participants=object.participants.first %}
+                {% if participants %}
+                    {% if participants.staff.exists %}
+                        <p><strong>Staff:</strong></p>
+                        <ul class="participant-list">
+                            {% for staff in participants.staff.all %}
+                                <li>{{ staff.firstname }} {{ staff.surname }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if participants.parents.exists %}
+                        <p><strong>Parents:</strong></p>
+                        <ul class="participant-list">
+                            {% for parent in participants.parents.all %}
+                                <li>{{ parent.firstname }} {{ parent.surname }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if not participants.staff.exists and not participants.parents.exists %}
+                        <p>No participants registered for this event.</p>
+                    {% endif %}
+                {% else %}
+                    <p>No participants registered for this event.</p>
+                {% endif %}
+            {% endwith %}
+            <hr class="divider">
+
+            <!-- Event Comments -->
+            <h5 class="section-title">Comments</h5>
+            {% if object.comments.exists %}
+                {% for comment in object.comments.all %}
+                    <div class="comment-item">
+                        <p>{{ comment.comment }}</p>
+                        <p class="comment-meta">
+                            By {{ comment.name }} on {{ comment.date_created|date:"Y-m-d H:i" }} 
+                            (<em>{{ comment.date_created|naturaltime }}</em>)
+                        </p>
+                    </div>
+                    {% if not forloop.last %}
+                        <hr class="divider dashed">
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>No comments for this event.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 15px 0 10px;
+}
+.event-item p {
+    font-size: 0.95rem;
+    color: #1f2937;
+    line-height: 1.5;
+    margin: 5px 0;
+}
+.event-item p em {
+    font-style: italic;
+}
+.file-list, .participant-list {
+    padding-left: 20px;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+.file-item, .participant-list li {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.comment-item {
+    margin: 10px 0;
+}
+.comment-meta {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.button:hover {
+    transform: scale(1.03);
+}
+.view-btn {
+    background: linear-gradient(45deg, #2dd4bf, #14b8a6);
+}
+.download-btn {
+    background: linear-gradient(45deg, #f97316, #ea580c);
+}
+.delete-btn {
+    background: linear-gradient(45deg, #ff6e40, #ff1744);
+}
+.divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 15px 0;
+}
+.divider.dashed {
+    border-top: 1px dashed #e5e7eb;
+}
+@media (max-width: 576px) {
+    .header {
+        padding: 10px;
+    }
+    .header h2 {
+        font-size: 1.5rem;
+    }
+    .event-item p, .file-list, .participant-list, .comment-meta {
+        font-size: 0.85rem;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .button {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+}
+</style>
+{% endblock content %}

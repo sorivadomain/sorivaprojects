@@ -1,0 +1,402 @@
+{% extends base_template %}
+
+{% block title %}Send SMS{% endblock %}
+
+{% block content %}
+<!-- Include necessary CSS and JS libraries -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px 0;
+        overflow-x: hidden; /* Prevent viewport shaking */
+    }
+
+    /* Header Styling */
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        border-radius: 0;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .back-btn {
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    /* Form Elements */
+    .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control, .form-select, .select2-container--default .select2-selection--single {
+        width: 100%;
+        min-height: 50px;
+        border-radius: 25px;
+        border: 1px solid #ccc;
+        padding: 0 20px;
+        font-size: 16px;
+        color: #333;
+        background-color: #fff;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3a86ff;
+        outline: none;
+        box-shadow: none;
+    }
+
+    textarea.form-control {
+        padding: 15px 20px;
+        resize: none;
+    }
+
+    /* Select2 Customization */
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 50px;
+        color: #333;
+        padding-left: 20px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 50px;
+        right: 20px;
+    }
+
+    /* Buttons */
+    .btn {
+        width: 100%;
+        min-height: 50px;
+        border-radius: 25px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(45deg, #3a86ff, #00c6ff);
+        transition: transform 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn:hover {
+        transform: scale(1.02);
+        background: linear-gradient(45deg, #0056b3, #00c6ff);
+    }
+
+    .btn-top {
+        width: auto;
+        padding: 0 30px;
+        position: absolute;
+        right: 20px;
+        top: 15px;
+    }
+
+    /* Table Wrapper for Scrollable Tables */
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto; /* Enable horizontal scrolling */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        margin-bottom: 15px;
+    }
+
+    /* Tables */
+    .recipient-table {
+        width: 100%;
+        min-width: 600px; /* Ensure table is wide enough to require scrolling on small screens */
+        border-collapse: collapse;
+    }
+
+    .recipient-table th, .recipient-table td {
+        padding: 12px 20px;
+        text-align: left;
+        border: none;
+    }
+
+    .recipient-table th {
+        color: #333;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap; /* Prevent text wrapping in headers */
+    }
+
+    .recipient-table td {
+        color: #666;
+        font-size: 14px;
+        white-space: nowrap; /* Prevent text wrapping in cells */
+    }
+
+    .recipient-table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .recipient-table tbody tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    .select-all-icon {
+        cursor: pointer;
+        color: #3a86ff;
+        font-size: 20px;
+        transition: color 0.3s;
+    }
+
+    .select-all-icon:hover {
+        color: #0056b3;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        .header {
+            padding: 10px 15px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .back-btn {
+            font-size: 20px;
+        }
+
+        .form-control, .form-select, .select2-container--default .select2-selection--single {
+            min-height: 45px;
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 45px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 45px;
+        }
+
+        .btn {
+            min-height: 45px;
+            font-size: 14px;
+        }
+
+        .btn-top {
+            padding: 0 20px;
+            top: 10px;
+            right: 15px;
+        }
+
+        .recipient-table th, .recipient-table td {
+            padding: 10px 15px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <span class="back-btn" onclick="window.history.back()">⬅️</span>
+        <h1>Send SMS</h1>
+    </div>
+
+    <!-- Form -->
+    <form id="sms-form" method="post" action="{% url 'send_sms_form' %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- Message -->
+        <div class="form-group">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" name="message" class="form-control" rows="4" placeholder="Type your message..." required></textarea>
+            <div class="invalid-feedback">
+                Please enter a message.
+            </div>
+        </div>
+
+        <!-- Students Filter Section -->
+        <div id="student_filters" class="form-group">
+            <label for="student_name_filter" class="form-label">Filter Students by Name</label>
+            <input type="text" id="student_name_filter" name="student_name_filter" class="form-control" placeholder="Search by name..." onkeyup="filterTable('student_name_filter', 'student_table')">
+
+            <label for="student_class_filter" class="form-label" style="margin-top: 10px;">Filter by Class</label>
+            <select id="student_class_filter" name="student_class_filter" class="form-select select2" onchange="filterTable('student_class_filter', 'student_table')">
+                <option value="" disabled selected>Select class</option>
+                {% for class in classes %}
+                    <option value="{{ class.name }}">{{ class.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Students Recipient Section -->
+        <div id="student_recipients" class="form-group">
+            <label class="form-label">Select Parents</label>
+            <div class="table-wrapper">
+                <table id="student_table" class="recipient-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">
+                                <i class="fas fa-check-square select-all-icon" onclick="selectAll('student_recipients_check')"></i>
+                            </th>
+                            <th style="width: 30%;">Name</th>
+                            <th style="width: 20%;">Class</th>
+                            <th style="width: 20%;">Father's Number</th>
+                            <th style="width: 20%;">Mother's Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" name="student_recipients" value="{{ student.id }}" class="form-check-input student_recipients_check">
+                                    </div>
+                                </td>
+                                <td>{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}</td>
+                                <td>{{ student.current_class.name }}</td>
+                                <td>{{ student.father_mobile_number }}</td>
+                                <td>{{ student.mother_mobile_number }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Staff Filter Section -->
+        <div id="staff_filters" class="form-group">
+            <label for="staff_name_filter" class="form-label">Filter Staff by Name</label>
+            <input type="text" id="staff_name_filter" name="staff_name_filter" class="form-control" placeholder="Search by name..." onkeyup="filterTable('staff_name_filter', 'staff_table')">
+        </div>
+
+        <!-- Staff Recipient Section -->
+        <div id="staff_recipients" class="form-group">
+            <label class="form-label">Select Staff</label>
+            <div class="table-wrapper">
+                <table id="staff_table" class="recipient-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">
+                                <i class="fas fa-check-square select-all-icon" onclick="selectAll('staff_recipients_check')"></i>
+                            </th>
+                            <th style="width: 50%;">Name</th>
+                            <th style="width: 40%;">Mobile Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in staff %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" name="staff_recipients" value="{{ member.mobile_number }}" class="form-check-input staff_recipients_check">
+                                    </div>
+                                </td>
+                                <td>{{ member.firstname }} {{ member.middle_name }} {{ member.surname }}</td>
+                                <td>{{ member.mobile_number }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Submit Button (Bottom) -->
+        <button type="submit" class="btn">
+            <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+    </form>
+</div>
+
+<!-- Include JavaScript -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+        initCheckboxHandlers();
+    });
+
+    function selectAll(checkboxClass) {
+        const checkboxes = $('.' + checkboxClass);
+        const isChecked = !checkboxes.first().is(':checked');
+        checkboxes.prop('checked', isChecked);
+    }
+
+    function filterTable(filterId, tableId) {
+        const filter = document.getElementById(filterId).value.toLowerCase();
+        const table = document.getElementById(tableId);
+        const trs = table.getElementsByTagName('tr');
+        for (let i = 1; i < trs.length; i++) {
+            const tds = trs[i].getElementsByTagName('td');
+            let showRow = false;
+            for (let j = 0; j < tds.length; j++) {
+                if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    showRow = true;
+                }
+            }
+            trs[i].style.display = showRow ? '' : 'none';
+        }
+    }
+
+    function initCheckboxHandlers() {
+        $('.form-check-input').on('change', function() {
+            const sectionId = $(this).closest('div').parent().parent().parent().attr('id');
+            const checkboxClass = sectionId.includes('student') ? 'student_recipients_check' : 'staff_recipients_check';
+            const allCheckboxes = $('.' + checkboxClass);
+            const allChecked = allCheckboxes.length === allCheckboxes.filter(':checked').length;
+        });
+    }
+
+    (function () {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

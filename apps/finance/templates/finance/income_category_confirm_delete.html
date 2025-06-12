@@ -1,0 +1,143 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <span class="nav-btn back-btn" onclick="window.history.back()" title="Go Back">⬅️</span>
+    <h3 class="title">{{ page_title }}</h3>
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Confirmation -->
+<div class="confirmation-container">
+    <p class="confirmation-text">Are you sure you want to delete "<strong>{{ object.name }}</strong>"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-delete" title="Confirm Delete">🗑️ Delete</button>
+        <a href="{% url 'income_category_list' %}" class="btn btn-sm btn-cancel" title="Cancel">🚫 Cancel</a>
+    </form>
+</div>
+
+<style>
+/* CSS Variables (Consistent with income_category_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --border-radius: 50px;
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Confirmation Styles */
+.confirmation-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.confirmation-text {
+    font-size: 1rem;
+    color: #343a40;
+    margin-bottom: 1.5rem;
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    margin-right: 10px;
+}
+
+.btn-cancel {
+    background: var(--gradient-blue);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+.btn-delete:hover, .btn-cancel:hover {
+    transform: scale(1.05);
+    color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .confirmation-container {
+        padding: 15px;
+    }
+    .confirmation-text {
+        font-size: 0.9rem;
+    }
+    .btn-delete, .btn-cancel {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock content %}

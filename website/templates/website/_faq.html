@@ -1,0 +1,245 @@
+{% load static %}
+<section class="faq">
+    <h1 class="faq-main-title">Frequently Asked Questions</h1>
+    <div class="faq-container">
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">What is the mission of Manus Dei Secondary School?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Manus Dei aims to provide a holistic education rooted in Catholic values, fostering academic excellence, moral integrity, and spiritual growth to prepare students for leadership and service.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">Is Manus Dei a boarding or day school?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Manus Dei is a co-educational Roman Catholic boarding school, offering a safe and nurturing residential environment for all students.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">What grades does the school offer?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>The school offers secondary education from Form 1 to Form 4, preparing students for the Certificate of Secondary Education Examination (CSEE).</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">What extracurricular activities are available?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Students can participate in football, netball, debate clubs, music, arts, and community service, promoting teamwork and leadership skills.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">How does the school support spiritual growth?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>As a Catholic institution, we offer daily prayers, Mass, catechism classes, and spiritual retreats to nurture students’ faith and values.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">What are the admission requirements?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Admission requires passing an entrance exam, submitting academic records, and aligning with the school’s Catholic ethos. Contact us for details.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">How is academic performance at Manus Dei?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>The school consistently achieves high performance in CSEE, with many students earning Division I and II results in science and arts subjects.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">Are there scholarships or financial aid options?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Limited scholarships are available based on merit and need. Interested families should contact the administration for application details.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">What facilities does the school provide?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Manus Dei offers modern classrooms, science labs, a library, sports fields, and comfortable boarding facilities to support learning and growth.</p>
+            </div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">
+                <span class="faq-icon">+</span>
+                <h2 class="faq-title">How can parents stay involved with the school?</h2>
+            </div>
+            <div class="faq-answer">
+                <p>Parents are encouraged to attend meetings, participate in events, and communicate with teachers via scheduled visits or our contact channels.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+.faq {
+    width: 100vw;
+    padding: 60px 0;
+    background: linear-gradient(180deg, #F5F5F5, #E8ECEF);
+    text-align: center;
+    border-top: 2px solid #F28C38;
+    border-bottom: 2px solid #F28C38;
+}
+.faq-main-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #007AFF; /* Blue */
+    margin: 0 auto 40px;
+    border-bottom: 2px solid #007AFF;
+    padding-bottom: 10px;
+    display: block;
+    width: fit-content;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.1s forwards;
+}
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.faq-item {
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid #F28C38; /* Carrot border */
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out forwards;
+}
+.faq-item:nth-child(1) { animation-delay: 0.2s; }
+.faq-item:nth-child(2) { animation-delay: 0.3s; }
+.faq-item:nth-child(3) { animation-delay: 0.4s; }
+.faq-item:nth-child(4) { animation-delay: 0.5s; }
+.faq-item:nth-child(5) { animation-delay: 0.6s; }
+.faq-item:nth-child(6) { animation-delay: 0.7s; }
+.faq-item:nth-child(7) { animation-delay: 0.8s; }
+.faq-item:nth-child(8) { animation-delay: 0.9s; }
+.faq-item:nth-child(9) { animation-delay: 1.0s; }
+.faq-item:nth-child(10) { animation-delay: 1.1s; }
+.faq-question {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.faq-question:hover {
+    background: rgba(242, 140, 56, 0.1); /* Carrot hover */
+}
+.faq-icon {
+    font-size: 1.5rem;
+    color: #F28C38; /* Carrot */
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+.faq-question.active .faq-icon {
+    transform: rotate(45deg); /* Plus to X */
+}
+.faq-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #F28C38; /* Carrot */
+    margin: 0;
+    flex: 1;
+}
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 20px;
+    transition: max-height 0.3s ease, padding-bottom 0.3s ease;
+}
+.faq-answer.active {
+    max-height: 200px; /* Adjust based on content */
+    padding-bottom: 15px;
+}
+.faq-answer p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: #333333;
+    line-height: 1.6;
+    margin: 0;
+    text-align: left;
+}
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+    .faq {
+        padding: 40px 0;
+    }
+    .faq-main-title {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+    .faq-container {
+        padding: 0 15px;
+    }
+    .faq-title {
+        font-size: 1.1rem;
+    }
+    .faq-answer p {
+        font-size: 0.95rem;
+    }
+    .faq-question {
+        padding: 12px 15px;
+    }
+    .faq-icon {
+        font-size: 1.3rem;
+    }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const questions = document.querySelectorAll('.faq-question');
+    questions.forEach(question => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            const isActive = answer.classList.contains('active');
+            // Collapse all answers
+            document.querySelectorAll('.faq-answer').forEach(ans => {
+                ans.classList.remove('active');
+                ans.style.maxHeight = '0';
+                ans.style.paddingBottom = '0';
+            });
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.classList.remove('active');
+            });
+            // Expand clicked answer if it wasn't active
+            if (!isActive) {
+                question.classList.add('active');
+                answer.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.style.paddingBottom = '15px';
+            }
+        });
+    });
+});
+</script>

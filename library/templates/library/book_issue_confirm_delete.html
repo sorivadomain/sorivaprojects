@@ -1,0 +1,98 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+Delete Book Issue
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">Delete Book Issue</h2>
+        <span></span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content px-3 py-4">
+        <div class="alert alert-warning" role="alert">
+            Are you sure you want to delete the book issue for <strong>{{ object.book.title }}</strong> 
+            ({{ object.book_number }} copies) issued to 
+            <strong>{{ object.student|default:object.staff }}</strong>?
+            This action cannot be undone.
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-danger rounded-button">Delete 🗑️</button>
+                <a href="{% if object.issue_type == 'student' %}{% url 'library_book_issue_student_detail' recipient_id=object.student.id %}{% else %}{% url 'library_book_issue_staff_detail' recipient_id=object.staff.id %}{% endif %}" class="btn btn-secondary rounded-button">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #ffffff;
+    padding: 15px 20px;
+}
+.content {
+    padding: 24px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.rounded-button {
+    border-radius: 50px !important;
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-width: 100px;
+    text-decoration: none;
+}
+.btn-danger.rounded-button {
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+.btn-danger.rounded-button:hover {
+    border-color: #b02a37;
+    color: #b02a37;
+}
+.btn-secondary.rounded-button {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+.btn-secondary.rounded-button:hover {
+    border-color: #565e64;
+    color: #565e64;
+}
+.alert {
+    border-radius: 10px;
+    padding: 16px;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 16px 12px;
+    }
+    .rounded-button {
+        padding: 8px 16px;
+        min-width: 80px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}

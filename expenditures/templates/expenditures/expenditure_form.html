@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Create Expenditure</h1>
+    <form id="expenditureForm" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_category">Category:</label>
+            <select name="category" id="id_category" class="form-control">
+                {% for category in categories %}
+                <option value="{{ category.pk }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_item_name">Item:</label>
+            <input type="text" name="item_name" id="id_item_name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="id_amount">Amount:</label>
+            <input type="number" name="amount" id="id_amount" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="id_date">Date:</label>
+            <input type="date" name="date" id="id_date" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="id_description">Description:</label>
+            <textarea name="description" id="id_description" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="id_quantity">Quantity:</label>
+            <input type="text" name="quantity" id="id_quantity" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="id_attachment">Attachment:</label>
+            <input type="file" name="attachment" id="id_attachment" class="form-control-file">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+<script>
+    // Function to check if the current URL contains certain text
+    function checkURL() {
+        var currentURL = window.location.href;
+        // Check if the URL contains 'expenditure'
+        if (currentURL.includes('expenditure')) {
+            // If the URL contains 'expenditure', display the form with animation
+            document.getElementById('expenditureForm').style.display = 'block';
+            // You can add animation effects here using CSS classes or JavaScript animation libraries
+        }
+    }
+
+    // Call the function when the page loads
+    window.onload = checkURL;
+</script>
+{% endblock %}

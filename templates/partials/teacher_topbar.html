@@ -1,0 +1,201 @@
+{% load static %}
+
+<style>
+  .topbar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background: linear-gradient(45deg, #001f3f, #00509d);
+    color: #fff;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    flex: 0 0 auto;
+  }
+  .logo-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .logo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .school-name {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .topbar-search {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 8px;
+    min-width: 0;
+  }
+  .topbar-search input {
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 300px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+  .notification-icon {
+    font-size: 20px;
+    cursor: pointer;
+    margin: 0 15px 0 10px;
+    flex-shrink: 0;
+  }
+  .profile-pic-container {
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-right: 5px;
+  }
+  .profile-pic-container img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  .profile-initial {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+  }
+  /* Background colors based on first letter */
+  .initial-a, .initial-b, .initial-c { background-color: #ff6f61; } /* Coral */
+  .initial-d, .initial-e, .initial-f { background-color: #6b5b95; } /* Purple */
+  .initial-g, .initial-h, .initial-i { background-color: #88b04b; } /* Green */
+  .initial-j, .initial-k, .initial-l { background-color: #f7cac9; } /* Light Pink */
+  .initial-m, .initial-n, .initial-o { background-color: #92a8d1; } /* Light Blue */
+  .initial-p, .initial-q, .initial-r { background-color: #f4a261; } /* Orange */
+  .initial-s, .initial-t, .initial-u { background-color: #d5a6bd; } /* Mauve */
+  .initial-v, .initial-w, .initial-x { background-color: #b565a7; } /* Magenta */
+  .initial-y, .initial-z { background-color: #009b77; } /* Teal */
+  .profile-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background-color: #fff;
+    color: #333;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    min-width: 180px;
+  }
+  .profile-dropdown a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+  }
+  .profile-dropdown a:hover {
+    background-color: #f0f0f0;
+  }
+  .menu-emoji {
+    margin-right: 8px;
+  }
+  @media (max-width: 576px) {
+    .topbar-container {
+      padding: 8px;
+    }
+    .school-name {
+      font-size: 12px;
+    }
+    .topbar-search {
+      margin: 0 6px;
+    }
+    .topbar-search input {
+      min-width: 80px;
+      max-width: none;
+    }
+    .notification-icon {
+      margin: 0 10px 0 6px;
+    }
+  }
+</style>
+
+<div class="topbar-container">
+  <!-- Left: small circle logo + "MDS" abbreviation -->
+  <div class="topbar-left">
+    <div class="logo-circle">
+      <img src="{% static 'images/school.png' %}" alt="School Logo">
+    </div>
+    <span class="school-name">MDS</span>
+  </div>
+
+  <!-- Middle: Search bar -->
+  <div class="topbar-search">
+    <input type="text" placeholder="Search Sidebar...">
+  </div>
+
+  <!-- Right: Notification + Profile -->
+  <div class="topbar-right">
+    <span class="notification-icon" title="Notifications">🔔</span>
+    <div class="profile-pic-container" onclick="toggleProfileMenu()">
+      {% if request.user.profile_picture %}
+        <img id="profile-pic" src="{{ request.user.profile_picture.url }}" alt="User Profile">
+      {% else %}
+        {% with first_letter=request.user.username|slice:":1"|lower %}
+          <div class="profile-initial initial-{{ first_letter }}">{{ first_letter|upper }}</div>
+        {% endwith %}
+      {% endif %}
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="{% url 'custom_login' %}"><span class="menu-emoji">🚪</span> Logout</a>
+        <a href="{% url 'update_profile' %}"><span class="menu-emoji">⬆️</span> Upload Profile Pic</a>
+        <a href="#"><span class="menu-emoji">🔑</span> Change Password</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleProfileMenu() {
+    const menu = document.getElementById('profileDropdown');
+    if (menu.style.display === 'block') {
+      menu.style.display = 'none';
+    } else {
+      menu.style.display = 'block';
+    }
+  }
+
+  document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('profileDropdown');
+    const profileContainer = document.querySelector('.profile-pic-container');
+    if (!profileContainer.contains(event.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+</script>

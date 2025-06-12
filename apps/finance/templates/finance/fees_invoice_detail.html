@@ -1,0 +1,235 @@
+{% extends base_template %}
+{% load static humanize %}
+
+{% block title %}Invoice Details - {{ invoice.invoice_id }}{% endblock title %}
+
+{% block content %}
+<div class="my-4">
+    <!-- Navigation -->
+    <div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+        <span class="nav-btn back-btn" onclick="window.history.back()" title="Go Back">⬅️</span>
+        <h3 class="title">Invoice Details - {{ invoice.invoice_id }}</h3>
+        <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+    </div>
+
+    <!-- Invoice Details Container -->
+    <div class="invoice-details bg-white p-4">
+        <!-- Invoice Information -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="text-uppercase">Invoice Information</h5>
+                <p><strong>Invoice ID:</strong> {{ invoice.invoice_id }}</p>
+                <p><strong>Invoice Date:</strong> {{ invoice.invoice_date|date:"d M Y" }}</p>
+                <p><strong>Academic Session:</strong> {{ invoice.session.name }}</p>
+                <p><strong>Term:</strong> {{ invoice.term.name }}</p>
+                <p><strong>Installment:</strong> {{ invoice.installment.name }}</p>
+                <p><strong>Class Level:</strong> {{ invoice.class_level.name }}</p>
+                <p><strong>Status:</strong>
+                    {% if invoice.status == 'PAID' %}
+                        <span class="badge bg-success">Paid ✅✅</span>
+                    {% elif invoice.status == 'PARTIAL' %}
+                        <span class="badge bg-warning text-dark">Partial ✅</span>
+                    {% else %}
+                        <span class="badge bg-danger">Unpaid 🔴</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-6">
+                <h5 class="text-uppercase">Student Information</h5>
+                <p><strong>Name:</strong> {{ invoice.student.firstname }} {% if invoice.student.middle_name %}{{ invoice.student.middle_name }} {% endif %}{{ invoice.student.surname }}</p>
+                <p><strong>Registration No:</strong> {{ invoice.student.registration_number }}</p>
+                <p><strong>Created:</strong> {{ invoice.date_created|date:"d M Y H:i" }}</p>
+                <p><strong>Updated:</strong> {{ invoice.date_updated|date:"d M Y H:i" }}</p>
+            </div>
+        </div>
+
+        <!-- Payment Details -->
+        <h5 class="text-uppercase mb-3">Payment Details</h5>
+        {% if payments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Amount Paid (TZS)</th>
+                            <th>Payment Date</th>
+                            <th>Payment Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ payment.amount_paid|floatformat:2|intcomma }}</td>
+                                <td>{{ payment.payment_date|date:"d M Y" }}</td>
+                                <td>{{ payment.get_method_display }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No payments recorded for this invoice.</p>
+        {% endif %}
+
+        <!-- Financial Summary -->
+        <div class="row mt-4">
+            <div class="col-md-6 offset-md-6">
+                <table class="table">
+                    <tr>
+                        <th>Total Amount Payable:</th>
+                        <td class="text-right">{{ invoice.total_invoice_amount|floatformat:2|intcomma }} TZS</td>
+                    </tr>
+                    <tr>
+                        <th>Total Amount Paid:</th>
+                        <td class="text-right">{{ total_paid|floatformat:2|intcomma }} TZS</td>
+                    </tr>
+                    <tr>
+                        <th>Balance:</th>
+                        <td class="text-right">{{ balance|floatformat:2|intcomma }} TZS</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mt-4">
+            {% if is_authorized_for_actions %}
+                <a href="{% url 'fees_invoice_update' pk=invoice.pk %}" class="btn btn-sm" title="Update Invoice">📝 Update invoice</a>
+                <a href="{% url 'fees_invoice_delete' pk=invoice.pk %}" class="btn btn-sm" title="Delete Invoice">🗑️ Delete invoice</a>
+                {% if invoice.status == 'PAID' %}
+                    <a href="{% url 'fees_invoice_receipt' pk=invoice.id %}" class="btn btn-sm" title="View Receipt">🧾 View receipt</a>
+                {% endif %}
+                {% if invoice.payments.exists %}
+                    <a href="{% url 'payment_update' invoice_id=invoice.id pk=invoice.payments.first.id %}" class="btn btn-sm" title="Update Payment">💰 Update payment</a>
+                {% else %}
+                    <a href="{% url 'payment_create' invoice_id=invoice.id %}" class="btn btn-sm" title="Create Payment">💸 Create payment</a>
+                {% endif %}
+            {% endif %}
+            <a href="{% url 'fees_invoice_list' %}" class="btn btn-sm" title="Back to Invoices">⬅️ Back to Invoices</a>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --gradient-teal: linear-gradient(45deg, #17a2b8, #20c997);
+    --gradient-purple: linear-gradient(45deg, #6f42c1, #007bff);
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+    margin: 0;
+}
+
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 12px;
+    font-size: 0.85rem;
+}
+
+.table thead th {
+    background: var(--gradient-blue);
+    color: #fff;
+    font-weight: 600;
+}
+
+.table td.text-right {
+    font-family: monospace;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    margin: 2px;
+    font-size: 0.8rem;
+    color: #fff;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-sm:hover {
+    transform: scale(1.05);
+}
+
+.btn-sm[title="Update Invoice"] { background: var(--gradient-blue); }
+.btn-sm[title="Delete Invoice"] { background: var(--gradient-red); }
+.btn-sm[title="View Receipt"] { background: var(--gradient-teal); }
+.btn-sm[title="Update Payment"] { background: var(--gradient-purple); }
+.btn-sm[title="Create Payment"] { background: var(--gradient-green); }
+.btn-sm[title="Back to Invoices"] { background: var(--gradient-purple); }
+
+@media (max-width: 576px) {
+    .invoice-details {
+        padding: 15px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .table th, .table td {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+}
+</style>
+{% endblock content %}

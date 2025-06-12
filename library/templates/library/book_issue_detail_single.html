@@ -1,0 +1,243 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+Book Issue Details
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">Book Issue Details</h2>
+        <span></span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content px-3 py-4">
+        <!-- Action Buttons -->
+        <div class="action-buttons text-end mb-4">
+            <a href="{% url 'library_book_issue_create' %}" class="btn btn-success rounded-button me-2" title="Create New Book Issue">
+                <i class="bi bi-plus"></i>
+            </a>
+            <a href="{% url 'library_book_issue_update' pk=issue.pk %}" class="btn btn-primary rounded-button me-2" title="Update Book Issue">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <a href="{% url 'library_book_issue_delete' pk=issue.pk %}" class="btn btn-danger rounded-button me-2" title="Delete Book Issue">
+                <i class="bi bi-trash"></i>
+            </a>
+            <a href="{% if issue.issue_type == 'student' %}{% url 'library_book_issue_student_detail' recipient_id=issue.student.id %}{% else %}{% url 'library_book_issue_staff_detail' recipient_id=issue.staff.id %}{% endif %}" class="btn btn-secondary rounded-button">Back</a>
+        </div>
+
+        <!-- Details -->
+        <div class="details">
+            <h4 class="section-title mb-3">Book Information</h4>
+            <div class="detail-item">
+                <strong>Title:</strong> {{ issue.book.title }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Author:</strong> {{ issue.book.author }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Category:</strong> {{ issue.book.get_category_display }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>ISBN:</strong> {{ issue.book.isbn|default:"N/A" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Shelf Location:</strong> {{ issue.book.shelf_location|default:"N/A" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Total Copies:</strong> {{ issue.book.total_copies }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Available Copies:</strong> {{ issue.book.available_copies }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Class:</strong> {{ issue.book.book_class|default:"N/A" }}
+            </div>
+            <hr>
+
+            <h4 class="section-title mb-3 mt-4">Issue Information</h4>
+            <div class="detail-item">
+                <strong>Issue Type:</strong> {{ issue.get_issue_type_display }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Recipient:</strong> {{ issue.student|default:issue.staff }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Issue Date:</strong> {{ issue.issue_date|date:"M d, Y" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Due Date:</strong> {{ issue.due_date|date:"M d, Y" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Return Date:</strong> {{ issue.return_date|date:"M d, Y"|default:"Not Returned" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Book Number:</strong> {{ issue.book_number }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Returned:</strong> {% if issue.is_returned %}✅✅{% else %}❌{% endif %}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Fine:</strong> {{ issue.fine }} TZS
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Notes:</strong> {{ issue.notes|default:"None" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Date Created:</strong> {{ issue.date_created|date:"M d, Y, H:i" }}
+            </div>
+            <hr>
+            <div class="detail-item">
+                <strong>Date Updated:</strong> {{ issue.date_updated|date:"M d, Y, H:i" }}
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>
+
+<!-- CSS and JavaScript -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #ffffff;
+    padding: 15px 20px;
+}
+.content {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.details {
+    background: transparent;
+}
+.detail-item {
+    font-size: 1rem;
+    padding: 8px 0;
+}
+.detail-item strong {
+    font-weight: 500;
+    color: #374151;
+    margin-right: 8px;
+}
+hr {
+    border: 0;
+    border-top: 3px solid #6b7280;
+    margin: 12px 0;
+}
+.action-buttons {
+    margin-bottom: 16px;
+}
+.rounded-button {
+    border-radius: 50px !important;
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    min-width: 100px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.rounded-button i {
+    font-size: 1.2rem;
+}
+.btn-success.rounded-button {
+    border: 2px solid #28a745;
+    background: #28a745;
+    color: #fff;
+}
+.btn-success.rounded-button:hover {
+    border-color: #218838;
+    background: #218838;
+}
+.btn-primary.rounded-button {
+    border: 2px solid #007bff;
+    background: #007bff;
+    color: #fff;
+}
+.btn-primary.rounded-button:hover {
+    border-color: #0056b3;
+    background: #0056b3;
+}
+.btn-danger.rounded-button {
+    border: 2px solid #dc3545;
+    background: #dc3545;
+    color: #fff;
+}
+.btn-danger.rounded-button:hover {
+    border-color: #c82333;
+    background: #c82333;
+}
+.btn-secondary.rounded-button {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+.btn-secondary.rounded-button:hover {
+    border-color: #565e64;
+    color: #565e64;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 12px;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .detail-item {
+        font-size: 0.95rem;
+    }
+    hr {
+        border-top: 2px solid #6b7280;
+        margin: 10px 0;
+    }
+    .action-buttons {
+        margin-bottom: 12px;
+    }
+    .rounded-button {
+        padding: 8px 16px;
+        min-width: 80px;
+        font-size: 0.9rem;
+    }
+    .rounded-button i {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

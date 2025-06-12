@@ -1,0 +1,246 @@
+<!-- accounts/templates/accounts/user_details.html -->
+{% extends base_template %}
+{% load static %}
+
+{% block title %}User Details{% endblock title %}
+
+{% block head %}
+<style>
+    .user-details-container {
+        width: 100%;
+        max-width: 600px; /* Slightly wider for a free look */
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    .user-details-container p {
+        margin: 15px 0;
+        font-size: 16px;
+        line-height: 1.6;
+        text-align: left;
+        color: #333;
+    }
+    .user-details-container strong {
+        color: #007aff; /* iPhone-like blue */
+        font-weight: 600;
+    }
+    .user-details-container img {
+        display: block;
+        margin: 20px auto;
+        border-radius: 50%; /* Circular profile picture */
+        width: 120px;
+        height: 120px;
+        object-fit: cover; /* Ensure image fits within circular container */
+    }
+    .user-details-container .profile-initial {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        border-radius: 50%; /* Circular container */
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+        font-weight: bold;
+        color: #fff;
+        text-transform: uppercase;
+    }
+    /* Background colors based on first letter, matching topbar.html for consistency */
+    .user-details-container .initial-a, .user-details-container .initial-b, .user-details-container .initial-c { background-color: #ff6f61; } /* Coral */
+    .user-details-container .initial-d, .user-details-container .initial-e, .user-details-container .initial-f { background-color: #6b5b95; } /* Purple */
+    .user-details-container .initial-g, .user-details-container .initial-h, .user-details-container .initial-i { background-color: #88b04b; } /* Green */
+    .user-details-container .initial-j, .user-details-container .initial-k, .user-details-container .initial-l { background-color: #f7cac9; } /* Light Pink */
+    .user-details-container .initial-m, .user-details-container .initial-n, .user-details-container .initial-o { background-color: #92a8d1; } /* Light Blue */
+    .user-details-container .initial-p, .user-details-container .initial-q, .user-details-container .initial-r { background-color: #f4a261; } /* Orange */
+    .user-details-container .initial-s, .user-details-container .initial-t, .user-details-container .initial-u { background-color: #d5a6bd; } /* Mauve */
+    .user-details-container .initial-v, .user-details-container .initial-w, .user-details-container .initial-x { background-color: #b565a7; } /* Magenta */
+    .user-details-container .initial-y, .user-details-container .initial-z { background-color: #009b77; } /* Teal */
+    .user-details-container hr {
+        border: 0;
+        height: 2px; /* Thicker for visibility */
+        background: #333; /* Dark, solid color for prominence */
+        margin: 20px 0;
+        width: 100%; /* Full width */
+    }
+    .user-details-container .error-message {
+        color: #d9534f;
+        text-align: center;
+        font-weight: 500;
+        margin: 15px 0;
+    }
+    .user-details-container .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin: 25px 0 15px;
+        text-align: center;
+    }
+    /* Ensure the link has no underline and blends seamlessly */
+    .user-details-container .profile-link {
+        text-decoration: none;
+        display: block;
+        width: fit-content;
+        margin: 20px auto;
+    }
+    /* Header styles for back button */
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .back-button {
+        position: absolute;
+        left: 0;
+        font-size: 24px;
+        cursor: pointer;
+        color: #007aff;
+        transition: color 0.2s;
+    }
+    .back-button:hover {
+        color: #0053a6;
+    }
+    @media (max-width: 768px) {
+        .user-details-container {
+            padding: 10px;
+            max-width: 90%;
+        }
+        .user-details-container p {
+            font-size: 14px;
+        }
+        .user-details-container img, .user-details-container .profile-initial {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+        .user-details-container .section-title {
+            font-size: 18px;
+        }
+        .user-details-container hr {
+            margin: 15px 0;
+        }
+        .user-details-container .profile-link {
+            margin: 15px auto;
+        }
+        .header-container {
+            margin-bottom: 15px;
+        }
+        .back-button {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="header-container">
+    <span class="back-button" onclick="window.history.back()">⬅️</span>
+</div>
+<div class="user-details-container">
+    {% if user_type == "admin" %}
+        <div class="section-title">Admin Profile</div>
+        <a href="{% url 'update_profiles' %}" class="profile-link">
+            {% if profile_picture %}
+                <img src="{{ profile_picture }}" alt="Profile Picture">
+            {% else %}
+                {% with first_letter=admin_username|slice:":1"|lower %}
+                    <div class="profile-initial initial-{{ first_letter }}">{{ first_letter|upper }}</div>
+                {% endwith %}
+            {% endif %}
+        </a>
+        <p><strong>Username:</strong> {{ admin_username }}</p>
+        <hr>
+        <p><strong>Admin Name:</strong> {{ admin_name }}</p>
+        <hr>
+    {% elif user_type == "parent" %}
+        <div class="section-title">Parent Profile</div>
+        <a href="{% url 'update_profiles' %}" class="profile-link">
+            {% if profile_picture %}
+                <img src="{{ profile_picture }}" alt="Profile Picture">
+            {% else %}
+                {% with first_letter=parent_username|slice:":1"|lower %}
+                    <div class="profile-initial initial-{{ first_letter }}">{{ first_letter|upper }}</div>
+                {% endwith %}
+            {% endif %}
+        </a>
+        <p><strong>Username:</strong> {{ parent_username }}</p>
+        <hr>
+        {% if student_full_name %}
+            <div class="section-title">Student Details</div>
+            <p><strong>Registration Number:</strong> {{ student_registration_number }}</p>
+            <hr>
+            <p><strong>Full Name:</strong> {{ student_full_name }}</p>
+            <hr>
+            <p><strong>Gender:</strong> {{ student_gender }}</p>
+            <hr>
+            <p><strong>Date of Birth:</strong> {{ student_date_of_birth }}</p>
+            <hr>
+            <p><strong>Current Class:</strong> {{ student_current_class }}</p>
+            <hr>
+            <p><strong>Status:</strong> {{ student_status }}</p>
+            <hr>
+            <p><strong>Father's Mobile:</strong> {{ father_mobile_number }}</p>
+            <hr>
+            <p><strong>Mother's Mobile:</strong> {{ mother_mobile_number }}</p>
+            <hr>
+            <p><strong>Address:</strong> {{ student_address|default:"Not provided" }}</p>
+            <hr>
+            <p><strong>Other Details:</strong> {{ student_other_details|default:"None" }}</p>
+            <hr>
+            <p><strong>Parent-Student ID:</strong> {{ parent_student_id }}</p>
+            <hr>
+        {% else %}
+            <p class="error-message">{{ error_message }}</p>
+            <hr>
+        {% endif %}
+    {% elif user_type == "staff" %}
+        <div class="section-title">Staff Profile</div>
+        <a href="{% url 'update_profiles' %}" class="profile-link">
+            {% if profile_picture %}
+                <img src="{{ profile_picture }}" alt="Profile Picture">
+            {% else %}
+                {% with first_letter=staff_username|slice:":1"|lower %}
+                    <div class="profile-initial initial-{{ first_letter }}">{{ first_letter|upper }}</div>
+                {% endwith %}
+            {% endif %}
+        </a>
+        <p><strong>Username:</strong> {{ staff_username }}</p>
+        <hr>
+        {% if staff_first_name %}
+            <p><strong>First Name:</strong> {{ staff_first_name }}</p>
+            <hr>
+            <p><strong>Middle Name:</strong> {{ staff_middle_name|default:"Not set" }}</p>
+            <hr>
+            <p><strong>Surname:</strong> {{ staff_surname }}</p>
+            <hr>
+            <p><strong>Gender:</strong> {{ staff_gender }}</p>
+            <hr>
+            <p><strong>Date of Birth:</strong> {{ staff_date_of_birth }}</p>
+            <hr>
+            <p><strong>Occupation:</strong> {{ staff_occupation }}</p>
+            <hr>
+            <p><strong>Mobile Number:</strong> {{ staff_mobile_number }}</p>
+            <hr>
+            <p><strong>Address:</strong> {{ staff_address|default:"Not provided" }}</p>
+            <hr>
+            <p><strong>Salary:</strong> {{ staff_salary }}</p>
+            <hr>
+            <p><strong>Status:</strong> {{ staff_status }}</p>
+            <hr>
+            <p><strong>Staff User ID:</strong> {{ staff_user_id }}</p>
+            <hr>
+            <p><strong>Teaching Assignments:</strong> {{ teaching_assignments }}</p>
+            <hr>
+        {% else %}
+            <p class="error-message">{{ error_message }}</p>
+            <hr>
+        {% endif %}
+    {% else %}
+        <div class="section-title">Error</"Rethinking">🚀</div>
+        <p class="error-message">Unknown user type. Please contact support.</p>
+        <hr>
+    {% endif %}
+</div>
+{% endblock content %}

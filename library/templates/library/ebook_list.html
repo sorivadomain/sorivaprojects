@@ -1,0 +1,1016 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Digital Books{% endblock title %}
+
+{% block extra_head %}
+<!-- Favicon to suppress 404 error -->
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+{% endblock %}
+
+{% block content %}
+<!-- Upload Confirmation Modal -->
+<div class="custom-modal" id="uploadConfirmModal" tabindex="-1" aria-labelledby="uploadConfirmModalLabel" aria-hidden="true">
+    <div class="custom-modal-dialog custom-modal-centered">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h5 class="custom-modal-title" id="uploadConfirmModalLabel">Confirm Upload</h5>
+                <button type="button" class="custom-modal-close" data-modal-dismiss="uploadConfirmModal" aria-label="Close">×</button>
+            </div>
+            <div class="custom-modal-body">
+                <p>Are you sure you want to upload <span id="uploadFileName"></span>?</p>
+                <div class="custom-margin-bottom">
+                    <label for="documentName" class="custom-label">Document Name</label>
+                    <input type="text" id="documentName" class="custom-input custom-rounded" placeholder="Enter document name (e.g., Chapter 1 Notes)">
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="custom-button secondary" data-modal-dismiss="uploadConfirmModal">Cancel</button>
+                <button type="button" class="custom-button primary" id="confirmUploadBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="custom-modal" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="custom-modal-dialog custom-modal-centered">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h5 class="custom-modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                <button type="button" class="custom-modal-close" data-modal-dismiss="deleteConfirmModal" aria-label="Close">×</button>
+            </div>
+            <div class="custom-modal-body">
+                Are you sure you want to delete this file?
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="custom-button secondary" data-modal-dismiss="deleteConfirmModal">Cancel</button>
+                <button type="button" class="custom-button danger" id="confirmDeleteBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extraction Loading Bar with Overlay -->
+<div id="extract-progress" class="custom-overlay" style="z-index: 9999; display: none; background: rgba(0, 0, 0, 0.7);">
+    <div class="custom-overlay-content">
+        <div class="custom-progress-container">
+            <div class="custom-progress">
+                <div class="custom-progress-bar custom-progress-animated primary" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <div class="custom-progress-text">Extracting, please wait...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Loading Bar with Overlay -->
+<div id="upload-progress" class="custom-overlay" style="z-index: 9999; display: none; background: rgba(0, 0, 0, 0.7);">
+    <div class="custom-overlay-content">
+        <div class="custom-progress-container">
+            <div class="custom-progress">
+                <div class="custom-progress-bar custom-progress-animated success" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <div class="custom-progress-text">Uploading, please wait...</div>
+        </div>
+    </div>
+</div>
+
+<div class="custom-container" id="main-content">
+    <!-- Header -->
+    <div class="custom-header">
+        <span class="custom-back-btn" onclick="window.history.back()">⬅️</span>
+        <h2 class="custom-header-title">Digital Books</h2>
+        <span></span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="custom-content">
+        <!-- Success Alert -->
+        <div id="success-alert" class="custom-alert success hidden" role="alert">
+            <i class="fas fa-check-circle custom-alert-icon"></i>
+            <span id="success-message"></span>
+            <button type="button" class="custom-alert-close" data-alert-dismiss="success-alert" aria-label="Close">×</button>
+        </div>
+
+        <!-- Filters -->
+        <h4 class="custom-section-title">Filter Digital Books</h4>
+        <div class="custom-row">
+            <div class="custom-col">
+                <label for="book-search" class="custom-label">Title/Author/ISBN</label>
+                <input type="text" id="book-search" class="custom-input custom-rounded" placeholder="Search title, author, or ISBN">
+            </div>
+            <div class="custom-col">
+                <label for="category-filter" class="custom-label">Category</label>
+                <select id="category-filter" class="custom-input custom-rounded">
+                    <option value="">All Categories</option>
+                    {% for value, label in book_categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="custom-col">
+                <label for="shelf-filter" class="custom-label">Shelf Location</label>
+                <input type="text" id="shelf-filter" class="custom-input custom-rounded" placeholder="Enter shelf location">
+            </div>
+        </div>
+
+        <!-- Tables -->
+        {% for category_label, books in grouped_books.items %}
+            {% if books %}
+                <h4 class="custom-section-title" data-category-label="{{ category_label|slugify }}">{{ category_label }}</h4>
+                <div class="custom-table-responsive">
+                    <table class="custom-table" data-category-label="{{ category_label|slugify }}">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Book</th>
+                                <th>Files Uploaded</th>
+                                {% if can_modify %}
+                                <th>Upload File</th>
+                                {% endif %}
+                                <th>Document Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                                <tr data-book-id="{{ book.id }}" data-category="{{ book.category }}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        {% if book.isbn %}
+                                            {{ book.isbn }}:
+                                        {% endif %}
+                                        {{ book.title }} ({{ book.author }})
+                                    </td>
+                                    <td class="files-uploaded">{{ book.ebooks.count }}</td>
+                                    {% if can_modify %}
+                                    <td>
+                                        <label for="upload-{{ book.id }}" class="custom-button primary small">
+                                            <i class="fas fa-upload"></i>
+                                        </label>
+                                        <input type="file" id="upload-{{ book.id }}" class="hidden upload-file" data-book-id="{{ book.id }}">
+                                    </td>
+                                    {% endif %}
+                                    <td class="document-actions">
+                                        {% for ebook in book.ebooks.all %}
+                                            <div class="document-item">
+                                                <span>{{ ebook.name|escape }}</span>
+                                                {% if ebook.extraction_status == 'completed' %}
+                                                    <a href="{% url 'ebook_view' ebook.id %}" class="custom-button info small view-ebook" title="View" target="_blank"><i class="fas fa-eye"></i></a>
+                                                {% else %}
+                                                    <button class="custom-button warning small extract-ebook" data-ebook-id="{{ ebook.id }}" title="Extract"><i class="fas fa-cog"></i></button>
+                                                {% endif %}
+                                                <button class="custom-button success small download-ebook" data-file-url="{{ ebook.file.url }}" data-file-name="{{ ebook.name|escape }}" title="Download"><i class="fas fa-download"></i></button>
+                                                {% if can_modify %}
+                                                <button class="custom-button danger small delete-ebook" data-ebook-id="{{ ebook.id }}" data-book-id="{{ book.id }}" title="Delete"><i class="fas fa-trash"></i></button>
+                                                {% endif %}
+                                            </div>
+                                        {% empty %}
+                                            <span>No documents</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- CSS and JavaScript -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    margin: 0;
+    color: #000000;
+}
+.custom-container {
+    padding: 0;
+    width: 100%;
+}
+.custom-header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.custom-header-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+.custom-back-btn {
+    font-size: 24px;
+    cursor: pointer;
+}
+.custom-content {
+    padding: 24px 16px;
+}
+.custom-section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.custom-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+}
+.custom-input {
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    padding: 12px 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.custom-input:focus {
+    outline: none;
+}
+.custom-rounded {
+    border-radius: 50px;
+    height: 44px;
+}
+.custom-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    gap: 16px;
+}
+.custom-col {
+    flex: 1;
+    min-width: 250px;
+}
+.custom-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+.custom-table th, .custom-table td {
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 1rem;
+    vertical-align: middle;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+}
+.custom-table .files-uploaded, .custom-table .document-actions {
+    font-weight: 400;
+}
+.custom-table .document-item span {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+    display: inline;
+}
+.custom-button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+}
+.custom-button.small {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+.custom-button.primary {
+    background-color: #3a86ff;
+}
+.custom-button.primary:hover {
+    background-color: #2f6acc;
+}
+.custom-button.secondary {
+    background-color: #6c757d;
+}
+.custom-button.secondary:hover {
+    background-color: #5a6268;
+}
+.custom-button.success {
+    background-color: #28a745;
+}
+.custom-button.success:hover {
+    background-color: #218838;
+}
+.custom-button.danger {
+    background-color: #dc3545;
+}
+.custom-button.danger:hover {
+    background-color: #c82333;
+}
+.custom-button.info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+.custom-button.info:hover {
+    background-color: #138496;
+}
+.custom-button.warning {
+    background-color: #ffc107;
+}
+.custom-button.warning:hover {
+    background-color: #e0a800;
+}
+.document-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.document-item span {
+    flex: 1;
+}
+.document-item .custom-button {
+    margin-left: 5px;
+}
+.custom-alert {
+    padding: 12px 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.custom-alert.success {
+    color: #155724;
+}
+.custom-alert.show {
+    opacity: 1;
+}
+.custom-alert.hidden {
+    display: none;
+}
+.custom-alert-icon {
+    margin-right: 8px;
+}
+.custom-alert-close {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: auto;
+}
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    z-index: 1000;
+}
+.custom-modal.show {
+    display: block;
+}
+.custom-modal-dialog {
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.custom-modal-centered {
+    display: flex;
+    align-items: center;
+    min-height: 100%;
+}
+.custom-modal-content {
+    background-color: #d17a7a;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.custom-modal-header {
+    padding: 16px;
+    background-color: #82a7cd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+.custom-modal-title {
+    font-size: 1.25rem;
+    margin: 0;
+}
+.custom-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+.custom-modal-body {
+    padding: 16px;
+}
+.custom-modal-footer {
+    padding: 16px;
+    border-top: 1px solid #e0e0e0;
+    text-align: right;
+}
+.custom-margin-bottom {
+    margin-bottom: 16px;
+}
+.custom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s;
+}
+.custom-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.custom-progress-container {
+    width: 50%;
+    min-width: 300px;
+    max-width: 600px;
+}
+.custom-progress {
+    height: 25px;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+}
+.custom-progress-bar {
+    height: 100%;
+    transition: width 0.3s ease;
+    text-align: center;
+    line-height: 25px;
+}
+.custom-progress-bar.primary {
+    background: #3a86ff;
+}
+.custom-progress-bar.success {
+    background: #28a745;
+}
+.custom-progress-animated {
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 40px 40px;
+    animation: progress-bar-stripes 1s linear infinite;
+}
+@keyframes progress-bar-stripes {
+    0% { background-position: 40px 0; }
+    100% { background-position: 0 0; }
+}
+.custom-progress-text {
+    text-align: center;
+    padding: 8px;
+    margin-top: 8px;
+}
+.hidden {
+    display: none;
+}
+@media (max-width: 576px) {
+    .custom-content {
+        padding: 16px 12px;
+    }
+    .custom-section-title {
+        font-size: 1.1rem;
+    }
+    .custom-label {
+        font-size: 0.9rem;
+    }
+    .custom-input.custom-rounded {
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .custom-alert {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+    .custom-table {
+        font-size: 0.85rem;
+    }
+    .custom-button.small {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    .custom-progress-container {
+        min-width: 250px;
+    }
+    .custom-modal-dialog {
+        max-width: 90%;
+        margin: 0 16px;
+    }
+    .custom-modal-content {
+        border-radius: 8px;
+    }
+    .custom-modal-header,
+    .custom-modal-body,
+    .custom-modal-footer {
+        padding: 12px;
+    }
+    .custom-modal-title {
+        font-size: 1.1rem;
+    }
+    .custom-modal-close {
+        font-size: 1.25rem;
+    }
+}
+</style>
+
+<script>
+// Global error handler to catch unexpected errors
+window.addEventListener('error', function(event) {
+    console.error(`Global error: ${event.message}, file: ${event.filename}, line: ${event.lineno}`);
+});
+
+// Initial book data (only is_digital=True books)
+const books = [
+    {% for book in books %}
+        {% if book.is_digital %}
+        {
+            id: {{ book.id }},
+            title: "{{ book.title|escapejs }}",
+            author: "{{ book.author|escapejs }}",
+            isbn: "{{ book.isbn|default:''|escapejs }}",
+            category: "{{ book.category|escapejs }}",
+            shelf_location: "{{ book.shelf_location|default:''|escapejs }}",
+            files_uploaded: {{ book.ebooks.count }}
+        }{% if not forloop.last %},{% endif %}
+        {% endif %}
+    {% endfor %}
+];
+
+// Modal handling
+function showModal(modalId) {
+    document.getElementById(modalId).classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function hideModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Close modals and alerts
+document.querySelectorAll('[data-modal-dismiss]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const modalId = btn.getAttribute('data-modal-dismiss');
+        hideModal(modalId);
+        enableContent();
+    });
+});
+document.querySelectorAll('[data-alert-dismiss]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const alertId = btn.getAttribute('data-alert-dismiss');
+        const alert = document.getElementById(alertId);
+        alert.classList.remove('show');
+        setTimeout(() => alert.classList.add('hidden'), 300);
+    });
+});
+
+// Function to render document actions
+function renderDocumentActions(ebooks, bookId) {
+    if (ebooks.length === 0) {
+        return '<span>No documents</span>';
+    }
+    let html = '';
+    ebooks.forEach((ebook) => {
+        html += `
+            <div class="document-item">
+                <span>${ebook.name}</span>
+                ${ebook.extraction_status === 'completed' ?
+                    `<a href="/library/ebooks/view/${ebook.id}/" class="custom-button info small view-ebook" title="View" target="_blank"><i class="fas fa-eye"></i></a>` :
+                    `<button class="custom-button warning small extract-ebook" data-ebook-id="${ebook.id}" title="Extract"><i class="fas fa-cog"></i></button>`
+                }
+                <button class="custom-button success small download-ebook" data-file-url="${ebook.file_url}" data-file-name="${ebook.name}" title="Download"><i class="fas fa-download"></i></button>
+                {% if can_modify %}
+                <button class="custom-button danger small delete-ebook" data-ebook-id="${ebook.id}" data-book-id="${bookId}" title="Delete"><i class="fas fa-trash"></i></button>
+                {% endif %}
+            </div>
+        `;
+    });
+    return html;
+}
+
+// Function to show success alert
+function showSuccessAlert(message) {
+    const alert = document.getElementById('success-alert');
+    document.getElementById('success-message').textContent = message;
+    alert.classList.remove('hidden');
+    alert.classList.add('show');
+    setTimeout(() => {
+        alert.classList.remove('show');
+        setTimeout(() => alert.classList.add('hidden'), 300);
+    }, 5000);
+}
+
+// Function to show loading bar
+function showLoadingBar(type = 'upload') {
+    const progressId = type === 'upload' ? 'upload-progress' : 'extract-progress';
+    const progressEl = document.getElementById(progressId);
+    progressEl.style.display = 'block';
+    progressEl.style.opacity = '1';
+    const bar = progressEl.querySelector('.custom-progress-bar');
+    bar.style.width = '0%';
+    bar.setAttribute('aria-valuenow', 0);
+    bar.textContent = '0%';
+    document.getElementById('main-content').style.pointerEvents = 'none';
+    document.getElementById('main-content').style.opacity = '0.25';
+    document.querySelectorAll('#main-content input, #main-content select, #main-content button, #main-content a').forEach(el => el.disabled = true);
+}
+
+// Function to update loading bar
+function updateLoadingBar(percentage, type = 'upload') {
+    const progressId = type === 'upload' ? 'upload-progress' : 'extract-progress';
+    const bar = document.getElementById(progressId).querySelector('.custom-progress-bar');
+    bar.style.width = `${percentage}%`;
+    bar.setAttribute('aria-valuenow', percentage);
+    bar.textContent = `${Math.round(percentage)}%`;
+}
+
+// Function to hide loading bar
+function hideLoadingBar(type = 'upload') {
+    const progressId = type === 'upload' ? 'upload-progress' : 'extract-progress';
+    const progressEl = document.getElementById(progressId);
+    progressEl.style.opacity = '0';
+    setTimeout(() => {
+        progressEl.style.display = 'none';
+    }, 300);
+    document.getElementById('main-content').style.pointerEvents = 'auto';
+    document.getElementById('main-content').style.opacity = '1';
+    document.querySelectorAll('#main-content input, #main-content select, #main-content button, #main-content a').forEach(el => el.disabled = false);
+}
+
+// Function to disable content during modal
+function disableContent() {
+    document.getElementById('main-content').style.pointerEvents = 'none';
+    document.getElementById('main-content').style.opacity = '0.25';
+    document.querySelectorAll('#main-content input, #main-content select, #main-content button, #main-content a').forEach(el => el.disabled = true);
+}
+
+// Function to enable content after modal
+function enableContent() {
+    document.getElementById('main-content').style.pointerEvents = 'auto';
+    document.getElementById('main-content').style.opacity = '1';
+    document.querySelectorAll('#main-content input, #main-content select, #main-content button, #main-content a').forEach(el => el.disabled = false);
+}
+
+// Filter books
+function filterBooks() {
+    console.log('Entering filterBooks');
+    const search = document.getElementById('book-search').value.toLowerCase().trim();
+    const category = document.getElementById('category-filter').value;
+    const shelf = document.getElementById('shelf-filter').value.toLowerCase().trim();
+    console.log(`Filters: search="${search}", category="${category}", shelf="${shelf}"`);
+
+    let visibleBooks = 0;
+
+    document.querySelectorAll('tr[data-book-id]').forEach(row => {
+        row.style.display = 'none';
+    });
+
+    document.querySelectorAll('tr[data-book-id]').forEach(row => {
+        const bookId = row.getAttribute('data-book-id');
+        const bookCategory = row.getAttribute('data-category');
+        const book = books.find(b => b.id === parseInt(bookId));
+
+        if (!book) {
+            console.warn(`Book with ID ${bookId} not found in books array`);
+            return;
+        }
+
+        const matchesSearch = book.title.toLowerCase().includes(search) ||
+                             book.author.toLowerCase().includes(search) ||
+                             book.isbn.toLowerCase().includes(search);
+        const matchesCategory = !category || book.category === category;
+        const matchesShelf = !shelf || book.shelf_location.toLowerCase().includes(shelf);
+
+        const isVisible = matchesSearch && matchesCategory && matchesShelf;
+        row.style.display = isVisible ? '' : 'none';
+        
+        if (isVisible) {
+            visibleBooks++;
+            console.log(`Showing book ID ${bookId}: ${book.title} (category: ${book.category})`);
+        } else {
+            console.log(`Hiding book ID ${bookId}: ${book.title} (category: ${book.category})`);
+        }
+    });
+
+    document.querySelectorAll('.custom-section-title').forEach(title => {
+        const categoryLabel = title.getAttribute('data-category-label');
+        const nextSibling = title.nextElementSibling;
+        if (!nextSibling || !nextSibling.classList.contains('custom-table-responsive')) {
+            console.warn(`No table-responsive sibling for category "${categoryLabel}"`);
+            title.style.display = 'none';
+            return;
+        }
+        const table = nextSibling.querySelector('table');
+        if (!table) {
+            console.warn(`No table found for category "${categoryLabel}"`);
+            title.style.display = 'none';
+            nextSibling.style.display = 'none';
+            return;
+        }
+        const visibleRows = table.querySelectorAll('tbody tr:not([style*="display: none"])').length;
+
+        title.style.display = visibleRows > 0 ? '' : 'none';
+        nextSibling.style.display = visibleRows > 0 ? '' : 'none';
+        console.log(`Category "${categoryLabel}": ${visibleRows} visible rows, section ${visibleRows > 0 ? 'shown' : 'hidden'}`);
+    });
+
+    console.log(`Total visible books: ${visibleBooks}`);
+    console.log('Exiting filterBooks');
+}
+
+// Handle file upload
+document.querySelectorAll('.upload-file').forEach(input => {
+    input.addEventListener('change', function() {
+        const fileInput = this;
+        const bookId = fileInput.getAttribute('data-book-id');
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        // Show upload confirmation modal
+        document.getElementById('uploadFileName').textContent = file.name;
+        document.getElementById('documentName').value = '';
+        showModal('uploadConfirmModal');
+        disableContent();
+
+        // Handle confirm upload
+        const confirmBtn = document.getElementById('confirmUploadBtn');
+        const confirmHandler = function() {
+            const documentName = document.getElementById('documentName').value.trim();
+            if (!documentName) {
+                alert('Please enter a document name.');
+                return;
+            }
+            hideModal('uploadConfirmModal');
+            enableContent();
+
+            const formData = new FormData();
+            formData.append('book_id', bookId);
+            formData.append('file', file);
+            formData.append('name', documentName);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            const xhr = new XMLHttpRequest();
+            
+            showLoadingBar('upload');
+
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentage = Math.round((e.loaded / e.total) * 100);
+                    console.log(`Upload progress: ${percentage}%`);
+                    updateLoadingBar(percentage, 'upload');
+                }
+            });
+
+            xhr.addEventListener('load', function() {
+                console.log(`Raw response: status=${xhr.status}, body=${xhr.responseText}`);
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && response.status === 'success') {
+                        console.log(`Upload success: ${response.message}`);
+                        const row = fileInput.closest('tr');
+                        row.querySelector('.files-uploaded').textContent = response.files_uploaded;
+                        row.querySelector('.document-actions').innerHTML = renderDocumentActions(response.ebooks, bookId);
+                        fileInput.value = '';
+                        try {
+                            filterBooks();
+                        } catch (filterError) {
+                            console.error(`Filter error after upload: ${filterError.message}`);
+                        }
+                        showSuccessAlert(response.message);
+                        enableContent();
+                    } else {
+                        console.error(`Upload failed: status=${xhr.status}, response=${JSON.stringify(response)}`);
+                        alert(response.message || 'Upload failed.');
+                    }
+                } catch (e) {
+                    console.error(`Upload error: Failed to parse response, status=${xhr.status}, response=${xhr.responseText}, error=${e.message}`);
+                    alert('Error parsing server response: ' + e.message);
+                }
+                hideLoadingBar('upload');
+            });
+
+            xhr.addEventListener('error', function() {
+                console.error(`Upload network error: status=${xhr.status}, response=${xhr.responseText}`);
+                alert('Network error during upload.');
+                hideLoadingBar('upload');
+            });
+
+            xhr.addEventListener('abort', function() {
+                console.warn('Upload aborted by user');
+                alert('Upload cancelled.');
+                hideLoadingBar('upload');
+            });
+
+            xhr.open('POST', '{% url 'ebook_upload' %}');
+            xhr.send(formData);
+        };
+        confirmBtn.removeEventListener('click', confirmHandler);
+        confirmBtn.addEventListener('click', confirmHandler);
+
+        // Handle modal close
+        document.getElementById('uploadConfirmModal').addEventListener('click', function(e) {
+            if (e.target.classList.contains('custom-modal')) {
+                hideModal('uploadConfirmModal');
+                enableContent();
+                fileInput.value = '';
+            }
+        });
+    });
+});
+
+// Handle file deletion
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.delete-ebook')) {
+        const button = e.target.closest('.delete-ebook');
+        const ebookId = button.getAttribute('data-ebook-id');
+        const bookId = button.getAttribute('data-book-id');
+
+        // Show delete confirmation modal
+        showModal('deleteConfirmModal');
+        disableContent();
+
+        // Handle confirm delete
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const confirmHandler = function() {
+            hideModal('deleteConfirmModal');
+            enableContent();
+
+            $.ajax({
+                url: '{% url 'ebook_delete' %}',
+                type: 'POST',
+                data: {
+                    ebook_id: ebookId,
+                    book_id: bookId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        console.log(`Delete success: ${response.message}`);
+                        const row = document.querySelector(`tr[data-book-id="${bookId}"]`);
+                        row.querySelector('.files-uploaded').textContent = response.files_uploaded;
+                        row.querySelector('.document-actions').innerHTML = renderDocumentActions(response.ebooks, bookId);
+                        alert(response.message);
+                        try {
+                            filterBooks();
+                        } catch (filterError) {
+                            console.error(`Filter error after delete: ${filterError.message}`);
+                        }
+                    } else {
+                        console.error(`Delete failed: ${response.message}`);
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(`Delete error: status=${xhr.status}, response=${xhr.responseText}, error=${error}`);
+                    alert('Error deleting file: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                }
+            });
+        };
+        confirmBtn.removeEventListener('click', confirmHandler);
+        confirmBtn.addEventListener('click', confirmHandler);
+
+        // Handle modal close
+        document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
+            if (e.target.classList.contains('custom-modal')) {
+                hideModal('deleteConfirmModal');
+                enableContent();
+            }
+        });
+    }
+});
+
+// Handle text extraction
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.extract-ebook')) {
+        const button = e.target.closest('.extract-ebook');
+        const ebookId = button.getAttribute('data-ebook-id');
+        console.log(`Initiating extraction for ebook_id=${ebookId}`);
+
+        showLoadingBar('extract');
+
+        // Poll for progress
+        let lastProgress = 0;
+        const pollInterval = setInterval(() => {
+            $.ajax({
+                url: `/library/ebooks/extract/${ebookId}/`,
+                type: 'GET',
+                success: function(response) {
+                    if (response.extraction_status === 'processing') {
+                        const progress = response.extraction_progress;
+                        if (progress !== lastProgress) {
+                            console.log(`Extraction progress: ${progress}%`);
+                            updateLoadingBar(progress, 'extract');
+                            lastProgress = progress;
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.error(`Poll error: status=${xhr.status}, response=${xhr.responseText}`);
+                }
+            });
+        }, 1000);
+
+        $.ajax({
+            url: `/library/ebooks/extract/${ebookId}/`,
+            type: 'POST',
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                clearInterval(pollInterval);
+                hideLoadingBar('extract');
+                if (response.status === 'success') {
+                    console.log(`Extraction success: ${response.message}`);
+                    const newLink = document.createElement('a');
+                    newLink.href = `/library/ebooks/view/${ebookId}/`;
+                    newLink.className = 'custom-button info small view-ebook';
+                    newLink.title = 'View';
+                    newLink.target = '_blank';
+                    newLink.innerHTML = '<i class="fas fa-eye"></i>';
+                    button.parentNode.replaceChild(newLink, button);
+                    showSuccessAlert(response.message);
+                } else {
+                    console.error(`Extraction failed: ${response.message}`);
+                    alert(response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                clearInterval(pollInterval);
+                hideLoadingBar('extract');
+                console.error(`Extraction error: status=${xhr.status}, response=${xhr.responseText}, error=${error}`);
+                alert('Error extracting text: ' + (xhr.responseJSON?.message || 'Unknown error'));
+            }
+        });
+    }
+});
+
+// Handle file download
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.download-ebook')) {
+        const button = e.target.closest('.download-ebook');
+        const fileUrl = button.getAttribute('data-file-url');
+        const fileName = button.getAttribute('data-file-name');
+        console.log(`Initiating download: url=${fileUrl}, name=${fileName}`);
+        
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+});
+
+// Bind filter events
+['book-search', 'category-filter', 'shelf-filter'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+        console.log(`Filter triggered: ${id}`);
+        try {
+            filterBooks();
+        } catch (filterError) {
+            console.error(`Filter error: ${filterError.message}`);
+        }
+    });
+    document.getElementById(id).addEventListener('change', function() {
+        console.log(`Filter triggered: ${id}`);
+        try {
+            filterBooks();
+        } catch (filterError) {
+            console.error(`Filter error: ${filterError.message}`);
+        }
+    });
+});
+
+// Initialize filters
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Document ready');
+    try {
+        filterBooks();
+    } catch (filterError) {
+        console.error(`Initial filter error: ${filterError.message}`);
+    }
+});
+</script>
+
+{% endblock %}

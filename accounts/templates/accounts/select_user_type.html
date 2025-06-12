@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select User Type</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            animation-name: fadeIn;
+            animation-duration: 0.4s;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%; /* Reduce width */
+            max-width: 500px; /* Add a max-width for smaller screens */
+            animation-name: slideIn;
+            animation-duration: 0.4s;
+            border-radius: 10px;
+        }
+        @keyframes slideIn {
+            from {top: -300px; opacity: 0}
+            to {top: 0; opacity: 1}
+        }
+        @keyframes fadeIn {
+            from {opacity: 0}
+            to {opacity: 1}
+        }
+        .modal h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: magenta;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Ensure buttons wrap on small screens */
+        }
+        .button-container a {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button-container a i {
+            margin-right: 8px;
+        }
+        .button-container a.parent {
+            background-color: #007bff;
+        }
+        .button-container a.teacher {
+            background-color: #28a745;
+        }
+        .button-container a.bursor {
+            background-color: #8b4513;
+        }
+        .button-container a.secretary {
+            background-color: #d2691e;
+        }
+        .button-container a.academic {
+            background-color: #00bfff;
+        }
+        .button-container a:hover {
+            transform: scale(1.1);
+        }
+        .button-container a:active {
+            transform: scale(1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="userTypeModal" class="modal">
+        <div class="modal-content">
+            <h1>Select User Type</h1>
+            <div class="button-container">
+                <a href="{% url 'create_parent_user' %}" class="parent"><i class="fas fa-user"></i> Create Parent User</a>
+                <a href="{% url 'create_teacher_user' %}" class="teacher"><i class="fas fa-chalkboard-teacher"></i> Create Teacher User</a>
+                <a href="{% url 'create_bursor_user' %}" class="bursor"><i class="fas fa-user-tie"></i> Create Bursor User</a>
+                <a href="{% url 'create_secretary_user' %}" class="secretary"><i class="fas fa-user-secret"></i> Create Secretary User</a>
+                <a href="{% url 'create_academic_user' %}" class="academic"><i class="fas fa-graduation-cap"></i> Create Academic User</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('userTypeModal');
+            modal.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
+{% endblock content %}

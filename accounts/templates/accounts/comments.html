@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comments</title>
+</head>
+<body>
+<div class="comment-container" data-parent-id="{% if parent %}{{ parent.id }}{% endif %}">
+    <!-- Header -->
+    <div class="comment-header">
+        <a href="/home/" class="back-btn">←</a>
+        <h3>
+            {% if is_parent %}
+                Comment
+            {% else %}
+                {{ parent.student.firstname }} {{ parent.student.middle_name }} {{ parent.student.surname }}
+            {% endif %}
+        </h3>
+    </div>
+
+    <!-- Messages -->
+    <div class="comment-messages">
+        {% for comment in comments %}
+            <div class="message {% if is_parent %}comment-parent{% else %}comment-staff{% endif %}" data-comment-id="{{ comment.id }}" data-comment-type="{{ comment.comment_type }}">
+                <div class="message-content">
+                    {% if comment.comment_message %}
+                        <p class="comment-text">{{ comment.comment_message }}</p>
+                    {% endif %}
+                    {% if comment.audio_message %}
+                        <audio controls preload="auto">
+                            <source src="{{ comment.audio_message.url }}" type="audio/webm">
+                            Your browser does not support the audio element.
+                        </audio>
+                    {% endif %}
+                    <span class="message-meta">{{ comment.comment_type }} • {{ comment.date_created|date:"M d, H:i" }}</span>
+                    {% if is_parent and comment.user.id == request.user.id %}
+                        <div class="message-actions">
+                            <span class="edit-comment" title="Edit Comment">✏️</span>
+                            <span class="delete-comment" title="Delete Comment">🗑️</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if comment.answer %}
+                <div class="message {% if is_parent %}answer-parent{% else %}answer-staff{% endif %}" data-answer-id="{{ comment.answer.id }}">
+                    <div class="message-content">
+                        {% if comment.answer.answer_message %}
+                            <p class="answer-text">{{ comment.answer.answer_message }}</p>
+                        {% endif %}
+                        {% if comment.answer.audio_answer %}
+                            <audio controls preload="auto">
+                                <source src="{{ comment.answer.audio_answer.url }}" type="audio/webm">
+                                Your browser does not support the audio element.
+                            </audio>
+                        {% endif %}
+                        <span class="message-meta">Answer • {{ comment.answer.date_created|date:"M d, H:i" }}</span>
+                        {% if not is_parent and comment.comment_type == comment_type %}
+                            <div class="message-actions">
+                                <span class="edit-answer" title="Edit Answer">✏️</span>
+                                <span class="delete-answer" title="Delete Answer">🗑️</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if not is_parent and not comment.answer and comment.comment_type == comment_type %}
+                <form method="post" class="answer-form" data-comment-id="{{ comment.id }}" data-parent-id="{{ parent.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                    <input type="hidden" name="audio_data" class="audio-data">
+                    {{ answer_form.answer_message }}
+                    <button type="button" class="audio-btn">🎙️</button>
+                    <span class="record-timer">00:00</span>
+                    <button type="button" class="send-btn">➤</button>
+                    <div class="audio-preview" style="display: none;">
+                        <audio controls class="preview-audio"></audio>
+                        <button type="button" class="preview-btn">Play</button>
+                        <button type="button" class="redo-btn">Re-record</button>
+                        <button type="button" class="confirm-btn">Confirm</button>
+                    </div>
+                </form>
+            {% endif %}
+        {% endfor %}
+        {% if not comments %}
+            <p class="no-messages">No comments available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Comment Form (Parent Only) -->
+    {% if is_parent %}
+        <div class="comment-input">
+            <form method="post" id="comment-form">
+                {% csrf_token %}
+                <input type="hidden" name="audio_data" id="audio-data">
+                <input type="hidden" name="comment_type" id="comment-type">
+                {{ form.comment_message }}
+                <button type="button" id="audio-btn">🎙️</button>
+                <span class="record-timer" id="record-timer">00:00</span>
+                <button type="button" id="send-btn">➤</button>
+                <div class="audio-preview" id="audio-preview" style="display: none;">
+                    <audio controls id="preview-audio"></audio>
+                    <button type="button" id="play-btn">Play</button>
+                    <button type="button" id="redo-btn">Re-record</button>
+                    <button type="button" id="confirm-btn">Confirm</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comment Type Modal -->
+        <div id="comment-type-modal" class="modal">
+            <div class="modal-content">
+                <h4>Select Comment Type</h4>
+                <div class="comment-type-field">
+                    {{ form.comment_type }}
+                </div>
+                <button id="modal-confirm-btn">Confirm</button>
+                <button id="modal-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Edit Comment Modal -->
+    {% if is_parent %}
+        <div id="edit-comment-modal" class="modal">
+            <div class="modal-content">
+                <h4>Edit Comment</h4>
+                <form id="edit-comment-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="comment_id" id="edit-comment-id">
+                    <input type="hidden" name="comment_type" id="edit-comment-type">
+                    <textarea name="comment_message" id="edit-comment-message" class="form-control" rows="2" placeholder="Edit your message..."></textarea>
+                    <button type="button" id="edit-comment-confirm">Save</button>
+                    <button type="button" id="edit-comment-cancel">Cancel</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Edit Answer Modal -->
+    {% if not is_parent %}
+        <div id="edit-answer-modal" class="modal">
+            <div class="modal-content">
+                <h4>Edit Answer</h4>
+                <form id="edit-answer-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="answer_id" id="edit-answer-id">
+                    <input type="hidden" name="comment_id" id="edit-answer-comment-id">
+                    <textarea name="answer_message" id="edit-answer-message" class="form-control" rows="2" placeholder="Edit your response..."></textarea>
+                    <button type="button" id="edit-answer-confirm">Save</button>
+                    <button type="button" id="edit-answer-cancel">Cancel</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 50%, #d4fc79 100%);
+        height: 100vh;
+        overflow: hidden;
+    }
+    .comment-container {
+        max-width: 800px;
+        margin: 0 auto;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .comment-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+    .back-btn {
+        cursor: pointer;
+        font-size: 20px;
+        color: #007aff;
+        margin-right: 10px;
+        text-decoration: none;
+    }
+    .comment-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    .comment-messages {
+        flex-grow: 1;
+        padding: 80px 20px 100px;
+        overflow-y: auto;
+        background: transparent;
+    }
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+        position: relative;
+    }
+    /* Parent: Comments left, Answers right */
+    .comment-parent {
+        justify-content: flex-start;
+    }
+    .answer-parent {
+        justify-content: flex-end;
+    }
+    /* Staff: Comments right, Answers left */
+    .comment-staff {
+        justify-content: flex-end;
+    }
+    .answer-staff {
+        justify-content: flex-start;
+    }
+    .message-content {
+        position: relative;
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+    }
+    .comment-parent .message-content {
+        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        color: #333;
+    }
+    .answer-parent .message-content {
+        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        color: #333;
+    }
+    .comment-staff .message-content {
+        background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        color: #333;
+    }
+    .answer-staff .message-content {
+        background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        color: #333;
+    }
+    /* Chat bubble tail effect */
+    .comment-parent .message-content::before,
+    .answer-staff .message-content::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        bottom: 10px;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-right: 8px solid rgba(224, 234, 252, 0.95);
+        border-bottom: 8px solid transparent;
+    }
+    .answer-parent .message-content::before,
+    .comment-staff .message-content::before {
+        content: '';
+        position: absolute;
+        right: -8px;
+        bottom: 10px;
+        width: 0;
+        height: 0;
+        border-top: 8px solid transparent;
+        border-left: 8px solid rgba(161, 196, 253, 0.95);
+        border-bottom: 8px solid transparent;
+    }
+    .message-content p {
+        margin: 0;
+        font-size: 14px;
+    }
+    .message-content audio {
+        width: 200px;
+        margin-top: 5px;
+    }
+    .message-meta {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 5px;
+        display: block;
+    }
+    .message-actions {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        display: flex;
+        gap: 5px;
+    }
+    .message-actions span {
+        cursor: pointer;
+        font-size: 16px;
+        color: #007aff;
+    }
+    .message-actions span:hover {
+        color: #ff2d55;
+    }
+    .no-messages {
+        text-align: center;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 16px;
+        margin-top: 20px;
+    }
+    .comment-input, .answer-form {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+    .comment-input form, .answer-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    textarea {
+        flex-grow: 1;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        padding: 10px;
+        font-size: 16px;
+        resize: none;
+        min-height: 40px;
+        background: rgba(255, 255, 255, 0.8);
+        color: #333;
+    }
+    button {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #007aff;
+    }
+    button:hover {
+        color: #005bb5;
+    }
+    button:disabled {
+        color: rgba(0, 0, 0, 0.3);
+        cursor: not-allowed;
+    }
+    .record-timer {
+        font-size: 14px;
+        color: red;
+        display: none;
+    }
+    .record-timer.active {
+        display: block;
+    }
+    .audio-preview {
+        display: none;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+    }
+    .audio-preview audio {
+        width: 150px;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 400px;
+        width: 90%;
+    }
+    .modal-content h4 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    .modal-content textarea {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .modal-content select {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+    .modal-content button {
+        padding: 10px 15px;
+        margin: 5px;
+        font-size: 14px;
+        border-radius: 8px;
+        background: #007bff;
+        color: white;
+    }
+    .modal-content button:hover {
+        background: #005bb5;
+    }
+    .form-control {
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 20px;
+        padding: 10px;
+        font-size: 16px;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, binding event listeners');
+    // CSRF Token Setup
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (!csrftoken) console.error('CSRF token missing');
+
+    // Utility to scroll messages
+    function scrollMessages() {
+        const messages = document.querySelector('.comment-messages');
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Format date
+    function formatDate(date) {
+        const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(date).toLocaleString('en-US', options).replace(',', '');
+    }
+
+    // Comment Form
+    const commentForm = document.querySelector('#comment-form');
+    const commentAudioBtn = document.querySelector('#audio-btn');
+    const commentSendBtn = document.querySelector('#send-btn');
+    const commentAudioData = document.querySelector('#audio-data');
+    const commentRecordTimer = document.querySelector('#record-timer');
+    const commentTypeModal = document.querySelector('#comment-type-modal');
+    const modalConfirmBtn = document.querySelector('#modal-confirm-btn');
+    const modalCancelBtn = document.querySelector('#modal-cancel-btn');
+    const commentTypeHidden = document.querySelector('#comment-type');
+    const commentAudioPreview = document.querySelector('#audio-preview');
+    const commentPreviewAudio = document.querySelector('#preview-audio');
+    const commentPlayBtn = document.querySelector('#play-btn');
+    const commentRedoBtn = document.querySelector('#redo-btn');
+    const commentConfirmBtn = document.querySelector('#confirm-btn');
+    let commentMediaRecorder = null;
+    let commentAudioChunks = [];
+
+    if (commentForm) {
+        let isRecording = false;
+        console.log('Comment form found, binding events');
+
+        commentAudioBtn?.addEventListener('click', async () => {
+            console.log('Comment audio button clicked, isRecording:', isRecording);
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    commentMediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    commentAudioChunks = [];
+
+                    commentMediaRecorder.addEventListener('dataavailable', e => commentAudioChunks.push(e.data));
+                    commentMediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(commentAudioChunks, { type: 'audio/webm' });
+                        commentPreviewAudio.src = URL.createObjectURL(audioBlob);
+                        commentAudioPreview.style.display = 'block';
+                        commentAudioBtn.disabled = true;
+                        commentSendBtn.disabled = true;
+                        commentRecordTimer.classList.remove('active');
+                        stream.getTracks().forEach(track => track.stop());
+                    });
+
+                    commentMediaRecorder.start();
+                    isRecording = true;
+                    commentAudioBtn.textContent = '⏹';
+                    commentAudioBtn.style.color = 'red';
+                    commentRecordTimer.classList.add('active');
+                    const startTime = Date.now();
+                    const timerInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        commentRecordTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }, 1000);
+                    commentMediaRecorder.addEventListener('stop', () => clearInterval(timerInterval));
+                } catch (error) {
+                    console.error('Comment audio error:', error.message);
+                    alert('Recording failed: Please allow microphone access and use HTTPS.');
+                }
+            } else {
+                commentMediaRecorder.stop();
+                isRecording = false;
+                commentAudioBtn.textContent = '🎙️';
+                commentAudioBtn.style.color = '#007bff';
+                commentAudioBtn.disabled = false;
+            }
+        });
+
+        commentPlayBtn?.addEventListener('click', () => {
+            console.log('Comment play button clicked');
+            commentPreviewAudio.play().catch(e => console.error('Comment play error:', e.message));
+        });
+
+        commentRedoBtn?.addEventListener('click', () => {
+            console.log('Comment redo button clicked');
+            commentAudioPreview.style.display = 'none';
+            commentAudioBtn.disabled = false;
+            commentSendBtn.disabled = false;
+            commentAudioData.value = '';
+            commentPreviewAudio.src = '';
+            commentAudioChunks = [];
+        });
+
+        commentConfirmBtn?.addEventListener('click', () => {
+            console.log('Comment confirm button clicked');
+            if (commentAudioChunks.length) {
+                const audioBlob = new Blob(commentAudioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    commentAudioData.value = reader.result;
+                    commentAudioPreview.style.display = 'none';
+                    commentAudioBtn.disabled = false;
+                    commentSendBtn.disabled = false;
+                    const textInput = commentForm.querySelector('textarea').value.trim();
+                    if (textInput || commentAudioData.value) {
+                        commentTypeModal.style.display = 'block';
+                    } else {
+                        alert('Please provide a message or audio.');
+                    }
+                };
+                reader.readAsDataURL(audioBlob);
+            } else {
+                alert('No audio recorded.');
+            }
+        });
+
+        commentSendBtn?.addEventListener('click', () => {
+            console.log('Comment send button clicked');
+            const textInput = commentForm.querySelector('textarea').value.trim();
+            if (textInput || commentAudioData.value) {
+                commentTypeModal.style.display = 'block';
+            } else {
+                alert('Please provide a message or audio.');
+            }
+        });
+
+        modalConfirmBtn?.addEventListener('click', () => {
+            console.log('Modal confirm button clicked');
+            const commentTypeSelect = commentTypeModal.querySelector('select[name=comment_type]');
+            if (commentTypeSelect?.value) {
+                commentTypeHidden.value = commentTypeSelect.value;
+                const formData = new FormData(commentForm);
+                console.log('Submitting comment:', Object.fromEntries(formData));
+                $.ajax({
+                    url: '/accounts/comments/',
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: response => {
+                        if (response.status === 'success') {
+                            const message = `
+                                <div class="message comment-parent" data-comment-id="${response.comment_id}" data-comment-type="${response.comment_type}">
+                                    <div class="message-content">
+                                        ${response.comment_message ? `<p class="comment-text">${response.comment_message}</p>` : ''}
+                                        ${response.audio_url ? `<audio controls preload="auto"><source src="${response.audio_url}" type="audio/webm"></audio>` : ''}
+                                        <span class="message-meta">${response.comment_type} • ${formatDate(response.date_created)}</span>
+                                        <div class="message-actions">
+                                            <span class="edit-comment" title="Edit Comment">✏️</span>
+                                            <span class="delete-comment" title="Delete Comment">🗑️</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            document.querySelector('.comment-messages').insertAdjacentHTML('beforeend', message);
+                            commentForm.reset();
+                            commentTypeModal.style.display = 'none';
+                            scrollMessages();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: xhr => {
+                        console.error('Comment submission error:', xhr.responseText);
+                        alert('Error submitting comment.');
+                    }
+                });
+            } else {
+                alert('Please select a comment type.');
+            }
+        });
+
+        modalCancelBtn?.addEventListener('click', () => {
+            console.log('Modal cancel button clicked');
+            commentTypeModal.style.display = 'none';
+        });
+    }
+
+    // Answer Forms
+    const answerForms = document.querySelectorAll('.answer-form');
+    console.log('Answer forms found:', answerForms.length);
+    answerForms.forEach(form => {
+        const audioBtn = form.querySelector('.audio-btn');
+        const sendBtn = form.querySelector('.send-btn');
+        const audioDataInput = form.querySelector('.audio-data');
+        const recordTimer = form.querySelector('.record-timer');
+        const audioPreview = form.querySelector('.audio-preview');
+        const previewAudio = form.querySelector('.preview-audio');
+        const playBtn = form.querySelector('.preview-btn');
+        const redoBtn = form.querySelector('.redo-btn');
+        const confirmBtn = form.querySelector('.confirm-btn');
+        const commentIdInput = form.querySelector('input[name=comment_id]');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        audioBtn?.addEventListener('click', async () => {
+            console.log('Answer audio button clicked, isRecording:', isRecording);
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    audioChunks = [];
+
+                    mediaRecorder.addEventListener('dataavailable', e => audioChunks.push(e.data));
+                    mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        previewAudio.src = URL.createObjectURL(audioBlob);
+                        audioPreview.style.display = 'block';
+                        audioBtn.disabled = true;
+                        sendBtn.disabled = true;
+                        recordTimer.classList.remove('active');
+                        stream.getTracks().forEach(track => track.stop());
+                    });
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    audioBtn.textContent = '⏹';
+                    audioBtn.style.color = 'red';
+                    recordTimer.classList.add('active');
+                    const startTime = Date.now();
+                    const timerInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        recordTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }, 1000);
+                    mediaRecorder.addEventListener('stop', () => clearInterval(timerInterval));
+                } catch (error) {
+                    console.error('Answer audio error:', error.message);
+                    alert('Recording failed: Please allow microphone access and use HTTPS.');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                audioBtn.textContent = '🎙️';
+                audioBtn.style.color = '#007bff';
+                audioBtn.disabled = false;
+            }
+        });
+
+        playBtn?.addEventListener('click', () => {
+            console.log('Answer play button clicked');
+            previewAudio.play().catch(e => console.error('Answer play error:', e.message));
+        });
+
+        redoBtn?.addEventListener('click', () => {
+            console.log('Answer redo button clicked');
+            audioPreview.style.display = 'none';
+            audioBtn.disabled = false;
+            sendBtn.disabled = false;
+            audioDataInput.value = '';
+            previewAudio.src = '';
+            audioChunks = [];
+        });
+
+        confirmBtn?.addEventListener('click', () => {
+            console.log('Answer confirm button clicked');
+            if (audioChunks.length) {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    audioDataInput.value = reader.result;
+                    audioPreview.style.display = 'none';
+                    audioBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    submitAnswerForm(form);
+                };
+                reader.readAsDataURL(audioBlob);
+            } else {
+                alert('No audio recorded.');
+            }
+        });
+
+        sendBtn?.addEventListener('click', () => {
+            console.log('Answer send button clicked');
+            submitAnswerForm(form);
+        });
+
+        function submitAnswerForm(form) {
+            console.log('Submitting answer form');
+            const textInput = form.querySelector('textarea').value.trim();
+            if (textInput || audioDataInput.value) {
+                const formData = new FormData(form);
+                const parentId = form.dataset.parentId;
+                console.log('Submitting answer:', Object.fromEntries(formData), 'parentId:', parentId);
+                $.ajax({
+                    url: `/accounts/comments/${parentId}/`,
+                    type: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: response => {
+                        if (response.status === 'success') {
+                            const message = `
+                                <div class="message answer-staff" data-answer-id="${response.answer_id}">
+                                    <div class="message-content">
+                                        ${response.answer_message ? `<p class="answer-text">${response.answer_message}</p>` : ''}
+                                        ${response.audio_url ? `<audio controls preload="auto"><source src="${response.audio_url}" type="audio/webm"></audio>` : ''}
+                                        <span class="message-meta">Answer • ${formatDate(response.date_created)}</span>
+                                        <div class="message-actions">
+                                            <span class="edit-answer" title="Edit Answer">✏️</span>
+                                            <span class="delete-answer" title="Delete Answer">🗑️</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            const commentMessage = document.querySelector(`.message[data-comment-id="${response.comment_id}"]`);
+                            commentMessage.insertAdjacentHTML('afterend', message);
+                            form.remove();
+                            scrollMessages();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: xhr => {
+                        console.error('Answer submission error:', xhr.responseText);
+                        alert('Error submitting answer.');
+                    }
+                });
+            } else {
+                alert('Please provide a response or audio.');
+            }
+        }
+    });
+
+    // Edit/Delete Comments
+    const editCommentModal = document.querySelector('#edit-comment-modal');
+    const editCommentForm = document.querySelector('#edit-comment-form');
+    const editCommentId = document.querySelector('#edit-comment-id');
+    const editCommentType = document.querySelector('#edit-comment-type');
+    const editCommentMessage = document.querySelector('#edit-comment-message');
+    const editCommentConfirm = document.querySelector('#edit-comment-confirm');
+    const editCommentCancel = document.querySelector('#edit-comment-cancel');
+
+    if (editCommentModal) {
+        document.querySelector('.comment-messages').addEventListener('click', e => {
+            if (e.target.classList.contains('edit-comment')) {
+                console.log('Edit comment clicked');
+                const message = e.target.closest('.message');
+                const commentId = message.dataset.commentId;
+                const commentType = message.dataset.commentType;
+                const commentText = message.querySelector('.comment-text')?.textContent || '';
+                editCommentId.value = commentId;
+                editCommentType.value = commentType;
+                editCommentMessage.value = commentText;
+                editCommentModal.style.display = 'block';
+            } else if (e.target.classList.contains('delete-comment')) {
+                console.log('Delete comment clicked');
+                const commentId = e.target.closest('.message').dataset.commentId;
+                if (confirm('Are you sure you want to delete this comment?')) {
+                    $.ajax({
+                        url: `/accounts/comments/comment/${commentId}/delete/`,
+                        type: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken },
+                        data: { csrfmiddlewaretoken: csrftoken },
+                        success: response => {
+                            if (response.status === 'success') {
+                                document.querySelector(`.message[data-comment-id="${commentId}"]`).remove();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: xhr => {
+                            console.error('Comment deletion error:', xhr.responseText);
+                            alert('Error deleting comment.');
+                        }
+                    });
+                }
+            }
+        });
+
+        editCommentConfirm?.addEventListener('click', () => {
+            console.log('Edit comment confirm clicked');
+            const formData = new FormData(editCommentForm);
+            console.log('Updating comment:', Object.fromEntries(formData));
+            $.ajax({
+                url: `/accounts/comments/comment/${editCommentId.value}/update/`,
+                type: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: response => {
+                    if (response.status === 'success') {
+                        const message = document.querySelector(`.message[data-comment-id="${editCommentId.value}"]`);
+                        const textElement = message.querySelector('.comment-text');
+                        if (textElement) {
+                            textElement.textContent = response.comment_message;
+                        } else if (response.comment_message) {
+                            message.querySelector('.message-content').insertAdjacentHTML('afterbegin', `<p class="comment-text">${response.comment_message}</p>`);
+                        }
+                        editCommentModal.style.display = 'none';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: xhr => {
+                    console.error('Comment update error:', xhr.responseText);
+                    alert('Error updating comment.');
+                }
+            });
+        });
+
+        editCommentCancel?.addEventListener('click', () => {
+            console.log('Edit comment cancel clicked');
+            editCommentModal.style.display = 'none';
+        });
+    }
+
+    // Edit/Delete Answers
+    const editAnswerModal = document.querySelector('#edit-answer-modal');
+    const editAnswerForm = document.querySelector('#edit-answer-form');
+    const editAnswerId = document.querySelector('#edit-answer-id');
+    const editAnswerCommentId = document.querySelector('#edit-answer-comment-id');
+    const editAnswerMessage = document.querySelector('#edit-answer-message');
+    const editAnswerConfirm = document.querySelector('#edit-answer-confirm');
+    const editAnswerCancel = document.querySelector('#edit-answer-cancel');
+
+    if (editAnswerModal) {
+        document.querySelector('.comment-messages').addEventListener('click', e => {
+            if (e.target.classList.contains('edit-answer')) {
+                console.log('Edit answer clicked');
+                const message = e.target.closest('.message');
+                const answerId = message.dataset.answerId;
+                const commentId = message.previousElementSibling.dataset.commentId;
+                const answerText = message.querySelector('.answer-text')?.textContent || '';
+                editAnswerId.value = answerId;
+                editAnswerCommentId.value = commentId;
+                editAnswerMessage.value = answerText;
+                editAnswerModal.style.display = 'block';
+            } else if (e.target.classList.contains('delete-answer')) {
+                console.log('Delete answer clicked');
+                const answerId = e.target.closest('.message').dataset.answerId;
+                const commentId = e.target.closest('.message').previousElementSibling.dataset.commentId;
+                if (confirm('Are you sure you want to delete this answer?')) {
+                    $.ajax({
+                        url: `/accounts/comments/answer/${answerId}/delete/`,
+                        type: 'POST',
+                        headers: { 'X-CSRFToken': csrftoken },
+                        data: { csrfmiddlewaretoken: csrftoken, comment_id: commentId },
+                        success: response => {
+                            if (response.status === 'success') {
+                                document.querySelector(`.message[data-answer-id="${answerId}"]`).remove();
+                                const commentMessage = document.querySelector(`.message[data-comment-id="${commentId}"]`);
+                                const form = document.createElement('form');
+                                form.className = 'answer-form';
+                                form.dataset.commentId = commentId;
+                                form.dataset.parentId = commentMessage.closest('.comment-container').dataset.parentId;
+                                form.innerHTML = `
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
+                                    <input type="hidden" name="comment_id" value="${commentId}">
+                                    <input type="hidden" name="audio_data" class="audio-data">
+                                    <textarea name="answer_message" class="form-control" rows="2" placeholder="Type your response..."></textarea>
+                                    <button type="button" class="audio-btn">🎙️</button>
+                                    <span class="record-timer">00:00</span>
+                                    <button type="button" class="send-btn">➤</button>
+                                    <div class="audio-preview" style="display: none;">
+                                        <audio controls class="preview-audio"></audio>
+                                        <button type="button" class="preview-btn">Play</button>
+                                        <button type="button" class="redo-btn">Re-record</button>
+                                        <button type="button" class="confirm-btn">Confirm</button>
+                                    </div>
+                                `;
+                                commentMessage.insertAdjacentElement('afterend', form);
+                                bindAnswerFormEvents(form);
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: xhr => {
+                            console.error('Answer deletion error:', xhr.responseText);
+                            alert('Error deleting answer.');
+                        }
+                    });
+                }
+            }
+        });
+
+        editAnswerConfirm?.addEventListener('click', () => {
+            console.log('Edit answer confirm clicked');
+            const formData = new FormData(editAnswerForm);
+            console.log('Updating answer:', Object.fromEntries(formData));
+            $.ajax({
+                url: `/accounts/comments/answer/${editAnswerId.value}/update/`,
+                type: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: response => {
+                    if (response.status === 'success') {
+                        const message = document.querySelector(`.message[data-answer-id="${editAnswerId.value}"]`);
+                        const textElement = message.querySelector('.answer-text');
+                        if (textElement) {
+                            textElement.textContent = response.answer_message;
+                        } else if (response.answer_message) {
+                            message.querySelector('.message-content').insertAdjacentHTML('afterbegin', `<p class="answer-text">${response.answer_message}</p>`);
+                        }
+                        editAnswerModal.style.display = 'none';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: xhr => {
+                    console.error('Answer update error:', xhr.responseText);
+                    alert('Error updating answer.');
+                }
+            });
+        });
+
+        editAnswerCancel?.addEventListener('click', () => {
+            console.log('Edit answer cancel clicked');
+            editAnswerModal.style.display = 'none';
+        });
+    }
+
+    // Bind events to dynamically added answer forms
+    function bindAnswerFormEvents(form) {
+        console.log('Binding events to dynamic answer form');
+        const audioBtn = form.querySelector('.audio-btn');
+        const sendBtn = form.querySelector('.send-btn');
+        const audioDataInput = form.querySelector('.audio-data');
+        const recordTimer = form.querySelector('.record-timer');
+        const audioPreview = form.querySelector('.audio-preview');
+        const previewAudio = form.querySelector('.preview-audio');
+        const playBtn = form.querySelector('.preview-btn');
+        const redoBtn = form.querySelector('.redo-btn');
+        const confirmBtn = form.querySelector('.confirm-btn');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        audioBtn?.addEventListener('click', async () => {
+            console.log('Dynamic answer audio button clicked, isRecording:', isRecording);
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    audioChunks = [];
+
+                    mediaRecorder.addEventListener('dataavailable', e => audioChunks.push(e.data));
+                    mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        previewAudio.src = URL.createObjectURL(audioBlob);
+                        audioPreview.style.display = 'block';
+                        audioBtn.disabled = true;
+                        sendBtn.disabled = true;
+                        recordTimer.classList.remove('active');
+                        stream.getTracks().forEach(track => track.stop());
+                    });
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    audioBtn.textContent = '⏹';
+                    audioBtn.style.color = 'red';
+                    recordTimer.classList.add('active');
+                    const startTime = Date.now();
+                    const timerInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        recordTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }, 1000);
+                    mediaRecorder.addEventListener('stop', () => clearInterval(timerInterval));
+                } catch (error) {
+                    console.error('Dynamic answer audio error:', error.message);
+                    alert('Recording failed: Please allow microphone access and use HTTPS.');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                audioBtn.textContent = '🎙️';
+                audioBtn.style.color = '#007bff';
+                audioBtn.disabled = false;
+            }
+        });
+
+        playBtn?.addEventListener('click', () => {
+            console.log('Dynamic answer play button clicked');
+            previewAudio.play().catch(e => console.error('Dynamic answer play error:', e.message));
+        });
+
+        redoBtn?.addEventListener('click', () => {
+            console.log('Dynamic answer redo button clicked');
+            audioPreview.style.display = 'none';
+            audioBtn.disabled = false;
+            sendBtn.disabled = false;
+            audioDataInput.value = '';
+            previewAudio.src = '';
+            audioChunks = [];
+        });
+
+        confirmBtn?.addEventListener('click', () => {
+            console.log('Dynamic answer confirm button clicked');
+            if (audioChunks.length) {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    audioDataInput.value = reader.result;
+                    audioPreview.style.display = 'none';
+                    audioBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    submitAnswerForm(form);
+                };
+                reader.readAsDataURL(audioBlob);
+            } else {
+                alert('No audio recorded.');
+            }
+        });
+
+        sendBtn?.addEventListener('click', () => {
+            console.log('Dynamic answer send button clicked');
+            submitAnswerForm(form);
+        });
+    }
+
+    scrollMessages();
+});
+</script>
+</body>
+</html>

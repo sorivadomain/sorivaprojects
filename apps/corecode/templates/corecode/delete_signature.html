@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Signature{% endblock title %}
+
+{% block content %}
+<div class="container mt-5" data-aos="fade-up" data-aos-duration="1000">
+    <h2 class="text-center text-danger mb-4">Delete Signature</h2>
+    <p class="text-center">Are you sure you want to delete the signature for "{{ signature.name }}"?</p>
+    <div class="d-flex justify-content-center">
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger mr-3">Yes, Delete</button>
+            <a href="{% url 'signature_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock content %}

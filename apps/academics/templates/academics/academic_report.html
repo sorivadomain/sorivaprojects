@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding-top: 70px;
+            color: #1c2526;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #00509d 0%, #003087 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+        .header a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            margin-right: 20px;
+            transition: transform 0.3s ease;
+        }
+        .header a:hover {
+            transform: scale(1.2);
+        }
+        .content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .filters {
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+        .filters label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1c2526;
+        }
+        select, button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            color: #1c2526;
+        }
+        button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #ffffff;
+        }
+        select:focus, button:focus {
+            outline: none;
+            box-shadow: 0 4px 16px rgba(0, 84, 255, 0.2);
+        }
+        select:hover, button:hover {
+            transform: translateY(-2px);
+        }
+        .report-section {
+            margin-bottom: 30px;
+        }
+        .report-section h2 {
+            font-size: 1.8rem;
+            color: #1c2526;
+            margin-bottom: 20px;
+        }
+        .class-report {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .class-report:hover {
+            transform: translateY(-4px);
+        }
+        .class-report h3 {
+            font-size: 1.5rem;
+            color: #1c2526;
+            margin: 0 0 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th {
+            background: linear-gradient(135deg, #f4f4f9 0%, #e2e8f0 100%);
+            font-weight: 600;
+            color: #1c2526;
+        }
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        tr:hover {
+            background: #eff6ff;
+        }
+        .comments {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .comments h4 {
+            margin: 0 0 10px;
+            font-weight: 600;
+            color: #1c2526;
+        }
+        .comments ul {
+            padding-left: 20px;
+            margin: 0;
+            list-style-type: disc;
+        }
+        .comments li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #4b5563;
+            white-space: pre-wrap; /* Preserve newlines */
+        }
+        .trend-section {
+            margin-top: 40px;
+        }
+        .trend-section canvas {
+            max-height: 300px; /* Reduced for mobile */
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .trend-advice {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .trend-advice p {
+            font-size: 1rem;
+            color: #4b5563;
+            line-height: 1.6;
+            margin: 0;
+            white-space: pre-wrap; /* Preserve newlines */
+        }
+        .error-message {
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 8px;
+            color: #dc2626;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 768px) {
+            .content { padding: 15px; }
+            .header h1 { font-size: 1.4rem; }
+            .filters { flex-direction: column; align-items: flex-start; }
+            select, button { width: 100%; min-width: unset; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 10px; }
+            .class-report { padding: 15px; }
+            .trend-section canvas {
+                max-height: 250px; /* Smaller for phones */
+                padding: 10px;
+            }
+            .comments li, .trend-advice p {
+                font-size: 0.9rem; /* Slightly smaller for readability */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="{% url 'academics_home' %}" title="Home">🏠</a>
+        <h1>Academic Report</h1>
+    </header>
+    <div class="content">
+        <div class="filters">
+            <form method="GET" action="{% url 'academic-report' %}">
+                <label for="session-filter">Session: </label>
+                <select id="session-filter" name="session_id">
+                    {% if current_session %}
+                    <option value="{{ current_session.id }}" {% if selected_session_id == current_session.id|stringformat:'s' %}selected{% endif %}>{{ current_session.name }}</option>
+                    {% endif %}
+                    {% for session in sessions %}
+                        {% if session != current_session %}
+                        <option value="{{ session.id }}" {% if selected_session_id == session.id|stringformat:'s' %}selected{% endif %}>{{ session.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    <option value="all" {% if selected_session_id == 'all' %}selected{% endif %}>All Sessions</option>
+                </select>
+                <label for="term-filter">Term: </label>
+                <select id="term-filter" name="term_id">
+                    {% if current_term %}
+                    <option value="{{ current_term.id }}" {% if selected_term_id == current_term.id|stringformat:'s' %}selected{% endif %}>{{ current_term.name }}</option>
+                    {% endif %}
+                    {% for term in terms %}
+                        {% if term != current_term %}
+                        <option value="{{ term.id }}" {% if selected_term_id == term.id|stringformat:'s' %}selected{% endif %}>{{ term.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    <option value="all" {% if selected_term_id == 'all' %}selected{% endif %}>All Terms</option>
+                </select>
+                <label for="exam-filter">Exam: </label>
+                <select id="exam-filter" name="exam_id">
+                    {% if current_exam %}
+                    <option value="{{ current_exam.id }}" {% if selected_exam_id == current_exam.id|stringformat:'s' %}selected{% endif %}>{{ current_exam.name }}</option>
+                    {% endif %}
+                    {% for exam in exams %}
+                        {% if exam != current_exam %}
+                        <option value="{{ exam.id }}" {% if selected_exam_id == exam.id|stringformat:'s' %}selected{% endif %}>{{ exam.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    <option value="all" {% if selected_exam_id == 'all' %}selected{% endif %}>All Exams</option>
+                </select>
+                <button type="submit">Apply Filters</button>
+            </form>
+        </div>
+        <div class="report-section">
+            <h2>Result Report</h2>
+            {% if class_reports %}
+                {% for report in class_reports %}
+                    <div class="class-report">
+                        <h3>{{ report.class_name }} (Class Teacher: {{ report.class_teacher }})</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Total Students</td>
+                                    <td>{{ report.total_students }}</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Valid (≥7 subjects)</td>
+                                    <td>{{ report.valid_students }}</td>
+                                    <td>{{ report.valid_percentage }}%</td>
+                                </tr>
+                                <tr>
+                                    <td>ABS (<7 subjects)</td>
+                                    <td>{{ report.abs_students }}</td>
+                                    <td>{{ report.abs_percentage }}%</td>
+                                </tr>
+                                <tr>
+                                    <td>Pass (Avg ≥50)</td>
+                                    <td>{{ report.pass_students }}</td>
+                                    <td>{{ report.pass_percentage }}%</td>
+                                </tr>
+                                <tr>
+                                    <td>Fail (Avg <50)</td>
+                                    <td>{{ report.fail_students }}</td>
+                                    <td>{{ report.fail_percentage }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Top 3 Students</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Name</th>
+                                    <th>Average</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in report.top_students %}
+                                    <tr>
+                                        <td>{{ student.rank }} {{ student.icon }}</td>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.average }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <h4>Top 3 Subjects</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Average</th>
+                                    <th>Teacher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for subject in report.top_subjects %}
+                                    <tr>
+                                        <td>{{ subject.name }}</td>
+                                        <td>{{ subject.average }}</td>
+                                        <td>{{ subject.teacher }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="comments">
+                            <h4>Danger Zone (Avg <30)</h4>
+                            {% if report.danger_zone %}
+                                <ul>
+                                    {% for student in report.danger_zone %}
+                                        <li>{{ student.name }} (Avg: {{ student.average }})</li>
+                                    {% endfor %}
+                                </ul>
+                                <ul>
+                                    {% for comment in report.danger_comments %}
+                                        <li>{{ comment }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No students in danger zone.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="error-message">No data available for the selected filters. Try different session, term, or exam.</div>
+            {% endif %}
+        </div>
+        <div class="trend-section">
+            <h2>Performance Trend</h2>
+            <canvas id="trend-chart"></canvas>
+            <div class="trend-advice">
+                <p>{{ trend.advice }}</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Render trend chart
+        const ctx = document.getElementById('trend-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ trend.labels|safe }},
+                datasets: [{
+                    label: 'Overall Average',
+                    data: {{ trend.data|safe }},
+                    borderColor: '{{ trend.status }}' === 'rising' ? '#10b981' : '{{ trend.status }}' === 'falling' ? '#ef4444' : '#3b82f6',
+                    fill: false,
+                    tension: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: { 
+                            display: true, 
+                            text: 'Average Marks',
+                            font: { size: 14 }
+                        },
+                        ticks: { font: { size: 12 } }
+                    },
+                    x: {
+                        title: { 
+                            display: true, 
+                            text: 'Assessment Period',
+                            font: { size: 14 }
+                        },
+                        ticks: { 
+                            font: { size: 12 },
+                            maxRotation: 0,
+                            minRotation: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

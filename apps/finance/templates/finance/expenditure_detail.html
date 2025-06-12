@@ -1,0 +1,248 @@
+{% extends base_template %}
+
+{% block title %}{{ expenditure.expenditure_name }} Details{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <a href="{% url 'expenditure_list' category_id=category.id %}" class="nav-btn back-btn" title="Back to Expenditures">⬅️</a>
+    <h3 class="title">{{ expenditure.expenditure_name }} Details</h3>
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Expenditure Details -->
+<div class="details-list">
+    <div class="detail-item">
+        <span class="detail-label">Category:</span>
+        <span class="detail-value">{{ expenditure.category.name|default:"Uncategorized" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Expenditure Name:</span>
+        <span class="detail-value">{{ expenditure.expenditure_name }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Depositor Name:</span>
+        <span class="detail-value">{{ expenditure.depositor_name }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Amount Used:</span>
+        <span class="detail-value">TZS {{ expenditure.amount_used|floatformat:2 }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Given:</span>
+        <span class="detail-value">{{ expenditure.date_given|date:"Y-m-d" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Attachment:</span>
+        <span class="detail-value">
+            {% if expenditure.attachment %}
+                <a href="{{ expenditure.attachment.url }}" class="btn btn-sm btn-attachment" title="Download Attachment" download>📥</a>
+                <a href="{{ expenditure.attachment.url }}" class="btn btn-sm btn-attachment" title="View Attachment" target="_blank">👁️</a>
+            {% else %}
+                <span class="no-attachment">N/A</span>
+            {% endif %}
+        </span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Created:</span>
+        <span class="detail-value">{{ expenditure.date_created|date:"Y-m-d H:i" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Updated:</span>
+        <span class="detail-value">{{ expenditure.date_updated|date:"Y-m-d H:i" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Actions:</span>
+        <span class="detail-value">
+            {% if is_authorized_for_actions %}
+                <a href="{% url 'expenditure_update' pk=expenditure.id %}" class="btn btn-sm btn-update" title="Update Expenditure">📝</a>
+                <a href="{% url 'expenditure_delete' category_id=category.id expenditure_id=expenditure.id %}" class="btn btn-sm btn-delete" title="Delete Expenditure">🗑️</a>
+            {% else %}
+                <span class="no-actions">No actions</span>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+    width: 100%;
+    padding: 0 15px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Details List Styles */
+.details-list {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Detail Item Styles */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+    flex: 0 0 100%;
+}
+
+.detail-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex: 0 0 40%;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    color: #343a40;
+    flex: 0 0 60%;
+    text-align: right;
+}
+
+.btn-attachment, .btn-update, .btn-delete {
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin: 0 2px;
+    display: inline-block;
+    transition: var(--transition);
+    color: #fff;
+}
+
+.btn-attachment {
+    background: var(--gradient-blue);
+}
+
+.btn-attachment:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #3b82f6, #1e3a8a);
+}
+
+.btn-update {
+    background: var(--gradient-yellow);
+}
+
+.btn-update:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #fbbf24, #fef08a);
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+}
+
+.btn-delete:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #ef4444, #f87171);
+}
+
+.no-attachment, .no-actions {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 10px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .details-list {
+        padding: 15px;
+    }
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 0;
+    }
+    .detail-label {
+        flex: none;
+        margin-bottom: 5px;
+    }
+    .detail-value {
+        flex: none;
+        text-align: left;
+    }
+    .btn-attachment, .btn-update, .btn-delete {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+        display: block;
+        margin: 2px 0;
+    }
+    .no-attachment, .no-actions {
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock content %}

@@ -1,27 +1,44 @@
-"""newapp URL Configuration
+# school_app/urls.py
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/3.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.contrib import admin
+from django.shortcuts import redirect
+from django.urls import reverse
+import debug_toolbar
+
+from accounts.views import welcome_view
+from mpesa.urls import mpesa_urls
+
+def admin_redirect(request):
+    return redirect(reverse('admin:index'))
 
 urlpatterns = [
+    path('', welcome_view, name='welcome_view'),
+    path('home/', include("apps.corecode.urls")),
+
+    path('admin/', admin.site.urls),
+    path('__debug__/', include(debug_toolbar.urls)),
+
     path("accounts/", include("django.contrib.auth.urls")),
-    path("", include("apps.corecode.urls")),
+    path("accounts/", include('accounts.urls')),
+
     path("student/", include("apps.students.urls")),
     path("staff/", include("apps.staffs.urls")),
-    path("finance/", include("apps.finance.urls")),
-    path("result/", include("apps.result.urls")),
+    path("expenditures/", include("expenditures.urls")),
+    path("event/", include("event.urls")),
+    path("school_properties/", include("school_properties.urls")),
+    path('goto-admin/', admin_redirect, name='goto-admin'),
+    path("library/", include("library.urls")),
+    path("attendace/", include("attendace.urls")),
+    path('sms/', include('sms.urls')),
+    path('mpesa/', include(mpesa_urls)),
+    path('finance/', include('apps.finance.urls')),
+    path('academics/', include('apps.academics.urls')),
+    path('location/', include('location.urls')),
+    path('duty/', include('duty.urls')),
+    path('meetings/', include('meetings.urls')),
+    path('website/', include('website.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

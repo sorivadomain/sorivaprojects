@@ -1,0 +1,483 @@
+{% extends base_template %}
+{% load static %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon to suppress 404 -->
+    <link rel="icon" href="data:;base64,=">
+{% endblock %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            <h3 class="header-title">{{ title }}</h3>
+        </div>
+    </div>
+
+    <!-- FORM AND FILTER -->
+    <div class="form-container">
+        <p class="message">{{ message }}</p>
+        <form method="post" id="attendanceForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.session.id_for_label }}">Session:</label>
+                    {{ form.session }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.term.id_for_label }}">Term:</label>
+                    {{ form.term }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.date.id_for_label }}">Date:</label>
+                    {{ form.date }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.class_field.id_for_label }}">Class:</label>
+                    {{ form.class_field }}
+                </div>
+            </div>
+        </form>
+
+        <!-- Search Filter -->
+        <div class="search-container" style="display: none;" id="searchContainer">
+            <input type="text" id="studentFilter" placeholder="Search by student name...">
+            <select id="genderFilter" class="iphone-select" style="margin-top: 10px;">
+                <option value="">All Genders</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+        <!-- Students List -->
+        <form method="post" id="saveAttendanceForm">
+            {% csrf_token %}
+            <input type="hidden" name="session" id="hiddenSession">
+            <input type="hidden" name="term" id="hiddenTerm">
+            <input type="hidden" name="date" id="hiddenDate">
+            <input type="hidden" name="class_field" id="hiddenClassField">
+            <div class="students-list" id="studentsList">
+                {% if students %}
+                    {% for student in students %}
+                        <div class="student-card" data-name="{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}" data-gender="{{ student.gender }}">
+                            <div class="student-info">
+                                <span class="sn">{{ forloop.counter }}.</span>
+                                <img src="{% if student.passport %}{{ student.passport.url }}{% else %}{% static default_male_image if student.gender == 'male' else default_female_image %}{% endif %}" alt="{{ student.firstname }}" class="student-passport">
+                                <span class="student-name">{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}</span>
+                            </div>
+                            <div class="status-selection">
+                                <label class="status-option">
+                                    <input type="radio" name="status_{{ student.id }}" value="present" {% if existing_attendance and existing_attendance.student.id|stringformat:"s" == student.id|stringformat:"s" and existing_attendance.student.status == 'present' %}checked{% endif %}>
+                                    <span class="status-icon present">✔️</span>
+                                </label>
+                                <label class="status-option">
+                                    <input type="radio" name="status_{{ student.id }}" value="has_permission" {% if existing_attendance and existing_attendance.student.id|stringformat:"s" == student.id|stringformat:"s" and existing_attendance.student.status == 'has_permission' %}checked{% endif %}>
+                                    <span class="status-icon permission">🅿️</span>
+                                </label>
+                                <label class="status-option">
+                                    <input type="radio" name="status_{{ student.id }}" value="absent" {% if existing_attendance and existing_attendance.student.id|stringformat:"s" == student.id|stringformat:"s" and existing_attendance.student.status == 'absent' %}checked{% endif %}>
+                                    <span class="status-icon absent">❌</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% if not forloop.last %}<hr class="student-separator">{% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <button type="submit" name="save_attendance" class="save-btn" style="display: none;" id="saveButton">Save Attendance</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background: transparent;
+        overflow-x: hidden;
+    }
+    .container {
+        width: 100%;
+        margin: 0 auto;
+        max-width: 600px;
+        padding: 0;
+    }
+    .header {
+        padding: 20px;
+        text-align: center;
+        margin: 0;
+    }
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin: 0;
+        padding: 0 15px;
+    }
+    .back-btn {
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .header-title {
+        margin: 0;
+        font-size: 20px;
+        flex-grow: 1;
+    }
+    .form-container {
+        padding: 15px 0;
+        margin: 0;
+        width: 100%;
+    }
+    .message {
+        color: #555;
+        text-align: center;
+        margin: 15px 0;
+        padding: 0 15px;
+    }
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 0;
+        padding: 0;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 0 15px;
+    }
+    .form-group label {
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-align: left;
+    }
+    .iphone-select, .iphone-input {
+        padding: 15px 20px;
+        width: 100%;
+        font-size: 16px;
+        border-radius: 50px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E');
+        background-repeat: no-repeat;
+        background-position: right 20px center;
+        background-size: 12px;
+    }
+    .iphone-input {
+        background-image: none;
+    }
+    .search-container {
+        margin: 20px 0;
+        padding: 0 15px;
+        width: 100%;
+    }
+    #studentFilter {
+        padding: 15px 20px;
+        width: 100%;
+        font-size: 16px;
+        border-radius: 50px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .students-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 0;
+        padding: 0 15px 20px;
+    }
+    .student-card {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.3s ease;
+    }
+    .student-card:hover {
+        transform: scale(1.02);
+    }
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+    }
+    .sn {
+        font-weight: bold;
+        color: #555;
+    }
+    .student-passport {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .student-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    .status-selection {
+        display: flex;
+        gap: 15px;
+    }
+    .status-option {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+    }
+    .status-option input {
+        display: none;
+    }
+    .status-icon {
+        font-size: 24px;
+        padding: 8px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+    .status-option input:checked + .status-icon::before {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border: 2px solid #007aff;
+        border-radius: 50%;
+        box-sizing: border-box;
+    }
+    .present {
+        color: #34c759;
+    }
+    .permission {
+        color: #007aff;
+    }
+    .absent {
+        color: #ff3b30;
+    }
+    .student-separator {
+        border: 0;
+        height: 4px;
+        background: #888;
+        margin: 0;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .save-btn {
+        display: block;
+        margin: 20px auto;
+        padding: 15px 30px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: #007aff;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .save-btn:hover {
+        transform: scale(1.05);
+    }
+    @media (max-width: 576px) {
+        .form-row {
+            gap: 10px;
+        }
+        .form-group {
+            padding: 0 10px;
+        }
+        .iphone-select, .iphone-input {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        .search-container {
+            padding: 0 10px;
+        }
+        #studentFilter {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        .students-list {
+            padding: 0 10px 15px;
+        }
+        .student-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .status-selection {
+            width: 100%;
+            justify-content: space-around;
+        }
+        .status-icon {
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+        }
+        .status-option input:checked + .status-icon::before {
+            width: 36px;
+            height: 36px;
+        }
+        .header {
+            padding: 15px;
+        }
+        .back-btn {
+            font-size: 20px;
+        }
+        .save-btn {
+            padding: 12px 25px;
+            font-size: 14px;
+        }
+        .container {
+            max-width: none;
+        }
+    }
+</style>
+
+<script>
+    function filterStudents() {
+        const nameInput = document.getElementById('studentFilter').value.toLowerCase();
+        const genderFilter = document.getElementById('genderFilter').value.toLowerCase();
+        const studentCards = document.getElementsByClassName('student-card');
+
+        for (let i = 0; i < studentCards.length; i++) {
+            const studentName = studentCards[i].getAttribute('data-name').toLowerCase();
+            const studentGender = studentCards[i].getAttribute('data-gender').toLowerCase();
+            const nameMatch = nameInput === '' || studentName.includes(nameInput);
+            const genderMatch = genderFilter === '' || studentGender === genderFilter;
+
+            if (nameMatch && genderMatch) {
+                studentCards[i].style.display = '';
+            } else {
+                studentCards[i].style.display = 'none';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const sessionSelect = document.getElementById('id_session');
+        const termSelect = document.getElementById('id_term');
+        const dateInput = document.getElementById('id_date');
+        const classSelect = document.getElementById('id_class_field');
+        const studentsList = document.getElementById('studentsList');
+        const saveForm = document.getElementById('saveAttendanceForm');
+        const searchContainer = document.getElementById('searchContainer');
+        const saveButton = document.getElementById('saveButton');
+        const message = document.querySelector('.message');
+
+        const studentFilter = document.getElementById('studentFilter');
+        const genderFilter = document.getElementById('genderFilter');
+        if (studentFilter) {
+            studentFilter.addEventListener('keyup', filterStudents);
+        }
+        if (genderFilter) {
+            genderFilter.addEventListener('change', filterStudents);
+        }
+
+        function updateStudents() {
+            const session = sessionSelect.value;
+            const term = termSelect.value;
+            const date = dateInput.value;
+            const classField = classSelect.value;
+
+            if (session && term && date && classField) {
+                fetch(`/attendace/get-students/?session=${session}&term=${term}&date=${date}&class_field=${classField}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            studentsList.innerHTML = `<p style="color: red; text-align: center;">${data.error}</p>`;
+                            searchContainer.style.display = 'none';
+                            saveButton.style.display = 'none';
+                            message.textContent = 'Error loading students.';
+                            message.style.color = 'red';
+                            return;
+                        }
+                        let html = '';
+                        data.students.forEach((student, index) => {
+                            html += `
+                                <div class="student-card" data-name="${student.firstname} ${student.middle_name} ${student.surname}" data-gender="${student.gender}">
+                                    <div class="student-info">
+                                        <span class="sn">${index + 1}.</span>
+                                        <img src="${student.passport ? student.passport : `/static/images/${student.gender}.png`}" alt="${student.firstname}" class="student-passport">
+                                        <span class="student-name">${student.firstname} ${student.middle_name} ${student.surname}</span>
+                                    </div>
+                                    <div class="status-selection">
+                                        <label class="status-option">
+                                            <input type="radio" name="status_${student.id}" value="present" ${student.status === 'present' ? 'checked' : ''}>
+                                            <span class="status-icon present">✔️</span>
+                                        </label>
+                                        <label class="status-option">
+                                            <input type="radio" name="status_${student.id}" value="has_permission" ${student.status === 'has_permission' ? 'checked' : ''}>
+                                            <span class="status-icon permission">🅿️</span>
+                                        </label>
+                                        <label class="status-option">
+                                            <input type="radio" name="status_${student.id}" value="absent" ${student.status === 'absent' ? 'checked' : ''}>
+                                            <span class="status-icon absent">❌</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                ${index < data.students.length - 1 ? '<hr class="student-separator">' : ''}
+                            `;
+                        });
+                        studentsList.innerHTML = html;
+                        document.getElementById('hiddenSession').value = session;
+                        document.getElementById('hiddenTerm').value = term;
+                        document.getElementById('hiddenDate').value = date;
+                        document.getElementById('hiddenClassField').value = classField;
+                        searchContainer.style.display = 'block';
+                        saveButton.style.display = 'block';
+                        if (data.message === 'Attendance already exists') {
+                            message.textContent = 'Attendance already exists for this session, term, date, and class. You can update the records below.';
+                            message.style.color = 'orange';
+                        } else {
+                            message.textContent = 'No attendance records found. Create new attendance below.';
+                            message.style.color = 'green';
+                        }
+                        filterStudents();
+                    })
+                    .catch(error => {
+                        studentsList.innerHTML = `<p style="color: red; text-align: center;">Error loading students</p>`;
+                        searchContainer.style.display = 'none';
+                        saveButton.style.display = 'none';
+                        message.textContent = 'Error loading students.';
+                        message.style.color = 'red';
+                        console.error('Error:', error);
+                    });
+            } else {
+                studentsList.innerHTML = '';
+                searchContainer.style.display = 'none';
+                saveButton.style.display = 'none';
+                message.textContent = 'Please select all fields to load students.';
+                message.style.color = '#555';
+            }
+        }
+
+        [sessionSelect, termSelect, dateInput, classSelect].forEach(el => {
+            el.addEventListener('change', updateStudents);
+        });
+
+        updateStudents();
+    });
+</script>
+{% endblock content %}

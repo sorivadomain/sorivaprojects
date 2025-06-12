@@ -1,0 +1,160 @@
+{% extends base_template %}
+
+{% block title %}Class List{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #007aff; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; margin: 0;">Class List</h2>
+        <a href="{% url 'settings_home' %}" class="home-btn" style="font-size: 24px; color: #007aff; cursor: pointer; padding-right: 10px; text-decoration: none;">🏠</a>
+    </div>
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'student_class_create' %}" class="btn btn-lg" style="border-radius: 15px; background: linear-gradient(45deg, #007aff, #00d4ff); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+            <i class="fas fa-plus"></i> Create Class
+        </a>
+    </div>
+    <div class="filter-container mb-4">
+        <input type="text" id="class-filter" placeholder="Filter by class name" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ced4da; background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1rem; color: #000; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+    </div>
+    <div class="class-list">
+        {% for class in classes %}
+        <div class="class-card" style="margin-bottom: 20px; padding: 15px;">
+            <div class="class-info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="class-name" style="color: #000; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1.2rem;">{{ class.name }}</span>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'student_class_update' class.pk %}" class="btn btn-sm" style="border-radius: 10px; background: linear-gradient(45deg, #ff9500, #ffcc00); border: none; color: #fff; padding: 5px 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'student_class_delete' class.pk %}" class="btn btn-sm" style="border-radius: 10px; background: linear-gradient(45deg, #ff3b30, #ff6b6b); border: none; color: #fff; padding: 5px 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="class-dates mt-2" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 0.9rem; color: #8e8e93;">
+                    <div>Created: {{ class.date_created|date:"Y-m-d H:i" }} ({{ class.date_created|timesince }})</div>
+                    <div>Updated: {{ class.date_updated|date:"Y-m-d H:i" }} ({{ class.date_updated|timesince }})</div>
+                </div>
+                <div style="width: 100vw; position: relative; left: calc(-50vw + 50%); border-bottom: 1px solid #d1d1d6; margin: 12px 0;"></div>
+            </div>
+            <div class="subjects-list mt-3" style="margin-left: 10px;">
+                <h4 style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; font-size: 1rem;">Subjects ({{ class.subjects.count }})</h4>
+                {% for subject in class.subjects.all %}
+                <div class="subject-item" style="padding: 10px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+                    <div style="color: #000; font-weight: 500; font-size: 1rem;">{{ subject.name }} (Code: {{ subject.subject_code }})</div>
+                    <div style="font-size: 0.85rem; color: #8e8e93;">
+                        Created: {{ subject.date_created|date:"Y-m-d H:i" }} ({{ subject.date_created|timesince }})
+                    </div>
+                    <div style="font-size: 0.85rem; color: #8e8e93;">
+                        Updated: {{ subject.date_updated|date:"Y-m-d H:i" }} ({{ subject.date_updated|timesince }})
+                    </div>
+                </div>
+                {% empty %}
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #8e8e93; font-size: 0.9rem; padding: 10px 0;">
+                    No subjects assigned.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% if not forloop.last %}
+        <hr style="border: 0; border-top: 1px solid #d1d1d6; margin: 20px 0;">
+        {% endif %}
+        {% empty %}
+        <div class="text-center" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #8e8e93; font-size: 1rem;">
+            No classes available.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .class-list {
+        width: 100%;
+    }
+    .class-card {
+        transition: transform 0.2s ease;
+    }
+    .class-card:hover {
+        transform: translateY(-2px);
+    }
+    .filter-container input::placeholder {
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 1rem;
+    }
+    .gap-2 {
+        gap: 0.5rem;
+    }
+    .btn-sm {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+    }
+    @media (max-width: 576px) {
+        .btn-lg, .btn-sm {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .class-card {
+            padding: 10px;
+        }
+        .class-info {
+            font-size: 0.9rem;
+        }
+        .subjects-list h4 {
+            font-size: 0.9rem;
+        }
+        .subject-item {
+            font-size: 0.85rem;
+        }
+        .subject-item div {
+            font-size: 0.8rem;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+        hr {
+            margin: 15px 0;
+        }
+        .filter-container input {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+    }
+</style>
+
+<script>
+    document.getElementById('class-filter').addEventListener('input', function() {
+        const filterValue = this.value.toLowerCase();
+        const classCards = document.querySelectorAll('.class-card');
+
+        classCards.forEach(card => {
+            const className = card.querySelector('.class-name').textContent.toLowerCase();
+            if (className.includes(filterValue)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const hrElements = document.querySelectorAll('hr');
+        hrElements.forEach((hr, index) => {
+            const nextCard = classCards[index + 1];
+            if (nextCard && nextCard.style.display !== 'none') {
+                hr.style.display = '';
+            } else {
+                hr.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,243 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <a href="{% url 'school_income_list' category_id=category_id %}" class="nav-btn back-btn" title="Back to Incomes">⬅️</a>
+    <h3 class="title">{{ page_title }}</h3>
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Income Details -->
+<div class="details-list">
+    <div class="detail-item">
+        <span class="detail-label">Category:</span>
+        <span class="detail-value">{{ income.income_category|default:"Uncategorized" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Amount Obtained:</span>
+        <span class="detail-value">{{ income.amount_obtained|floatformat:2 }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Provided:</span>
+        <span class="detail-value">{{ income.date_provided|date:"Y-m-d" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Obtained From:</span>
+        <span class="detail-value">{{ income.obtained_from }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Attachment:</span>
+        <span class="detail-value">
+            {% if income.attachment %}
+                <a href="{{ income.attachment.url }}" class="btn btn-sm btn-attachment" title="Download Attachment" download>📥</a>
+                <a href="{{ income.attachment.url }}" class="btn btn-sm btn-attachment" title="View Attachment" target="_blank">👁️</a>
+            {% else %}
+                <span class="no-attachment">N/A</span>
+            {% endif %}
+        </span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Created:</span>
+        <span class="detail-value">{{ income.date_created|date:"Y-m-d H:i" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date Updated:</span>
+        <span class="detail-value">{{ income.date_updated|date:"Y-m-d H:i" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Actions:</span>
+        <span class="detail-value">
+            {% if is_authorized_for_actions %}
+                <a href="{% url 'school_income_update' pk=income.pk %}" class="btn btn-sm btn-update" title="Update Income">📝</a>
+                <a href="{% url 'school_income_delete' category_id=category_id pk=income.pk %}" class="btn btn-sm btn-delete" title="Delete Income">🗑️</a>
+            {% else %}
+                <span class="no-actions">No actions</span>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --border-radius: 50px;
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Details List Styles */
+.details-list {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Detail Item Styles */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex: 0 0 40%;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    color: #343a40;
+    flex: 0 0 60%;
+    text-align: right;
+}
+
+.btn-attachment {
+    color: #343a40;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin: 0 2px;
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.btn-attachment:hover {
+    background: var(--gradient-blue);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.btn-update {
+    background: var(--gradient-yellow);
+    color: #fff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin: 0 2px;
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+    color: #fff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin: 0 2px;
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.btn-update:hover, .btn-delete:hover {
+    transform: scale(1.05);
+    color: #fff;
+}
+
+.no-attachment, .no-actions {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .details-list {
+        padding: 15px;
+    }
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 0;
+    }
+    .detail-label {
+        flex: none;
+        margin-bottom: 5px;
+    }
+    .detail-value {
+        flex: none;
+        text-align: left;
+    }
+    .btn-attachment, .btn-update, .btn-delete {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+        display: block;
+        margin: 2px 0;
+    }
+    .no-attachment, .no-actions {
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock content %}

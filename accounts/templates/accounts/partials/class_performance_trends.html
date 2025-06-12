@@ -1,0 +1,82 @@
+<div class="section" id="trends">
+    <h2>Class Performance Trends</h2>
+    <p><a href="{% url 'academics_analysis' %}#trends" class="trend-link">View Class Performance Trends</a></p>
+    {% for chart_data_item in trends_data.chart_data_list %}
+        <h3>{{ chart_data_item.class_name }}</h3>
+        <canvas id="{{ chart_data_item.canvas_id }}" style="max-height: 400px;"></canvas>
+    {% endfor %}
+    <div class="analysis">
+        <h3>Strategic Recommendations</h3>
+        <p>{{ trends_data.advice|linebreaks }}</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chartsData = [
+            {% for chart_data_item in trends_data.chart_data_list %}
+                {
+                    canvasId: '{{ chart_data_item.canvas_id }}',
+                    className: '{{ chart_data_item.class_name|escapejs }}',
+                    data: {{ chart_data_item.chart_data|safe }}
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        chartsData.forEach(function(chart) {
+            const ctx = document.getElementById(chart.canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: chart.data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: {
+                            display: true,
+                            text: 'Class Overall Average vs. Session-Term-Exam Periods for ' + chart.className
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: 'Overall Class Average (%)' }
+                        },
+                        x: {
+                            display: false  // Hide X-axis labels
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 2
+                        },
+                        point: {
+                            radius: 5,
+                            hoverRadius: 7
+                        }
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .section { margin-bottom: 40px; }
+    h2 { font-size: 1.8rem; color: #333; margin-bottom: 20px; }
+    h3 { font-size: 1.5rem; color: #444; margin-top: 20px; }
+    p { font-size: 1rem; color: #666; line-height: 1.6; }
+    canvas { max-width: 100%; margin-bottom: 20px; }
+    .analysis { padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .trend-link {
+        font-size: 1rem;
+        color: #00509d;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .trend-link:hover {
+        color: #007bff;
+    }
+</style>

@@ -1,0 +1,563 @@
+{% extends base_template %}
+{% load static %}
+
+{% block extra_head %}
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Suppress favicon 404 -->
+    <link rel="icon" href="data:;base64,=">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4" style="padding: 10px 20px;">
+    <a href="{% url 'finance-home' %}" class="nav-btn back-btn" title="Back to Finance Home">⬅️</a>
+    <h3 class="title">{{ page_title }}</h3>
+    <div class="nav-actions d-flex align-items-center gap-2">
+        {% if is_authorized_for_actions %}
+            <a href="{% url 'salary-create' %}" class="nav-btn create-btn" title="Create Salary">➕</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-section" style="padding: 20px 10px;">
+    <div class="filter-row d-flex flex-wrap gap-3">
+        <!-- Session Filter -->
+        <div class="col-3">
+            <label for="filter-session" class="label">Session</label>
+            <select id="filter-session" class="input-control form-select">
+                <option value="">All Sessions</option>
+                {% for session in sessions %}
+                    <option value="{{ session.name }}" {% if session == current_session %}selected{% endif %}>{{ session.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <!-- Month Filter -->
+        <div class="col-3">
+            <label for="filter-month" class="label">Month</label>
+            <select id="filter-month" class="input-control form-select">
+                <option value="">All Months</option>
+                {% for month, _ in month_choices %}
+                    <option value="{{ month }}">{{ month }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <!-- Staff Filter -->
+        <div class="col-3">
+            <label for="filter-staff" class="label">Staff</label>
+            <select id="filter-staff" class="input-control form-select">
+                <option value="">All Staff</option>
+                {% for staff in staffs %}
+                    <option value="{{ staff.pk }}">{{ staff.firstname }}{% if staff.middle_name %} {{ staff.middle_name }}{% endif %} {{ staff.surname }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <!-- From Date Filter -->
+        <div class="col-3">
+            <label for="filter-date-from" class="label">From Date</label>
+            <input type="date" id="filter-date-from" class="input-control form-control" placeholder="From">
+        </div>
+        <!-- To Date Filter -->
+        <div class="col-3">
+            <label for="filter-date-to" class="label">To Date</label>
+            <input type="date" id="filter-date-to" class="input-control form-control" placeholder="To">
+        </div>
+    </div>
+</div>
+
+<!-- Overall Totals -->
+<div class="totals-section" style="padding: 0 15px 20px;">
+    <h5 class="section-title">Overall Totals</h5>
+    <div class="flex-row totals-row d-flex flex-wrap gap-3">
+        <div class="total-item"><strong>Basic Salary:</strong> TZS <span id="total-basic-salary">{{ totals.total_basic_salary|floatformat:2|default:"0.00" }}</span></div>
+        <div class="total-item"><strong>Allowances:</strong> TZS <span id="total-allowances">{{ totals.total_allowances|floatformat:2|default:"0.00" }}</span></div>
+        <div class="total-item"><strong>Special Bonus:</strong> TZS <span id="total-special-bonus">{{ totals.total_special_bonus|floatformat:2|default:"0.00" }}</span></div>
+        <div class="total-item"><strong>Total Given Salary:</strong> TZS <span id="total-given-salary">{{ totals.total_given_salary|floatformat:2|default:"0.00" }}</span></div>
+        <div class="total-item"><strong>Deductions:</strong> TZS <span id="total-deductions">{{ totals.total_deductions|floatformat:2|default:"0.00" }}</span></div>
+        <div class="total-item"><strong>Net Salary:</strong> TZS <span id="total-net-salary">{{ totals.total_net_salary|floatformat:2|default:"0.00" }}</span></div>
+    </div>
+</div>
+
+<!-- Salary Tables -->
+{% for session_name, months in grouped_salaries.items %}
+    {% for month, salaries in months.items %}
+        <div class="table-section" data-session="{{ session_name }}" data-month="{{ month }}" style="padding: 0 15px 20px;">
+            <h5 class="section-title">{{ session_name }} - {{ month }}</h5>
+            <div class="table-wrapper" style="overflow-x: auto;">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Staff Name</th>
+                            <th>Basic Salary (TZS)</th>
+                            <th>Allowances (TZS)</th>
+                            <th>Special Bonus (TZS)</th>
+                            <th>Total Given Salary (TZS)</th>
+                            <th>Deductions (TZS)</th>
+                            <th>Net Salary (TZS)</th>
+                            <th>Date Given</th>
+                            <th>Date Created</th>
+                            <th>Date Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salary in salaries %}
+                            <tr data-staff="{{ salary.staff.pk }}" data-date-given="{{ salary.date_given|date:'Y-m-d' }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ salary.staff.firstname }}{% if salary.staff.middle_name %} {{ salary.staff.middle_name }}{% endif %} {{ salary.staff.surname }}</td>
+                                <td>{{ salary.basic_salary_amount|floatformat:2 }}</td>
+                                <td>{{ salary.allowances|floatformat:2 }}</td>
+                                <td>{{ salary.special_bonus|floatformat:2 }}</td>
+                                <td>{{ salary.basic_salary_amount|add:salary.allowances|add:salary.special_bonus|floatformat:2 }}</td>
+                                <td>{{ salary.deductions|floatformat:2 }}</td>
+                                <td>{{ salary.net_salary|floatformat:2 }}</td>
+                                <td>{{ salary.date_given|date:'Y-m-d' }}</td>
+                                <td>{{ salary.date_created|date:'Y-m-d H:i' }}</td>
+                                <td>{{ salary.date_updated|date:'Y-m-d H:i' }}</td>
+                                <td>
+                                    {% if is_authorized_for_actions %}
+                                        <a href="{% url 'salary-update' pk=salary.pk %}" class="button update-btn" data-salary-id="{{ salary.pk }}">✅ Update</a>
+                                        <a href="{% url 'salary-delete' pk=salary.pk %}" class="button delete-btn" data-salary-id="{{ salary.pk }}">🗑️ Delete</a>
+                                    {% endif %}
+                                    <a href="{% url 'salary-detail' pk=salary.pk %}" class="button detail-btn" data-salary-id="{{ salary.pk }}">🔍 View Details</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2"><strong>Total</strong></td>
+                            <td><strong><span class="table-total-basic-salary">0.00</span></strong></td>
+                            <td><strong><span class="table-total-allowances">0.00</span></strong></td>
+                            <td><strong><span class="table-total-special-bonus">0.00</span></strong></td>
+                            <td><strong><span class="table-total-given-salary">0.00</span></strong></td>
+                            <td><strong><span class="table-total-deductions">0.00</span></strong></td>
+                            <td><strong><span class="table-total-net-salary">0.00</span></strong></td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<style>
+/* CSS Variables (Consistent with salary_detail.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-yellow: linear-gradient(45deg, #ffee58, #ffca28);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+    border-radius: 8px;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+.back-btn, .create-btn {
+    background: var(--gradient-blue);
+}
+
+.back-btn:hover, .create-btn:hover {
+    background: linear-gradient(45deg, #3b82f6, #1e3a8a);
+}
+
+/* Filters Section */
+.filters-section {
+    max-width: 100%;
+}
+
+.filter-row {
+    gap: 15px;
+}
+
+.col-3 {
+    flex: 1 1 200px;
+    max-width: 300px;
+}
+
+.label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+.input-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.input-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Totals Section */
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.totals-row {
+    gap: 15px;
+}
+
+.total-item {
+    font-size: 0.9rem;
+    color: #343a40;
+}
+
+/* Table Section */
+.table {
+    min-width: 1000px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 10px;
+    font-size: 0.85rem;
+    border: 1px solid #dee2e6;
+}
+
+.table th {
+    background: var(--gradient-blue);
+    color: #fff;
+}
+
+.table tfoot td {
+    background: #f1f3f5;
+}
+
+/* Button Styles */
+.button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: var(--transition);
+    margin-right: 5px;
+}
+
+.button:hover {
+    transform: scale(1.05);
+}
+
+.update-btn {
+    background: var(--gradient-blue);
+    color: #fff;
+}
+
+.update-btn:hover {
+    background: linear-gradient(45deg, #3b82f6, #1e3a8a);
+}
+
+.detail-btn {
+    background: var(--gradient-yellow);
+    color: #212529;
+}
+
+.detail-btn:hover {
+    background: linear-gradient(45deg, #ffca28, #fff59d);
+}
+
+.delete-btn {
+    background: var(--gradient-red);
+    color: #fff;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(45deg, #ef4444, #f87171);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .nav-container {
+        gap: 5px;
+        padding: 10px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .filters-section {
+        padding: 15px 10px;
+    }
+    .filter-row {
+        gap: 10px;
+    }
+    .col-3 {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .total-item {
+        font-size: 0.85rem;
+    }
+    .table th, .table td {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+    .button {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+}
+</style>
+
+<script>
+// JavaScript for filtering and updating totals
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionFilter = document.getElementById('filter-session');
+    const monthFilter = document.getElementById('filter-month');
+    const staffFilter = document.getElementById('filter-staff');
+    const dateFromFilter = document.getElementById('filter-date-from');
+    const dateToFilter = document.getElementById('filter-date-to');
+
+    function applyFilters() {
+        console.log('Filter Values:', {
+            session: sessionFilter.value,
+            month: monthFilter.value,
+            staff: staffFilter.value,
+            dateFrom: dateFromFilter.value,
+            dateTo: dateToFilter.value
+        });
+
+        let overallTotals = {
+            basic_salary: 0,
+            allowances: 0,
+            special_bonus: 0,
+            given_salary: 0,
+            deductions: 0,
+            net_salary: 0
+        };
+        let anyVisibleTable = false;
+
+        const tables = document.querySelectorAll('.table-section');
+        tables.forEach(table => {
+            const tableSession = table.dataset.session;
+            const tableMonth = table.dataset.month;
+
+            let showTable = true;
+            if (sessionFilter.value && sessionFilter.value !== tableSession) {
+                showTable = false;
+            }
+            if (monthFilter.value && monthFilter.value !== tableMonth) {
+                showTable = false;
+            }
+
+            let tableTotals = {
+                basic_salary: 0,
+                allowances: 0,
+                special_bonus: 0,
+                given_salary: 0,
+                deductions: 0,
+                net_salary: 0
+            };
+            let visibleRows = 0;
+            let visibleRowData = [];
+
+            if (!showTable) {
+                table.style.display = 'none';
+                table.querySelector('.table-total-basic-salary').textContent = '0.00';
+                table.querySelector('.table-total-allowances').textContent = '0.00';
+                table.querySelector('.table-total-special-bonus').textContent = '0.00';
+                table.querySelector('.table-total-given-salary').textContent = '0.00';
+                table.querySelector('.table-total-deductions').textContent = '0.00';
+                table.querySelector('.table-total-net-salary').textContent = '0.00';
+                console.log(`Table ${tableSession} - ${tableMonth}: Skipped`, { visibleRows: 0, tableTotals, visibleRowData: [] });
+                return;
+            }
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowStaff = row.dataset.staff;
+                const rowDate = row.dataset.dateGiven;
+                let showRow = true;
+
+                if (staffFilter.value && staffFilter.value !== rowStaff) {
+                    showRow = false;
+                }
+                if (dateFromFilter.value && rowDate < dateFromFilter.value) {
+                    showRow = false;
+                }
+                if (dateToFilter.value && rowDate > dateToFilter.value) {
+                    showRow = false;
+                }
+
+                row.style.display = showRow ? '' : 'none';
+
+                if (showRow) {
+                    visibleRows++;
+                    const cells = row.querySelectorAll('td');
+                    const basicSalary = parseFloat(cells[2].textContent) || 0;
+                    const allowances = parseFloat(cells[3].textContent) || 0;
+                    const specialBonus = parseFloat(cells[4].textContent) || 0;
+                    const givenSalary = parseFloat(cells[5].textContent) || 0;
+                    const deductions = parseFloat(cells[6].textContent) || 0;
+                    const netSalary = parseFloat(cells[7].textContent) || 0;
+
+                    tableTotals.basic_salary += basicSalary;
+                    tableTotals.allowances += allowances;
+                    tableTotals.special_bonus += specialBonus;
+                    tableTotals.given_salary += givenSalary;
+                    tableTotals.deductions += deductions;
+                    tableTotals.net_salary += netSalary;
+
+                    overallTotals.basic_salary += basicSalary;
+                    overallTotals.allowances += allowances;
+                    overallTotals.special_bonus += specialBonus;
+                    overallTotals.given_salary += givenSalary;
+                    overallTotals.deductions += deductions;
+                    overallTotals.net_salary += netSalary;
+
+                    visibleRowData.push({
+                        staff: cells[1].textContent,
+                        basic_salary: basicSalary,
+                        allowances: allowances,
+                        special_bonus: specialBonus,
+                        given_salary: givenSalary,
+                        deductions: deductions,
+                        net_salary: netSalary
+                    });
+                }
+            });
+
+            table.querySelector('.table-total-basic-salary').textContent = tableTotals.basic_salary.toFixed(2);
+            table.querySelector('.table-total-allowances').textContent = tableTotals.allowances.toFixed(2);
+            table.querySelector('.table-total-special-bonus').textContent = tableTotals.special_bonus.toFixed(2);
+            table.querySelector('.table-total-given-salary').textContent = tableTotals.given_salary.toFixed(2);
+            table.querySelector('.table-total-deductions').textContent = tableTotals.deductions.toFixed(2);
+            table.querySelector('.table-total-net-salary').textContent = tableTotals.net_salary.toFixed(2);
+
+            const isTableVisible = visibleRows > 0;
+            table.style.display = isTableVisible ? '' : 'none';
+            if (isTableVisible) {
+                anyVisibleTable = true;
+            }
+
+            console.log(`Table ${tableSession} - ${tableMonth}:`, {
+                visibleRows,
+                tableTotals,
+                visibleRowData
+            });
+        });
+
+        document.getElementById('total-basic-salary').textContent = overallTotals.basic_salary.toFixed(2);
+        document.getElementById('total-allowances').textContent = overallTotals.allowances.toFixed(2);
+        document.getElementById('total-special-bonus').textContent = overallTotals.special_bonus.toFixed(2);
+        document.getElementById('total-given-salary').textContent = overallTotals.given_salary.toFixed(2);
+        document.getElementById('total-deductions').textContent = overallTotals.deductions.toFixed(2);
+        document.getElementById('total-net-salary').textContent = overallTotals.net_salary.toFixed(2);
+
+        console.log('Overall Totals:', overallTotals);
+        console.log('Any Visible Table:', anyVisibleTable);
+    }
+
+    [sessionFilter, monthFilter, staffFilter, dateFromFilter, dateToFilter].forEach(filter => {
+        filter.addEventListener('change', () => {
+            console.log(`Filter Changed: ${filter.id} = ${filter.value}`);
+            applyFilters();
+        });
+    });
+
+    document.querySelectorAll('.update-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            console.log(`Update Button Clicked: Salary ID = ${button.dataset.salaryId}`);
+        });
+    });
+
+    document.querySelectorAll('.detail-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            console.log(`Detail Button Clicked: Salary ID = ${button.dataset.salaryId}`);
+        });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            console.log(`Delete Button Clicked: Salary ID = ${button.dataset.salaryId}`);
+        });
+    });
+
+    document.querySelectorAll('.create-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            console.log('Create Salary Button Clicked');
+        });
+    });
+
+    console.log('Initial Filter Application');
+    applyFilters();
+});
+</script>
+
+{% block extra_scripts %}
+    <!-- Bootstrap 5.3.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+{% endblock %}
+{% endblock content %}

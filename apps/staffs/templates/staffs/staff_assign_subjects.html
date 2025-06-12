@@ -1,0 +1,309 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">Assign Subjects to {{ staff.firstname }} {% if staff.middle_name %}{{ staff.middle_name }} {% endif %}{{ staff.surname }}</h2>
+        <span></span>
+    </div>
+
+    <!-- Form -->
+    <div class="card m-3 p-4">
+        <form method="post" id="assignmentForm">
+            {% csrf_token %}
+            {{ formset.management_form }}
+
+            <!-- Assignment Fields -->
+            <div id="assignment-container">
+                {% for form in formset %}
+                <div class="assignment-row mb-3 row" data-index="{{ forloop.counter0 }}">
+                    <div class="col-md-5">
+                        <label class="form-label" for="{{ form.student_class.id_for_label }}">Class</label>
+                        {{ form.student_class }}
+                        {{ form.student_class.errors }}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                        {{ form.subject }}
+                        {{ form.subject.errors }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="form-check me-2">
+                            {{ form.DELETE }}
+                            <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Delete</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger rounded-pill remove-form">🗑️</button>
+                    </div>
+                    {{ form.id }}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Add More Button -->
+            <div class="mb-3">
+                <button type="button" id="add-assignment" class="btn btn-outline-primary rounded-pill">➕ Add Assignment</button>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'staff-detail' pk=staff.pk %}" class="btn btn-outline-secondary rounded-pill mx-2 px-4">Cancel</a>
+                <button type="submit" class="btn btn-primary rounded-pill px-4">💾 Save Assignments</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.container-fluid {
+    width: 100%;
+    padding: 0;
+}
+.header {
+    border-radius: 0;
+    width: 100%;
+}
+.card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.form-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+.form-select {
+    border: none !important;
+    outline: 1px solid #e5e7eb;
+    border-radius: 50px !important;
+    background: #fefefe;
+    padding: 8px 20px;
+    font-size: 1rem;
+    color: #1f2937;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.form-select:focus {
+    outline: 2px solid #a855f7;
+    background: #f8fafc;
+}
+.form-check-input {
+    margin-top: 0.5rem;
+}
+.btn-primary {
+    background: linear-gradient(45deg, #6b7280, #a855f7);
+    border: none;
+}
+.btn-primary:hover {
+    background: linear-gradient(45deg, #5b6270, #9855e7);
+}
+.btn-outline-primary {
+    border-color: #a855f7;
+    color: #a855f7;
+}
+.btn-outline-primary:hover {
+    background: #a855f7;
+    color: #fff;
+}
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: #fff;
+}
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+.assignment-row {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+}
+@media (max-width: 576px) {
+    .form-select {
+        padding: 6px 16px;
+        font-size: 0.9rem;
+    }
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    .assignment-row .col-md-5, .assignment-row .col-md-2 {
+        margin-bottom: 10px;
+    }
+}
+</style>
+
+<script>
+// Class-subject mappings from view
+const classSubjectMap = {{ class_subject_map|safe }};
+console.log('Class-subject map:', classSubjectMap);
+
+// Dynamic formset handling
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing formset');
+    const container = document.getElementById('assignment-container');
+    const addButton = document.getElementById('add-assignment');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+    console.log('Initial form count:', formCount, 'Total forms element:', totalForms);
+
+    if (!container || !addButton || !totalForms) {
+        console.error('Required elements missing:', { container, addButton, totalForms });
+        return;
+    }
+
+    // Update subject options based on selected class
+    function updateSubjectOptions(classSelect, subjectSelect) {
+        const classId = classSelect.value;
+        console.log('Updating subjects for class ID:', classId);
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+
+        if (classId && classSubjectMap[classId]) {
+            console.log('Subjects for class:', classSubjectMap[classId]);
+            classSubjectMap[classId].forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = subject.name;
+                subjectSelect.appendChild(option);
+            });
+        } else {
+            console.log('No subjects found for class ID:', classId);
+        }
+
+        // Restore selected subject if it exists
+        const initialSubject = subjectSelect.dataset.initialSubject || '';
+        if (initialSubject && subjectSelect.querySelector(`option[value="${initialSubject}"]`)) {
+            subjectSelect.value = initialSubject;
+            console.log('Restored initial subject:', initialSubject);
+        }
+    }
+
+    // Attach event listeners to existing class selects
+    document.querySelectorAll('.assignment-row').forEach(row => {
+        const classSelect = row.querySelector('select[name$="student_class"]');
+        const subjectSelect = row.querySelector('select[name$="subject"]');
+        console.log('Processing row:', row, 'Class select:', classSelect, 'Subject select:', subjectSelect);
+        
+        if (classSelect && subjectSelect) {
+            subjectSelect.dataset.initialSubject = subjectSelect.value;
+            classSelect.addEventListener('change', function() {
+                console.log('Class changed:', classSelect.value);
+                updateSubjectOptions(classSelect, subjectSelect);
+            });
+            if (classSelect.value) {
+                console.log('Initializing subjects for pre-selected class:', classSelect.value);
+                updateSubjectOptions(classSelect, subjectSelect);
+            }
+        } else {
+            console.error('Missing selects in row:', row);
+        }
+    });
+
+    // Add new form
+    addButton.addEventListener('click', function() {
+        console.log('Add Assignment button clicked');
+        const templateRow = container.querySelector('.assignment-row');
+        if (!templateRow) {
+            console.error('No template row found to clone');
+            return;
+        }
+        
+        const newForm = templateRow.cloneNode(true);
+        const newIndex = formCount;
+        console.log('Cloning form, new index:', newIndex);
+
+        // Update form indices
+        newForm.setAttribute('data-index', newIndex);
+        newForm.querySelectorAll('select, input').forEach(input => {
+            if (input.name) {
+                input.name = input.name.replace(/form-\d+-/, `form-${newIndex}-`);
+            }
+            if (input.id) {
+                input.id = input.id.replace(/form-\d+-/, `form-${newIndex}-`);
+            }
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            } else {
+                input.value = '';
+            }
+        });
+
+        // Clear errors and reset subject initial data
+        newForm.querySelectorAll('.errorlist').forEach(error => error.remove());
+        const subjectSelect = newForm.querySelector('select[name$="subject"]');
+        if (subjectSelect) {
+            subjectSelect.dataset.initialSubject = '';
+            console.log('Reset subject select:', subjectSelect);
+        } else {
+            console.error('Subject select not found in new form');
+        }
+
+        // Append new form
+        container.appendChild(newForm);
+        formCount++;
+        totalForms.value = formCount;
+        console.log('New form appended, updated form count:', formCount);
+
+        // Attach event listener to new class select
+        const newClassSelect = newForm.querySelector('select[name$="student_class"]');
+        if (newClassSelect && subjectSelect) {
+            newClassSelect.addEventListener('change', function() {
+                console.log('New class select changed:', newClassSelect.value);
+                updateSubjectOptions(newClassSelect, subjectSelect);
+            });
+        } else {
+            console.error('Missing selects in new form:', { newClassSelect, subjectSelect });
+        }
+    });
+
+    // Remove form
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-form') && container.querySelectorAll('.assignment-row').length > 1) {
+            console.log('Remove form button clicked');
+            const row = e.target.closest('.assignment-row');
+            const deleteCheckbox = row.querySelector('input[name$="DELETE"]');
+            if (deleteCheckbox && deleteCheckbox.name.includes('DELETE')) {
+                console.log('Marking existing form for deletion');
+                deleteCheckbox.checked = true;
+                row.style.display = 'none';
+            } else {
+                console.log('Removing new form');
+                row.remove();
+            }
+            formCount--;
+            totalForms.value = formCount;
+            console.log('Form removed, updated form count:', formCount);
+
+            // Reindex remaining forms
+            container.querySelectorAll('.assignment-row').forEach((row, index) => {
+                row.setAttribute('data-index', index);
+                row.querySelectorAll('select, input').forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/form-\d+-/, `form-${index}-`);
+                    }
+                    if (input.id) {
+                        input.id = input.id.replace(/form-\d+-/, `form-${index}-`);
+                    }
+                });
+            });
+            console.log('Forms reindexed');
+        }
+    });
+});
+</script>
+{% endblock %}

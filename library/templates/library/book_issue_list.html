@@ -1,0 +1,338 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+Book Issue List
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">Book Issue List</h2>
+        <a href="{% url 'library_book_issue_create' %}" class="create-btn" style="font-size: 24px; cursor: pointer; border: 2px solid #fff; border-radius: 50px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff;">➕</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content px-3 py-4">
+        <!-- Tabs -->
+        <div class="mb-4">
+            <button class="btn rounded-button tab-button active" data-tab="students">🎓 Issued Students</button>
+            <button class="btn rounded-button tab-button" data-tab="staff">💼 Issued Staff</button>
+        </div>
+
+        <!-- Students Section -->
+        <div class="tab-content" id="students-content">
+            <!-- Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-sm-12">
+                    <label for="student-search" class="form-label">Student Name</label>
+                    <input type="text" id="student-search" class="form-control rounded-field" placeholder="Search student name">
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label for="class-filter" class="form-label">Student Class</label>
+                    <select id="class-filter" class="form-control rounded-field">
+                        <option value="">All Classes</option>
+                        {% for student_class in student_classes %}
+                            <option value="{{ student_class.name }}">{{ student_class.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <!-- Total Books Issued -->
+            <div class="mb-4">
+                <strong>Total Books Issued: </strong><span id="student-total-books">0</span>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Student Name</th>
+                            <th>Student Class</th>
+                            <th>Total Books Issued</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                        {% for issue in student_issues %}
+                            <tr data-student-name="{{ issue.student__firstname|lower }} {{ issue.student__middle_name|lower }} {{ issue.student__surname|lower }}" data-class-name="{{ issue.student__current_class__name|lower }}" data-total-books="{{ issue.total_books }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ issue.student__firstname }} {% if issue.student__middle_name %}{{ issue.student__middle_name }} {% endif %}{{ issue.student__surname }}</td>
+                                <td>{{ issue.student__current_class__name|default:"N/A" }}</td>
+                                <td>{{ issue.total_books }}</td>
+                                <td>
+                                    <a href="{% url 'library_book_issue_student_detail' recipient_id=issue.student__id %}" class="btn btn-sm rounded-button">View All 📚</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No students with issued books.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Staff Section -->
+        <div class="tab-content" id="staff-content" style="display: none;">
+            <!-- Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6 col-sm-12">
+                    <label for="staff-search" class="form-label">Staff Name</label>
+                    <input type="text" id="staff-search" class="form-control rounded-field" placeholder="Search staff name">
+                </div>
+            </div>
+            <!-- Total Books Issued -->
+            <div class="mb-4">
+                <strong>Total Books Issued: </strong><span id="staff-total-books">0</span>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Staff Name</th>
+                            <th>Total Books Issued</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staff-table-body">
+                        {% for issue in staff_issues %}
+                            <tr data-staff-name="{{ issue.staff__firstname|lower }} {{ issue.staff__middle_name|lower }} {{ issue.staff__surname|lower }}" data-total-books="{{ issue.total_books }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ issue.staff__firstname }} {% if issue.staff__middle_name %}{{ issue.staff__middle_name }} {% endif %}{{ issue.staff__surname }}</td>
+                                <td>{{ issue.total_books }}</td>
+                                <td>
+                                    <a href="{% url 'library_book_issue_staff_detail' recipient_id=issue.staff__id %}" class="btn btn-sm rounded-button">View All 📚</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No staff with issued books.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS and JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #ffffff;
+    padding: 15px 20px;
+}
+.content {
+    padding: 24px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+.form-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+.form-control {
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+    border-color: #3a86ff;
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+    outline: none;
+}
+.rounded-field {
+    border-radius: 50px !important;
+    padding: 12px 16px;
+    height: 44px;
+}
+.rounded-button {
+    border-radius: 50px !important;
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 2px solid #3a86ff;
+    color: #3a86ff;
+    min-width: 100px;
+    text-decoration: none;
+}
+.rounded-button:hover {
+    border-color: #3267d6;
+    color: #3267d6;
+}
+.tab-button {
+    margin-right: 10px;
+    border: 2px solid #3a86ff;
+    color: #3a86ff;
+}
+.tab-button.active {
+    border-color: #34c759;
+    color: #34c759;
+}
+.tab-button:hover {
+    border-color: #3267d6;
+    color: #3267d6;
+}
+.tab-button.active:hover {
+    border-color: #2ca44f;
+    color: #2ca44f;
+}
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+.table th, .table td {
+    padding: 12px;
+    vertical-align: middle;
+}
+.create-btn:hover {
+    border-color: #ccc;
+    color: #ccc;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 16px 12px;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .form-label {
+        font-size: 0.9rem;
+    }
+    .rounded-field {
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .rounded-button {
+        padding: 8px 16px;
+        min-width: 80px;
+        font-size: 0.9rem;
+    }
+    .tab-button {
+        margin-bottom: 10px;
+    }
+    .create-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+// Calculate total books for students
+function updateStudentTotal() {
+    let total = 0;
+    $('#student-table-body tr:visible').each(function() {
+        const rowTotal = parseInt($(this).data('total-books')) || 0;
+        total += rowTotal;
+    });
+    $('#student-total-books').text(total);
+}
+
+// Calculate total books for staff
+function updateStaffTotal() {
+    let total = 0;
+    $('#staff-table-body tr:visible').each(function() {
+        const rowTotal = parseInt($(this).data('total-books')) || 0;
+        total += rowTotal;
+    });
+    $('#staff-total-books').text(total);
+}
+
+// Filter students
+function filterStudents() {
+    const search = $('#student-search').val().trim().toLowerCase();
+    const classFilter = $('#class-filter').val().trim().toLowerCase();
+    
+    $('#student-table-body tr').each(function() {
+        const row = $(this);
+        const studentName = row.data('student-name') || '';
+        const className = row.data('class-name') || '';
+        
+        // Skip rows without data attributes (e.g., empty message)
+        if (!studentName) {
+            row.hide();
+            return;
+        }
+        
+        const matchesSearch = !search || studentName.includes(search);
+        const matchesClass = !classFilter || className === classFilter;
+        
+        row.toggle(matchesSearch && matchesClass);
+    });
+    
+    updateStudentTotal();
+}
+
+// Filter staff
+function filterStaff() {
+    const search = $('#staff-search').val().trim().toLowerCase();
+    
+    $('#staff-table-body tr').each(function() {
+        const row = $(this);
+        const staffName = row.data('staff-name') || '';
+        
+        // Skip rows without data attributes
+        if (!staffName) {
+            row.hide();
+            return;
+        }
+        
+        row.toggle(!search || staffName.includes(search));
+    });
+    
+    updateStaffTotal();
+}
+
+// Tab switching
+$(document).ready(function() {
+    $('.tab-button').click(function() {
+        // Update active tab
+        $('.tab-button').removeClass('active');
+        $(this).addClass('active');
+        
+        // Show/hide content
+        $('.tab-content').hide();
+        $('#' + $(this).data('tab') + '-content').show();
+    });
+    
+    // Bind filter events
+    $('#student-search, #class-filter').on('input change', filterStudents);
+    $('#staff-search').on('input', filterStaff);
+    
+    // Initial filter and total calculation
+    filterStudents();
+    filterStaff();
+});
+</script>
+
+{% endblock %}

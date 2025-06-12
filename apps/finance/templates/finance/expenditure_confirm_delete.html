@@ -1,0 +1,116 @@
+{% extends base_template %}
+
+{% block title %}Delete {{ expenditure.expenditure_name }}{% endblock title %}
+
+{% block content %}
+<div class="content-container">
+    <h5>Confirm Deletion</h5>
+    <p>Are you sure you want to delete the following expenditure?</p>
+    <ul class="list-unstyled">
+        <li><strong>Name:</strong> {{ expenditure.expenditure_name }}</li>
+        <li><strong>Amount:</strong> TZS {{ expenditure.amount_used|floatformat:2 }}</li>
+        <li><strong>Depositor:</strong> {{ expenditure.depositor_name }}</li>
+        <li><strong>Date Given:</strong> {{ expenditure.date_given|date:"Y-m-d" }}</li>
+    </ul>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-confirm">Confirm Delete</button>
+        <a href="{% url 'expenditure_list' category_id=category.id %}" class="btn btn-secondary btn-cancel">Cancel</a>
+    </form>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Content Container */
+.content-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Content Styles */
+h5 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.list-unstyled li {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+.btn-confirm, .btn-cancel {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-confirm {
+    background: var(--gradient-red);
+    color: #fff;
+    border: none;
+}
+
+.btn-confirm:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #ef4444, #f87171);
+}
+
+.btn-cancel {
+    background: var(--gradient-blue);
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .content-container {
+        padding: 15px;
+        margin: 15px auto;
+    }
+    h5 {
+        font-size: 1.2rem;
+    }
+    p, .list-unstyled li {
+        font-size: 0.85rem;
+    }
+    .btn-confirm, .btn-cancel {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+}
+</style>
+{% endblock content %}

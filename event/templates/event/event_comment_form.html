@@ -1,0 +1,152 @@
+{% extends base_template %}
+{% load humanize %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0 flex-grow-1">{{ page_title }}</h2>
+        <span></span>
+    </div>
+
+    <!-- Comment Form Container -->
+    <div class="comment-container px-4">
+        <div class="comment-item">
+            <!-- Event Overview -->
+            <h5 class="section-title">Event Overview</h5>
+            <p>
+                You are {% if form.instance.pk %}editing a comment{% else %}adding a comment{% endif %} for the event 
+                <em>{{ event.title }}</em>, a <em>{{ event.get_event_type_display }}</em> event 
+                scheduled to start on <em>{{ event.start_datetime|date:"Y-m-d H:i" }}</em>.
+            </p>
+            <hr class="divider">
+
+            <!-- Comment Form -->
+            <h5 class="section-title">{{ page_title }}</h5>
+            <form method="post" class="form">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-danger">{{ field.errors.as_text }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="action-buttons d-flex flex-wrap gap-2 mt-4 mb-4">
+                    <button type="submit" class="button submit-btn">💬 Save Comment</button>
+                    <a href="{% url 'event-detail' event.pk %}" class="button cancel-btn">↩️ Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 15px 0 10px;
+}
+.comment-item p {
+    font-size: 0.95rem;
+    color: #1f2937;
+    line-height: 1.5;
+    margin: 5px 0;
+}
+.comment-item p em {
+    font-style: italic;
+}
+.form {
+    margin-top: 10px;
+}
+.form-field {
+    margin: 15px 0;
+}
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+.form input, .form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1f2937;
+    box-sizing: border-box;
+}
+.form textarea {
+    resize: vertical;
+}
+.text-danger {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+.button:hover {
+    transform: scale(1.03);
+}
+.submit-btn {
+    background: linear-gradient(45deg, #34c759, #10b981);
+}
+.cancel-btn {
+    background: linear-gradient(45deg, #6b7280, #4b5563);
+}
+.divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 15px 0;
+}
+@media (max-width: 576px) {
+    .header {
+        padding: 10px;
+    }
+    .header h2 {
+        font-size: 1.5rem;
+    }
+    .comment-item p, .form-label, .form input, .form textarea {
+        font-size: 0.85rem;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .action-buttons {
+        gap: 8px;
+    }
+    .button {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+}
+</style>
+{% endblock content %}

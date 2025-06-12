@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Manus Dei Secondary</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        main {
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    {% include 'website/_topbar.html' %}
+    <main>
+        <div id="home">{% include 'website/_hero.html' %}</div>
+        <div id="about">{% include 'website/_about.html' %}</div>
+        <div id="student-life">{% include 'website/_student_life.html' %}</div>
+        <div id="gallery">{% include 'website/_gallery.html' %}</div>
+        <div id="staff-leaders">{% include 'website/_staff_leaders.html' %}</div>
+        <div id="academics">{% include 'website/_academics.html' %}</div>
+        <div id="faq">{% include 'website/_faq.html' %}</div>
+        <div id="contact">{% include 'website/_contact.html' %}</div>
+    </main>
+</body>
+</html>

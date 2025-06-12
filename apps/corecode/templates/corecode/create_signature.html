@@ -1,0 +1,267 @@
+<!-- templates/corecode/create_signature.html -->
+{% extends 'base.html' %}
+
+{% load static %}
+{% block title %}Create Signature{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #007aff; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; margin: 0;">Create Signature</h2>
+        <a href="{% url 'settings_home' %}" class="home-btn" style="font-size: 24px; color: #007aff; cursor: pointer; padding-right: 10px; text-decoration: none;">🏠</a>
+    </div>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group mb-4">
+            {{ form.name.label_tag }}
+            <input type="{{ form.name.field.widget.input_type }}" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}"
+                   class="form-control" placeholder="Enter your name"
+                   style="border-radius: 10px; border: 1px solid #ced4da; background-color: #fff; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 12px; color: #000; font-size: 1rem;">
+            {% if form.name.errors %}
+                <div class="text-danger" style="font-size: 0.9rem; margin-top: 5px;">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-4 text-center">
+            <label for="signature-pad" class="form-label" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1.1em; color: #000; font-weight: 600;">
+                Signature
+            </label>
+            <canvas id="signature-pad" class="signature-pad"></canvas>
+            <input type="hidden" name="signature_data" id="signature_data">
+        </div>
+
+        <!-- Upload Signature Option -->
+        <div class="text-center mb-4">
+            <label for="signature-upload" class="form-label" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1.1em; color: #000; font-weight: 600;">
+                Or Upload Your Signature
+            </label>
+            <input type="file" id="signature-upload" accept="image/*" class="form-control-file"
+                   style="border-radius: 10px; border: 1px solid #ced4da; background-color: #fff; padding: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+        </div>
+
+        <!-- Color Picker -->
+        <div class="d-flex justify-content-center mb-4">
+            <label style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1.1em; font-weight: 600; margin-right: 10px; align-self: center;">Color:</label>
+            <div class="color-picker d-flex flex-wrap justify-content-center gap-2">
+                <button type="button" class="color-btn" data-color="black" style="width: 30px; height: 30px; border-radius: 50%; background-color: black; border: none;"></button>
+                <button type="button" class="color-btn" data-color="blue" style="width: 30px; height: 30px; border-radius: 50%; background-color: blue; border: none;"></button>
+                <button type="button" class="color-btn" data-color="red" style="width: 30px; height: 30px; border-radius: 50%; background-color: red; border: none;"></button>
+                <button type="button" class="color-btn" data-color="green" style="width: 30px; height: 30px; border-radius: 50%; background-color: green; border: none;"></button>
+                <button type="button" class="color-btn" data-color="orange" style="width: 30px; height: 30px; border-radius: 50%; background-color: orange; border: none;"></button>
+                <button type="button" class="color-btn" data-color="deepskyblue" style="width: 30px; height: 30px; border-radius: 50%; background-color: deepskyblue; border: none;"></button>
+            </div>
+        </div>
+
+        <!-- Toggle Drawing Mode Icons -->
+        <div class="d-flex justify-content-center mb-4 gap-2">
+            <button type="button" class="btn btn-light" id="freehand-button" title="Freehand Drawing" style="border-radius: 15px; border: 1px solid #d1d1d6; background-color: #fff; padding: 8px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 500;">
+                <i class="fas fa-pencil-alt"></i> Freehand
+            </button>
+            <button type="button" class="btn btn-light" id="straightline-button" title="Straight Line Drawing" style="border-radius: 15px; border: 1px solid #d1d1d6; background-color: #fff; padding: 8px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 500;">
+                <i class="fas fa-ruler-horizontal"></i> Straight Line
+            </button>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3">
+            <button type="button" class="btn btn-lg" id="clear-button" style="border-radius: 15px; background: linear-gradient(45deg, #ff9500, #ffcc00); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                Clear
+            </button>
+            <button type="submit" class="btn btn-lg" style="border-radius: 15px; background: linear-gradient(45deg, #007aff, #00d4ff); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                Save Signature
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .signature-pad {
+        border: 1px solid #d1d1d6;
+        border-radius: 12px;
+        background-color: #fff;
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+        aspect-ratio: 2 / 1;
+        display: block;
+        margin: 0 auto;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .color-btn.selected {
+        border: 2px solid #007aff !important;
+        transform: scale(1.2);
+    }
+    .form-control::placeholder {
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 1rem;
+    }
+    @media (max-width: 576px) {
+        .btn-lg {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .form-group input {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .color-btn {
+            width: 25px;
+            height: 25px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<script>
+    var canvas = document.getElementById('signature-pad');
+    var context = canvas.getContext('2d');
+    var isDrawing = false;
+    var startX = 0, startY = 0;
+    var isStraightLineMode = false;
+    var currentColor = 'black';
+    var snapshot;
+
+    // Dynamically set canvas size based on container width
+    function resizeCanvas() {
+        var containerWidth = canvas.parentElement.offsetWidth;
+        var maxWidth = Math.min(containerWidth, 600);
+        canvas.width = maxWidth;
+        canvas.height = maxWidth / 2;
+        context.strokeStyle = currentColor;
+        context.lineWidth = 2;
+    }
+
+    // Initialize canvas size and update on window resize
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Initialize cursor
+    canvas.addEventListener('mouseenter', function() {
+        canvas.style.cursor = "url('https://img.icons8.com/color/30/000000/pencil.png'), auto";
+    });
+
+    // Change cursor back to default when leaving the canvas
+    canvas.addEventListener('mouseleave', function() {
+        canvas.style.cursor = "auto";
+    });
+
+    // Start drawing
+    canvas.addEventListener('mousedown', function(event) {
+        isDrawing = true;
+        var rect = canvas.getBoundingClientRect();
+        startX = event.clientX - rect.left;
+        startY = event.clientY - rect.top;
+        if (!isStraightLineMode) {
+            context.strokeStyle = currentColor;
+            context.beginPath();
+            context.moveTo(startX, startY);
+        }
+    });
+
+    // Draw as the mouse moves
+    canvas.addEventListener('mousemove', function(event) {
+        if (isDrawing) {
+            var rect = canvas.getBoundingClientRect();
+            var x = event.clientX - rect.left;
+            var y = event.clientY - rect.top;
+            if (isStraightLineMode) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.putImageData(snapshot, 0, 0);
+                context.beginPath();
+                context.moveTo(startX, startY);
+                context.lineTo(x, y);
+                context.strokeStyle = currentColor;
+                context.stroke();
+            } else {
+                context.lineTo(x, y);
+                context.strokeStyle = currentColor;
+                context.stroke();
+            }
+        }
+    });
+
+    // Stop drawing
+    canvas.addEventListener('mouseup', function() {
+        isDrawing = false;
+        snapshot = context.getImageData(0, 0, canvas.width, canvas.height);
+    });
+
+    // Clear the canvas
+    document.getElementById('clear-button').addEventListener('click', function() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // Save the signature as a base64 string when the form is submitted
+    document.querySelector('form').addEventListener('submit', function(event) {
+        if (context.getImageData(0, 0, canvas.width, canvas.height).data.some(color => color !== 0)) {
+            var dataUrl = canvas.toDataURL();
+            document.getElementById('signature_data').value = dataUrl;
+        } else {
+            alert('Please provide a signature first.');
+            event.preventDefault();
+        }
+    });
+
+    // Upload an image and draw it on the canvas
+    document.getElementById('signature-upload').addEventListener('change', function(event) {
+        var file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert('Please upload a valid image file.');
+        }
+    });
+
+    // Toggle between freehand and straight-line mode
+    document.getElementById('freehand-button').addEventListener('click', function() {
+        isStraightLineMode = false;
+        this.classList.add('btn-primary');
+        this.classList.remove('btn-light');
+        document.getElementById('straightline-button').classList.remove('btn-primary');
+        document.getElementById('straightline-button').classList.add('btn-light');
+    });
+
+    document.getElementById('straightline-button').addEventListener('click', function() {
+        isStraightLineMode = true;
+        snapshot = context.getImageData(0, 0, canvas.width, canvas.height);
+        this.classList.add('btn-primary');
+        this.classList.remove('btn-light');
+        document.getElementById('freehand-button').classList.remove('btn-primary');
+        document.getElementById('freehand-button').classList.add('btn-light');
+    });
+
+    // Change color based on the selected button
+    var colorButtons = document.querySelectorAll('.color-btn');
+    colorButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            currentColor = this.getAttribute('data-color');
+            colorButtons.forEach(btn => btn.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+    });
+
+    // Initialize with black color selected
+    document.querySelector('.color-btn[data-color="black"]').classList.add('selected');
+</script>
+{% endblock content %}

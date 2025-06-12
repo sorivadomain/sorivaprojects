@@ -1,0 +1,415 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+{% if object %}Update{% else %}Create{% endif %} Book Issue
+{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{% if object %}Update{% else %}Create{% endif %} Book Issue</h2>
+        <span></span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content px-3 py-4">
+        <!-- Book Filters -->
+        <h4 class="section-title mb-3">Filter Books</h4>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-sm-6">
+                <label for="book-search" class="form-label">Title/Author/ISBN</label>
+                <input type="text" id="book-search" class="form-control rounded-field" placeholder="Search title, author, or ISBN">
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="category-filter" class="form-label">Category</label>
+                <select id="category-filter" class="form-control rounded-field">
+                    <option value="">All Categories</option>
+                    {% for value, label in book_categories %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="shelf-filter" class="form-label">Shelf Location</label>
+                <input type="text" id="shelf-filter" class="form-control rounded-field" placeholder="Enter shelf location">
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <label for="class-filter" class="form-label">Book Class</label>
+                <select id="class-filter" class="form-control rounded-field">
+                    <option value="">All Classes</option>
+                    {% for student_class in student_classes %}
+                        <option value="{{ student_class.id }}">{{ student_class.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Recipient Filters -->
+        <h4 class="section-title mb-3">Filter Recipients</h4>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-sm-12">
+                <label for="student-search" class="form-label">Student Name</label>
+                <input type="text" id="student-search" class="form-control rounded-field" placeholder="Search student name">
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <label for="staff-search" class="form-label">Staff Name</label>
+                <input type="text" id="staff-search" class="form-control rounded-field" placeholder="Search staff name">
+            </div>
+        </div>
+
+        <!-- Form -->
+        <h4 class="section-title mb-3">Issue Details</h4>
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="id_book" class="form-label">Book</label>
+                    {{ form.book }}
+                    <div class="invalid-feedback">Please select a book.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_issue_type" class="form-label">Issue Type</label>
+                    {{ form.issue_type }}
+                    <div class="invalid-feedback">Please select an issue type.</div>
+                </div>
+                <div class="col-md-6" id="student-container" style="display: none;">
+                    <label for="id_student" class="form-label">Student</label>
+                    {{ form.student }}
+                    <div class="invalid-feedback">Please select a student.</div>
+                </div>
+                <div class="col-md-6" id="staff-container" style="display: none;">
+                    <label for="id_staff" class="form-label">Staff</label>
+                    {{ form.staff }}
+                    <div class="invalid-feedback">Please select a staff member.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_book_number" class="form-label">Book Number</label>
+                    {{ form.book_number }}
+                    <div class="invalid-feedback">Please enter a valid number.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_issue_date" class="form-label">Issue Date</label>
+                    {{ form.issue_date }}
+                    <div class="invalid-feedback">Please enter a valid date.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_return_date" class="form-label">Return Date</label>
+                    {{ form.return_date }}
+                    <div class="invalid-feedback">Please enter a valid date.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="id_fine" class="form-label">Fine</label>
+                    {{ form.fine }}
+                    <div class="invalid-feedback">Please enter a valid amount.</div>
+                </div>
+                <div class="col-12">
+                    <label for="id_notes" class="form-label">Notes</label>
+                    {{ form.notes }}
+                </div>
+            </div>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary rounded-button">{% if object %}Update{% else %}Create{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CSS and JavaScript -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    margin: 0;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    padding: 15px 20px;
+}
+.content {
+    padding: 24px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.form-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.form-control {
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .select2-container--focus .select2-selection {
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
+    outline: none;
+}
+.rounded-field {
+    border-radius: 50px !important;
+    padding: 12px 16px;
+    height: 44px;
+}
+.rounded-field textarea {
+    height: auto;
+    border-radius: 20px !important;
+}
+.rounded-button {
+    border-radius: 50px !important;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    min-width: 120px;
+}
+.select2-container .select2-selection--single {
+    height: 44px;
+    border-radius: 50px;
+    border: 1px solid #d1d5db;
+}
+.select2-container .select2-selection__rendered {
+    line-height: 44px;
+    padding-left: 16px;
+}
+.select2-container .select2-selection__arrow {
+    height: 44px;
+    right: 12px;
+}
+.select2-container .select2-selection__arrow b {
+    border-color: #6b7280 transparent transparent transparent;
+}
+.select2-container--open .select2-selection__arrow b {
+    border-color: transparent transparent #6b7280 transparent;
+}
+.student-option, .staff-option {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+}
+.invalid-feedback {
+    font-size: 0.85rem;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 16px 12px;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .form-label {
+        font-size: 0.9rem;
+    }
+    .rounded-field, .select2-container .select2-selection--single {
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .rounded-button {
+        padding: 10px 24px;
+        min-width: 100px;
+    }
+}
+</style>
+
+<script>
+// Initial book data
+const books = [
+    {% for book in books %}
+    {
+        id: {{ book.id }},
+        title: "{{ book.title|escapejs }}",
+        author: "{{ book.author|escapejs }}",
+        isbn: "{{ book.isbn|default:''|escapejs }}",
+        category: "{{ book.category|escapejs }}",
+        shelf_location: "{{ book.shelf_location|default:''|escapejs }}",
+        book_class: {{ book.book_class.id|default:'null' }},
+        available_copies: {{ book.available_copies }}
+    }{% if not forloop.last %},{% endif %}
+    {% empty %}
+    {}
+    {% endfor %}
+];
+
+// Filter books
+function filterBooks() {
+    console.log('Entering filterBooks');
+    const search = $('#book-search').val().toLowerCase();
+    const category = $('#category-filter').val();
+    const shelf = $('#shelf-filter').val().toLowerCase();
+    const bookClass = $('#class-filter').val();
+    const initialBookId = $('#id_book').val();
+    console.log('Initial book ID:', initialBookId);
+
+    const filteredBooks = books.filter(book => {
+        if (!book.id) return false;
+        const matchesSearch = book.title.toLowerCase().includes(search) ||
+                             book.author.toLowerCase().includes(search) ||
+                             book.isbn.toLowerCase().includes(search);
+        const matchesCategory = !category || book.category === category;
+        const matchesShelf = !shelf || book.shelf_location.toLowerCase().includes(shelf);
+        const matchesClass = !bookClass || book.book_class == bookClass;
+        const hasAvailableCopies = book.available_copies >= 1;
+        return matchesSearch && matchesCategory && matchesShelf && matchesClass && hasAvailableCopies;
+    });
+
+    const bookSelect = $('#id_book');
+    bookSelect.empty().append('<option value="">Select a book</option>');
+    filteredBooks.forEach(book => {
+        const selected = book.id == initialBookId ? ' selected' : '';
+        bookSelect.append(`<option value="${book.id}"${selected}>${book.title} by ${book.author} (Available: ${book.available_copies})</option>`);
+    });
+    bookSelect.trigger('change');
+    console.log('Book dropdown updated, options:', bookSelect.find('option').length);
+    console.log('Exiting filterBooks');
+}
+
+// Initialize Select2 for book dropdown
+$('#id_book').select2({
+    placeholder: "Select a book",
+    allowClear: true,
+    width: '100%'
+}).val($('#id_book').val() || null).trigger('change');
+
+// Initialize Select2 for student dropdown
+$('#id_student').select2({
+    placeholder: "Select a student",
+    allowClear: true,
+    width: '100%',
+    templateResult: formatStudent,
+    templateSelection: formatStudentSelection
+}).val($('#id_student').val() || null).trigger('change');
+
+// Initialize Select2 for staff dropdown
+$('#id_staff').select2({
+    placeholder: "Select a staff member",
+    allowClear: true,
+    width: '100%',
+    templateResult: formatStaff,
+    templateSelection: formatStaffSelection
+}).val($('#id_staff').val() || null).trigger('change');
+
+// Format student dropdown option
+function formatStudent(student) {
+    if (!student.id) return student.text;
+    return $('<span class="student-option">' + student.text + '</span>');
+}
+
+// Format student selection
+function formatStudentSelection(student) {
+    return student.text || "Select a student";
+}
+
+// Format staff dropdown option
+function formatStaff(staff) {
+    if (!staff.id) return staff.text;
+    return $('<span class="staff-option">' + staff.text + '</span>');
+}
+
+// Format staff selection
+function formatStaffSelection(staff) {
+    return staff.text || "Select a staff member";
+}
+
+// Filter students
+function filterStudents() {
+    console.log('Entering filterStudents');
+    const search = $('#student-search').val().toLowerCase();
+    const initialStudentId = $('#id_student').val();
+    console.log('Initial student ID:', initialStudentId);
+    $('#id_student option').each(function() {
+        const text = $(this).text().toLowerCase();
+        $(this).toggle(text.includes(search));
+    });
+    $('#id_student').val(initialStudentId || null).trigger('change');
+    console.log('Exiting filterStudents');
+}
+
+// Filter staff
+function filterStaff() {
+    console.log('Entering filterStaff');
+    const search = $('#staff-search').val().toLowerCase();
+    const initialStaffId = $('#id_staff').val();
+    console.log('Initial staff ID:', initialStaffId);
+    $('#id_staff option').each(function() {
+        const text = $(this).text().toLowerCase();
+        $(this).toggle(text.includes(search));
+    });
+    $('#id_staff').val(initialStaffId || null).trigger('change');
+    console.log('Exiting filterStaff');
+}
+
+// Toggle student/staff fields based on issue_type
+$('#issue-type').on('change', function() {
+    console.log('Issue type changed:', $(this).val());
+    const issueType = $(this).val();
+    const $studentContainer = $('#student-container');
+    const $staffContainer = $('#staff-container');
+    console.log('Toggling student container:', issueType === 'student');
+    console.log('Toggling staff container:', issueType === 'staff');
+    $studentContainer.toggle(issueType === 'student');
+    $staffContainer.toggle(issueType === 'staff');
+    if ($(this).data('initial-load') !== true) {
+        if (issueType === 'student') {
+            $('#id_staff').val('').trigger('change');
+            console.log('Cleared staff selection');
+        } else if (issueType === 'staff') {
+            $('#id_student').val('').trigger('change');
+            console.log('Cleared student selection');
+        }
+    }
+    $(this).data('initial-load', false);
+    console.log('Student container display:', $studentContainer.css('display'));
+    console.log('Staff container display:', $staffContainer.css('display'));
+});
+
+// Bind filter events
+$('#book-search, #shelf-filter').on('input', filterBooks);
+$('#category-filter, #class-filter').on('change', filterBooks);
+$('#student-search').on('input', filterStudents);
+$('#staff-search').on('input', filterStaff);
+
+// Initialize filters
+$(document).ready(function() {
+    console.log('Document ready');
+    const initialIssueType = $('#issue-type').val();
+    console.log('Initial issue_type:', initialIssueType);
+    $('#issue-type').data('initial-load', true);
+    $('#student-container').toggle(initialIssueType === 'student');
+    $('#staff-container').toggle(initialIssueType === 'staff');
+    filterBooks();
+    filterStudents();
+    filterStaff();
+    console.log('Initial form values:', {
+        book: $('#id_book').val(),
+        issue_type: $('#issue-type').val(),
+        student: $('#id_student').val(),
+        staff: $('#id_staff').val(),
+        book_number: $('#id_book_number').val()
+    });
+
+    // Debug form submission
+    $('form.needs-validation').on('submit', function(e) {
+        console.log('Form submitted');
+        if (!this.checkValidity()) {
+            console.log('Form invalid');
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            console.log('Form valid, submitting');
+        }
+        this.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

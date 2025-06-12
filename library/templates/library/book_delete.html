@@ -1,0 +1,122 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{{ title }}</h2>
+        <span></span>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div class="delete-confirmation px-3">
+        <div class="card shadow-sm" style="border: none; border-radius: 15px; background: #fff;">
+            <div class="card-body">
+                <h3 class="card-title mb-4" style="font-size: 1.5rem; color: #6b7280;">Confirm Deletion</h3>
+                <p class="alert alert-warning" style="border-radius: 10px;">
+                    Are you sure you want to delete the book "<strong>{{ book.title }}</strong>"? This action cannot be undone.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <p class="form-value">{{ book.title }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <p class="form-value">{{ book.author }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ISBN</label>
+                    <p class="form-value">{{ book.isbn|default:"-" }}</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'library_books' %}" class="btn btn-outline-secondary rounded-pill me-2">Cancel</a>
+                        <button type="submit" class="btn btn-danger rounded-pill">Confirm Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+}
+.container-fluid {
+    padding: 0;
+}
+.header {
+    background: linear-gradient(135deg, #34c759, #3a86ff);
+    color: #fff;
+}
+.delete-confirmation {
+    padding: 0 15px;
+}
+.card {
+    border: none;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.card-body {
+    padding: 20px;
+}
+.form-label {
+    font-size: 1rem;
+    color: #6b7280;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+.form-value {
+    font-size: 1rem;
+    color: #1f2937;
+    margin: 0;
+}
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffecb5;
+    color: #856404;
+}
+.btn-outline-secondary {
+    border: 1px solid #6b7280;
+    color: #6b7280;
+    border-radius: 40px;
+}
+.btn-outline-secondary:hover {
+    background: #6b7280;
+    color: #fff;
+}
+.btn-danger {
+    background: #dc3545;
+    border: none;
+    border-radius: 40px;
+    color: #fff;
+}
+.btn-danger:hover {
+    background: #c82333;
+}
+@media (max-width: 576px) {
+    .card-body {
+        padding: 15px;
+    }
+    .card-title {
+        font-size: 1.25rem;
+    }
+    .form-label, .form-value {
+        font-size: 0.95rem;
+    }
+    .btn-outline-secondary, .btn-danger {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+}
+</style>
+{% endblock %}

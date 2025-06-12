@@ -1,0 +1,101 @@
+{% extends base_template %}
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h3>Parent List</h3>
+    </div>
+    <div class="parent-list">
+        {% for parent in parents %}
+            <a href="{% url 'chat_with_parent' parent.id %}" class="parent-item">
+                The parent of {{ parent.student.firstname }} {{ parent.student.middle_name }} {{ parent.student.surname }}
+                {% if parent.unanswered_count > 0 %}
+                    <span class="unanswered-badge">{{ parent.unanswered_count }}</span>
+                {% endif %}
+            </a>
+        {% endfor %}
+        {% if not parents %}
+            <p>No parents with active students found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+    .header {
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        padding: 15px;
+        text-align: center;
+        border-radius: 15px;
+        margin-bottom: 15px;
+    }
+    .header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    .parent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .parent-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        background: linear-gradient(45deg, #e0e0e0, #ffffff);
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        font-size: 1rem;
+        transition: transform 0.2s;
+    }
+    .parent-item:hover {
+        transform: scale(1.02);
+    }
+    .unanswered-badge {
+        background-color: #ff3b30;
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 12px;
+        min-width: 20px;
+        text-align: center;
+    }
+    p {
+        text-align: center;
+        color: #666;
+        font-size: 1rem;
+    }
+    @media (max-width: 576px) {
+        .container {
+            padding: 5px;
+        }
+        .header {
+            padding: 10px;
+        }
+        .header h3 {
+            font-size: 1.2rem;
+        }
+        .parent-item {
+            padding: 10px;
+            font-size: 0.875rem;
+        }
+        .unanswered-badge {
+            font-size: 0.65rem;
+            padding: 3px 6px;
+        }
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Update Profile</h2>
+    <!-- Display messages -->
+    <div class="messages">
+        {% if messages %}
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {% if field.name == "username" %}👤 {% endif %}
+                    {% if field.name == "admin_name" %}👤 {% endif %}
+                    {% if field.name == "password" or field.name == "confirm_password" %}🔒 {% endif %}
+                    {% if field.name == "profile_picture" %}📷 {% endif %}
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.name == "profile_picture" %}
+                    <div class="image-preview" id="profile-picture-preview">
+                        {% if request.user.profile_picture %}
+                            <img src="{{ request.user.profile_picture.url }}" alt="Current Profile Picture">
+                        {% else %}
+                            <div class="initial-preview">{{ request.user.username|slice:":1"|upper }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if field.name == "password" or field.name == "confirm_password" %}
+                    <span class="password-toggle" onclick="togglePasswordVisibility('{{ field.id_for_label }}')">👁️</span>
+                {% endif %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p class="error-message">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Save Changes</button>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    h2 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+    .messages {
+        text-align: center;
+        margin-bottom: 15px;
+        width: 100%;
+    }
+    .messages p {
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #FF6F61;
+        background: rgba(0, 0, 0, 0.05);
+    }
+    .error-message {
+        color: #FF6F61;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+        width: 100%;
+        position: relative;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+        font-size: 16px;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="file"] {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ccc;
+        border-radius: 25px;
+        background: #f5f5f5;
+        color: #333;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="file"]:focus {
+        border-color: #007AFF;
+    }
+    input[type="file"] {
+        padding: 10px;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #007AFF;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    button:hover {
+        background: #005BB5;
+    }
+    .image-preview {
+        margin-top: 10px;
+        text-align: center;
+    }
+    .image-preview img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        border: 2px solid #007AFF;
+        object-fit: cover;
+    }
+    .initial-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 2px solid #007AFF;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        color: #333;
+        text-transform: uppercase;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        color: #007AFF;
+        cursor: pointer;
+        user-select: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const profilePictureInput = document.querySelector('input[name="profile_picture"]');
+        const previewContainer = document.getElementById('profile-picture-preview');
+
+        profilePictureInput.addEventListener('change', function(event) {
+            console.log("Profile picture input changed");
+            const file = event.target.files[0];
+            if (file) {
+                console.log("File selected: ", file.name);
+                if (!file.type.startsWith('image/')) {
+                    console.log("Invalid file type, must be an image");
+                    alert('Please select an image file.');
+                    profilePictureInput.value = '';
+                    previewContainer.innerHTML = '<div class="initial-preview">{{ request.user.username|slice:":1"|upper }}</div>';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log("Image loaded for preview");
+                    previewContainer.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Profile Picture Preview';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                console.log("No file selected, restoring initial preview");
+                previewContainer.innerHTML = '<div class="initial-preview">{{ request.user.username|slice:":1"|upper }}</div>';
+            }
+        });
+
+        window.togglePasswordVisibility = function(fieldId) {
+            console.log('togglePasswordVisibility called for fieldId:', fieldId);
+            const passwordField = document.getElementById(fieldId);
+            if (!passwordField) {
+                console.error('Password field not found for ID:', fieldId);
+                return;
+            }
+            console.log('Password field found:', passwordField);
+            const toggleIcon = passwordField.nextElementSibling;
+            if (!toggleIcon || !toggleIcon.classList.contains('password-toggle')) {
+                console.error('Toggle icon not found or invalid next to field:', fieldId);
+                return;
+            }
+            console.log('Toggle icon found:', toggleIcon);
+            if (passwordField.type === 'password') {
+                console.log('Changing password to visible');
+                passwordField.type = 'text';
+                toggleIcon.textContent = '👁️‍🗨️';
+            } else {
+                console.log('Changing password to hidden');
+                passwordField.type = 'password';
+                toggleIcon.textContent = '👁️';
+            }
+            console.log('Toggle completed, new type:', passwordField.type, 'new icon:', toggleIcon.textContent);
+        };
+    });
+</script>
+{% endblock %}

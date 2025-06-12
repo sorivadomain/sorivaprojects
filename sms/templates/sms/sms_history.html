@@ -1,0 +1,269 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}SMS History{% endblock title %}
+
+{% block content %}
+<!-- Include Font Awesome for icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    /* Header Styling */
+    .header {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        min-height: 50px;
+        border-radius: 25px;
+        border: 1px solid #ccc;
+        padding: 0 20px;
+        font-size: 16px;
+        color: #333;
+        background-color: #fff;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        border-color: #3a86ff;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .btn-check-balance {
+        min-height: 50px;
+        border-radius: 25px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(45deg, #17a2b8, #138496);
+        transition: transform 0.3s ease;
+        padding: 0 20px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-check-balance:hover {
+        transform: scale(1.02);
+        background: linear-gradient(45deg, #138496, #117a8b);
+    }
+
+    /* Table Wrapper for Scrollable Tables */
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+    }
+
+    /* Tables */
+    .history-table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: collapse;
+    }
+
+    .history-table th, .history-table td {
+        padding: 12px 20px;
+        text-align: left;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .history-table th {
+        color: #333;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .history-table td {
+        color: #666;
+        font-size: 14px;
+    }
+
+    .history-table tbody tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .history-table tbody tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Delete Button */
+    .btn-delete {
+        min-height: 50px;
+        border-radius: 25px;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        transition: transform 0.3s ease;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-delete:hover {
+        transform: scale(1.02);
+        background: linear-gradient(45deg, #c82333, #bd2130);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        .header {
+            padding: 10px 15px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .filters {
+            flex-direction: column;
+        }
+
+        .form-control {
+            min-height: 45px;
+            font-size: 14px;
+        }
+
+        .btn-check-balance {
+            min-height: 45px;
+            font-size: 14px;
+        }
+
+        .btn-delete {
+            min-height: 45px;
+            font-size: 14px;
+        }
+
+        .history-table th, .history-table td {
+            padding: 10px 15px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>SMS History</h1>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <input type="date" id="date-search" class="form-control" placeholder="Search by date">
+        <input type="text" id="name-search" class="form-control" placeholder="Search by names">
+        <input type="number" id="year-search" class="form-control" placeholder="Search by year (YYYY)" min="1900" max="2099">
+        <a href="{% url 'check_balance' %}" class="btn-check-balance">Check Balance</a>
+    </div>
+
+    <!-- SMS History Table -->
+    <div class="table-wrapper">
+        <form id="delete-sms-form" method="POST" action="{% url 'delete_sms' %}">
+            {% csrf_token %}
+            <table id="sms-history-table" class="history-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>Status</th>
+                        <th>Sent (Date)</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Contact Number</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages %}
+                    <tr>
+                        <td><input type="checkbox" name="sms_ids" value="{{ message.id }}" class="delete-checkbox"></td>
+                        <td>{{ message.status }}</td>
+                        <td>{{ message.sent_date|date:"Y-m-d H:i" }}</td>
+                        <td>{{ message.first_name }}</td>
+                        <td>{{ message.last_name }}</td>
+                        <td>{{ message.dest_addr }}</td>
+                        <td>{{ message.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- Delete Button -->
+            <div>
+                <button type="submit" class="btn-delete">
+                    <i class="fas fa-trash"></i> Delete Selected
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    selectAllCheckbox.addEventListener('change', function() {
+        document.querySelectorAll('.delete-checkbox').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+
+    const inputs = [document.getElementById('date-search'), document.getElementById('name-search'), document.getElementById('year-search')];
+    inputs.forEach(input => input.addEventListener('input', function() {
+        const query = {
+            date: document.getElementById('date-search').value,
+            name: document.getElementById('name-search').value.toLowerCase(),
+            year: document.getElementById('year-search').value
+        };
+        document.querySelectorAll('#sms-history-table tbody tr').forEach(row => {
+            const date = row.cells[2].textContent.toLowerCase();
+            const firstName = row.cells[3].textContent.toLowerCase();
+            const lastName = row.cells[4].textContent.toLowerCase();
+            const year = new Date(row.cells[2].textContent).getFullYear().toString();
+            row.style.display = (!query.date || date.includes(query.date)) &&
+                                (!query.name || (firstName.includes(query.name) || lastName.includes(query.name))) &&
+                                (!query.year || year.includes(query.year)) ? '' : 'none';
+        });
+    }));
+});
+</script>
+{% endblock content %}

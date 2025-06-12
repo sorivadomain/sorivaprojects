@@ -1,0 +1,292 @@
+{% extends base_template %}
+
+{% block title %}
+    {% if is_update %}Update Invoice{% else %}Create Invoice{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.location.href='{% url 'fees_invoice_list' %}'" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">
+                {% if is_update %}Update Invoice{% else %}Create Invoice{% endif %}
+            </h3>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-container" style="width: 100%; max-width: 600px; margin: 0 auto; padding: 0 15px;">
+        {% if is_update and form.instance.invoice_id %}
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="color: #1f2937; font-size: 16px; font-weight: 600;">Invoice ID</label>
+            <input type="text" value="{{ form.instance.invoice_id }}" class="form-control" readonly style="background: #e5e7eb; cursor: not-allowed;">
+        </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {% if not is_update %}
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="student-filter" style="color: #1f2937; font-size: 16px; font-weight: 600;">Filter Students by Name</label>
+                <input type="text" id="student-filter" class="form-control" placeholder="Enter student name..." style="width: 100%;">
+            </div>
+            {% endif %}
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.student.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.student.label }}</label>
+                {{ form.student }}
+                {% if form.student.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.student.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.class_level.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.class_level.label }}</label>
+                {{ form.class_level }}
+                {% if form.class_level.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.class_level.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.session.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.session.label }}</label>
+                {{ form.session }}
+                {% if form.session.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.session.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.term.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.term.label }}</label>
+                {{ form.term }}
+                {% if form.term.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.term.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.installment.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.installment.label }}</label>
+                {{ form.installment }}
+                {% if form.installment.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.installment.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.invoice_date.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.invoice_date.label }}</label>
+                {{ form.invoice_date }}
+                {% if form.invoice_date.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.invoice_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.total_invoice_amount.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.total_invoice_amount.label }}</label>
+                {{ form.total_invoice_amount }}
+                {% if form.total_invoice_amount.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.total_invoice_amount.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.status.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.status.label }}</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="iphone-button" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 60px; background: linear-gradient(45deg, #00c6ff, #0072ff); border-radius: 40px; color: #fff; font-size: 18px; font-weight: 600; border: none; cursor: pointer; transition: transform 0.3s ease;">
+                    {% if is_update %}✏️ Update{% else %}➕ Create{% endif %}
+                </button>
+                <a href="{% url 'fees_invoice_list' %}" class="iphone-button" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 60px; background: linear-gradient(45deg, #6b7280, #9ca3af); border-radius: 40px; color: #fff; font-size: 18px; font-weight: 600; text-decoration: none; transition: transform 0.3s ease;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background: #f8f9fa;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 40px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3a86ff;
+        box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+    }
+    .form-control::placeholder {
+        color: #6b7280;
+        opacity: 1;
+    }
+    .form-control[readonly] {
+        background: #e5e7eb;
+        cursor: not-allowed;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60px;
+        border-radius: 40px;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .form-container {
+            padding: 0 10px;
+        }
+        .form-control {
+            font-size: 14px;
+            padding: 10px 15px;
+        }
+        .iphone-button {
+            min-height: 50px;
+            font-size: 16px;
+        }
+        .back-btn {
+            font-size: 20px;
+        }
+        div[style*="flex"] {
+            gap: 5px;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.querySelector('select[name="student"]');
+    const classLevelSelect = document.querySelector('select[name="class_level"]');
+    const sessionSelect = document.querySelector('select[name="session"]');
+    const termSelect = document.querySelector('select[name="term"]');
+    const installmentSelect = document.querySelector('select[name="installment"]');
+    const studentFilter = document.querySelector('#student-filter');
+
+    // Store original student options
+    const originalOptions = Array.from(studentSelect.options).map(option => ({
+        value: option.value,
+        text: option.text,
+        selected: option.selected
+    }));
+
+    // Filter students by name
+    function filterStudents() {
+        const filterValue = studentFilter.value.trim().toLowerCase();
+        const selectedValue = studentSelect.value;
+
+        // Clear current options
+        studentSelect.innerHTML = '';
+
+        // Filter and add matching options
+        const filteredOptions = originalOptions.filter(option => {
+            if (!filterValue) return true; // Show all if filter is empty
+            const fullName = option.text.toLowerCase();
+            return fullName.includes(filterValue);
+        });
+
+        // Add filtered options
+        filteredOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.text = opt.text;
+            option.selected = opt.value === selectedValue;
+            studentSelect.appendChild(option);
+        });
+
+        // If no options, add a placeholder
+        if (filteredOptions.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.text = 'No students found';
+            option.disabled = true;
+            option.selected = true;
+            studentSelect.appendChild(option);
+        }
+
+        // Trigger change event to update dependent fields
+        studentSelect.dispatchEvent(new Event('change'));
+    }
+
+    // Only enable filtering on create, not update
+    const isUpdate = {{ is_update|yesno:"true,false" }};
+    if (!isUpdate && studentFilter) {
+        studentFilter.addEventListener('input', filterStudents);
+
+        // Existing AJAX for dependent fields
+        studentSelect.addEventListener('change', function() {
+            const studentId = this.value;
+            if (studentId) {
+                fetch(`{% url 'student_details' 0 %}`.replace('0', studentId), {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                        return;
+                    }
+                    // Update dropdowns with fetched values
+                    classLevelSelect.value = data.class_level || '';
+                    sessionSelect.value = data.session || '';
+                    termSelect.value = data.term || '';
+                    installmentSelect.value = data.installment || '';
+                })
+                .catch(error => {
+                    console.error('Error fetching student details:', error);
+                });
+            } else {
+                // Reset dropdowns if no student is selected
+                classLevelSelect.value = '';
+                sessionSelect.value = '';
+                termSelect.value = '';
+                installmentSelect.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock content %}

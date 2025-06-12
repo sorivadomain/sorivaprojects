@@ -1,0 +1,177 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{% if event.pk %}Update Event Files{% else %}Add Event Files{% endif %}</h2>
+        <span></span>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="section mb-5">
+            <h3 class="section-title">Event Files</h3>
+            <!-- Existing Files -->
+            {% if existing_files %}
+                <div class="existing-files mb-3">
+                    <h4>Existing Files</h4>
+                    {% for file in existing_files %}
+                        <div class="file-item row mb-2 align-items-center">
+                            <div class="col-md-8">
+                                <span class="file-name">{{ file.file.name }}</span>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="checkbox" name="delete_files" value="{{ file.id }}" id="delete_file_{{ file.id }}" class="form-check-input">
+                                <label for="delete_file_{{ file.id }}" class="form-check-label">Delete</label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <!-- New Files Formset -->
+            <h4>New Files</h4>
+            {{ formset.management_form }}
+            <div id="formset-container">
+                {% for form in formset %}
+                    <div class="file-form row mb-3 align-items-center">
+                        <div class="col-md-8">
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                                {% for error in form.file.errors %}
+                                    <p class="text-danger">{{ error }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2">
+                            {% if form.DELETE %}
+                                <input type="checkbox" name="{{ form.DELETE.html_name }}" id="{{ form.DELETE.id_for_label }}" class="form-check-input">
+                                <label for="{{ form.DELETE.id_for_label }}" class="form-check-label">Delete</label>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-file" class="btn btn-secondary rounded-pill mb-3">➕ Add More</button>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end mb-4">
+            <button type="submit" name="skip" class="btn btn-outline-primary rounded-pill px-4 py-2 me-2">Skip</button>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">💾 Save and Continue</button>
+        </div>
+    </form>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+}
+.container-fluid {
+    padding: 0;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 20px 15px;
+    border-bottom: 2px solid #e5e7eb;
+}
+.existing-files h4 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 15px;
+}
+.file-form, .file-item {
+    margin: 0 15px;
+}
+.file-name {
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+@media (max-width: 576px) {
+    .file-name {
+        max-width: 200px; /* Adjust for smaller screens */
+    }
+}
+.form-control {
+    border: none;
+    outline: 1px solid #e5e7eb;
+    border-radius: 50px;
+    background: #fefefe;
+    padding: 8px 20px;
+    font-size: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.form-control:focus {
+    outline: 2px solid #a855f7;
+}
+.form-check-input {
+    margin-top: 0.3rem;
+}
+.btn-primary, .btn-outline-primary, .btn-secondary {
+    font-size: 1rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+}
+.btn-primary {
+    background: linear-gradient(45deg, #6b7280, #a855f7);
+    border: none;
+}
+.btn-primary:hover {
+    background: linear-gradient(45deg, #5b6270, #9855e7);
+}
+.btn-outline-primary {
+    border: 1px solid #a855f7;
+    color: #a855f7;
+}
+.btn-outline-primary:hover {
+    background: #a855f7;
+    color: #fff;
+}
+.btn-secondary {
+    background: #6b7280;
+}
+.btn-secondary:hover {
+    background: #5b6270;
+}
+.text-danger {
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addFileButton = document.getElementById('add-file');
+    const formsetContainer = document.getElementById('formset-container');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+    addFileButton.addEventListener('click', function() {
+        const formCount = parseInt(totalForms.value);
+        const newForm = document.createElement('div');
+        newForm.className = 'file-form row mb-3 align-items-center';
+        newForm.innerHTML = `
+            <div class="col-md-8">
+                <input type="file" name="form-${formCount}-file" class="form-control rounded-3" accept="*/*">
+            </div>
+            <div class="col-md-2">
+                <input type="checkbox" name="form-${formCount}-DELETE" id="id_form-${formCount}-DELETE" class="form-check-input">
+                <label for="id_form-${formCount}-DELETE" class="form-check-label">Delete</label>
+            </div>
+        `;
+        formsetContainer.appendChild(newForm);
+        totalForms.value = formCount + 1;
+    });
+});
+</script>
+{% endblock %}

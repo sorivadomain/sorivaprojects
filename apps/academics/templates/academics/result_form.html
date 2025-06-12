@@ -1,0 +1,283 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">{{ page_title }}</h3>
+            <span style="font-size: 24px; color: #fff; padding-right: 10px;"> </span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    {% if error %}
+        <div class="alert alert-danger" style="margin-bottom: 15px; border-radius: 15px; padding: 15px;">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- Session, Term, Exam Info -->
+        <div class="info-section" style="margin-bottom: 20px; padding: 15px; border-radius: 15px;">
+            <h5>Create result for:</h5>
+            <p><strong>Session:</strong> {{ session.name }}</p>
+            <p><strong>Term:</strong> {{ term.name }}</p>
+            <p><strong>Exam:</strong> {{ exam.name }}</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin-bottom: 15px; border-radius: 15px; padding: 15px;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" id="resultForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_student_class" style="font-weight: 600;">Class</label>
+                {{ form.student_class }}
+            </div>
+            <div class="form-group mt-3">
+                <label for="id_subject" style="font-weight: 600;">Subject</label>
+                {{ form.subject }}
+            </div>
+
+            <!-- Students Table Container -->
+            <div class="table-container mt-4" id="students-table" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <!-- Table will be inserted here via JavaScript -->
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-4 text-center">
+                <button type="submit" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 12px 24px; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    Save Results
+                </button>
+            </div>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const classSelect = document.getElementById('id_student_class');
+        const subjectSelect = document.getElementById('id_subject');
+        const tableContainer = document.getElementById('students-table');
+        const form = document.getElementById('resultForm');
+
+        classSelect.addEventListener('change', function() {
+            console.log('Class changed to:', this.value);
+            const classId = this.value;
+            if (classId) {
+                fetch(`/academics/get_subjects/?class_id=${classId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log('Subjects fetch response status:', response.status);
+                    if (response.status === 401 || response.status === 403) {
+                        alert('Unauthorized access. Please log in with appropriate permissions.');
+                        window.location.href = '/accounts/custom_login/';
+                        throw new Error('Unauthorized');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Subjects fetch response data:', data);
+                    subjectSelect.innerHTML = '<option value="">Select a subject</option>';
+                    if (data.subjects) {
+                        data.subjects.forEach(subject => {
+                            const option = document.createElement('option');
+                            option.value = subject.id;
+                            option.textContent = subject.name;
+                            subjectSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('No subjects found in response');
+                    }
+                    // Clear table
+                    tableContainer.innerHTML = '';
+                })
+                .catch(error => {
+                    console.error('Error fetching subjects:', error);
+                });
+            } else {
+                subjectSelect.innerHTML = '<option value="">Select a subject</option>';
+                tableContainer.innerHTML = '';
+            }
+        });
+
+        subjectSelect.addEventListener('change', function() {
+            console.log('Subject changed to:', this.value);
+            const classId = classSelect.value;
+            const subjectId = this.value;
+            if (classId && subjectId) {
+                fetch(`/academics/get_students/?class_id=${classId}&subject_id=${subjectId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log('Students fetch response status:', response.status);
+                    if (response.status === 401 || response.status === 403) {
+                        alert('Unauthorized access. Please log in with appropriate permissions.');
+                        window.location.href = '/accounts/custom_login/';
+                        throw new Error('Unauthorized');
+                    }
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Students fetch response data:', data);
+                    if (data.table_html) {
+                        tableContainer.innerHTML = data.table_html;
+                    } else if (data.error) {
+                        console.error('Error from server:', data.error);
+                        tableContainer.innerHTML = `<div class="alert alert-danger" style="border-radius: 15px; padding: 15px;">${data.error}</div>`;
+                    } else {
+                        console.error('No table_html or error in response');
+                        tableContainer.innerHTML = '<div class="alert alert-danger" style="border-radius: 15px; padding: 15px;">Failed to load student data.</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching students:', error);
+                    tableContainer.innerHTML = '<div class="alert alert-danger" style="border-radius: 15px; padding: 15px;">An error occurred while loading student data.</div>';
+                });
+            } else {
+                tableContainer.innerHTML = '';
+            }
+        });
+
+        // Trigger subject population if a class is pre-selected (e.g., during update)
+        if (classSelect.value) {
+            console.log('Pre-selected class found, triggering change event');
+            classSelect.dispatchEvent(new Event('change'));
+        }
+        if (subjectSelect.value) {
+            console.log('Pre-selected subject found, triggering change event');
+            subjectSelect.dispatchEvent(new Event('change'));
+        }
+
+        // Handle form submission only when the button is clicked
+        form.addEventListener('submit', function(e) {
+            if (!subjectSelect.value) {
+                e.preventDefault();
+                alert('Please select a subject before saving.');
+            }
+        });
+    });
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: #fff;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3a86ff;
+        box-shadow: 0 0 5px rgba(58, 134, 255, 0.3);
+    }
+    .rounded-input {
+        width: 100%;
+        max-width: 150px;
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: #fff;
+        text-align: center;
+    }
+    .rounded-input:focus {
+        outline: none;
+        border-color: #3a86ff;
+        box-shadow: 0 0 5px rgba(58, 134, 255, 0.3);
+    }
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+    table {
+        border-collapse: collapse;
+        border: none;
+        background: transparent;
+        width: 100%;
+        min-width: 600px;
+    }
+    th, td {
+        border: none;
+        font-size: 18px;
+        white-space: nowrap;
+        padding: 10px;
+        text-align: center;
+    }
+    th {
+        font-weight: 600;
+        border-bottom: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+    }
+    td {
+        border-bottom: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            min-width: 600px;
+        }
+        th, td {
+            font-size: 16px;
+            padding: 8px;
+        }
+        .form-control, .rounded-input {
+            font-size: 14px;
+            padding: 8px;
+        }
+    }
+</style>
+{% endblock content %}

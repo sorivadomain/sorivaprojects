@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+    <style>
+        /* General styling for containers */
+        .container {
+            border: 2px solid #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9; /* Light background for better readability */
+        }
+        h2 {
+            text-align: center;
+            color: darkblue;
+            font-family: 'Arial', sans-serif;
+            margin-bottom: 20px;
+        }
+        .animated-text {
+            font-family: 'Arial', sans-serif;
+            color: darkred;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #333;
+        }
+        td {
+            font-size: 1em;
+            color: #555;
+        }
+        /* Add striped effect for table rows */
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:nth-child(odd) {
+            background-color: #fff;
+        }
+        /* Highlight row on hover */
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        /* Styling for the first column (S/N) */
+        td:first-child {
+            font-weight: bold;
+        }
+        /* Animation for word by word appearance */
+        .word-appear span {
+            opacity: 0;
+            display: inline-block;
+            animation: appear 0.5s forwards;
+        }
+        .word-appear span:nth-child(1) { animation-delay: 0.5s; }
+        .word-appear span:nth-child(2) { animation-delay: 1s; }
+        .word-appear span:nth-child(3) { animation-delay: 1.5s; }
+        .word-appear span:nth-child(4) { animation-delay: 2s; }
+        .word-appear span:nth-child(5) { animation-delay: 2.5s; }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <h1 class="animated-text">Academic Analysis</h1>
+
+    <!-- 1. Line Graphs Container -->
+    <div class="container">
+        <h2 class="word-appear">
+            Academic trends of all the classes in the session {{ session_names|join:", " }}
+        </h2>
+
+        {% if class_graphs %}
+            <div style="display: flex; flex-wrap: wrap;">
+                {% for student_class_session, graph in class_graphs.items %}
+                    <div style="width: 32%; margin: 1%; text-align: center; border: 1px solid #ddd; padding: 10px; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); border-radius: 10px;">
+                        <h3>{{ student_class_session }}</h3>
+                        <img src="data:image/png;base64,{{ graph }}" alt="Academic Progress Graph for {{ student_class_session }}" style="width: 100%; height: auto;">
+                        <p><strong>AI Advice:</strong> {{ ai_advice|get_item:student_class_session }}</p>
+                    </div>
+                    {% if forloop.counter|divisibleby:3 %}
+                        <div style="flex-basis: 100%; height: 0;"></div> <!-- Break row after every 3 graphs -->
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No data available for analysis.</p>
+        {% endif %}
+    </div>
+
+    <!-- 2. Bar Graphs Container -->
+    <div class="container">
+        <h2 class="word-appear">
+            Subjects performance and trends in the session {{ session_names|join:", " }}
+        </h2>
+
+        {% if subject_graphs %}
+            <div style="display: flex; flex-wrap: wrap;">
+                {% for student_class_session, subject_graph in subject_graphs.items %}
+                    <div style="width: 32%; margin: 1%; text-align: center; border: 1px solid #ddd; padding: 10px; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); border-radius: 10px;">
+                        <h3>{{ student_class_session }}</h3>
+                        <img src="data:image/png;base64,{{ subject_graph }}" alt="Subject Performance Graph for {{ student_class_session }}" style="width: 100%; height: auto;">
+                        <p><strong>AI Advice:</strong> {{ subject_ai_advice|get_item:student_class_session }}</p>
+                        <p><strong>Teacher Comments:</strong> {{ teacher_comments|get_item:student_class_session }}</p>
+                    </div>
+                    {% if forloop.counter|divisibleby:3 %}
+                        <div style="flex-basis: 100%; height: 0;"></div> <!-- Break row after every 3 graphs -->
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No data available for analysis.</p>
+        {% endif %}
+    </div>
+
+    <!-- 3. General Report (New Section for Teacher Analysis) -->
+    <div class="container">
+        <h2 class="word-appear">General Academic Trends and Teacher Analysis</h2>
+        {% if teachers_analysis %}
+            {% for session, teacher_performance in teachers_analysis.items %}
+                <h3>Session: {{ session }}</h3>
+                {% for class_performance in teacher_performance %}
+                    <h4>Class: {{ class_performance.class }}</h4>
+                    <ul>
+                        {% for teacher in class_performance.teachers %}
+                            <li><strong>{{ teacher.teacher }} ({{ teacher.subject }}):</strong> {{ teacher.comments }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p>No teacher performance data available.</p>
+        {% endif %}
+    </div>
+
+    <!-- 4. Students Below 25 Average -->
+    <div class="container">
+        <h2 class="word-appear">Students Below 25 Average</h2>
+        {% for session, class_tables in student_below_25_tables.items %}
+            <h3>Session: {{ session }}</h3>
+            {% for class, students in class_tables.items %}
+                <h4>Class: {{ class }}</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Student Name</th>
+                            <th>Average</th>
+                            <th>Comments/Advice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ student.name }}</td>
+                                <td>{{ student.average }}</td>
+                                <td>{{ student.comments }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- 5. Subjects Below 25 Average -->
+    <div class="container">
+        <h2 class="word-appear">Subjects Below 25 Average</h2>
+        {% for session, class_tables in subject_below_25_tables.items %}
+            <h3>Session: {{ session }}</h3>
+            {% for class, subjects in class_tables.items %}
+                <h4>Class: {{ class }}</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Subject Name</th>
+                            <th>Average</th>
+                            <th>Comments/Advice</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subject in subjects %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.average }}</td>
+                                <td>{{ subject.comments }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <script>
+        // Function to animate text word by word with spaces
+        document.addEventListener('DOMContentLoaded', function () {
+            const animatedHeaders = document.querySelectorAll('.word-appear');
+            animatedHeaders.forEach(header => {
+                let words = header.textContent.split(' ');
+                header.textContent = '';
+                words.forEach((word, idx) => {
+                    let span = document.createElement('span');
+                    span.innerHTML = word + '&nbsp;';  // Adding space between words
+                    span.style.animationDelay = `${idx * 0.5}s`;
+                    header.appendChild(span);
+                });
+            });
+        });
+    </script>
+{% endblock %}

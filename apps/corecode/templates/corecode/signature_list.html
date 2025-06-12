@@ -1,0 +1,91 @@
+<!-- templates/corecode/signature_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Signature List{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #007aff; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; margin: 0;">Signature List</h2>
+        <a href="{% url 'settings_home' %}" class="home-btn" style="font-size: 24px; color: #007aff; cursor: pointer; padding-right: 10px; text-decoration: none;">🏠</a>
+    </div>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'create_signature' %}" class="btn btn-lg" style="border-radius: 15px; background: linear-gradient(45deg, #007aff, #00d4ff); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+            <i class="fas fa-plus"></i> Create Signature
+        </a>
+    </div>
+    <div class="signature-list">
+        {% for signature in signatures %}
+        <div class="signature-card" style="background-color: #fff; border-radius: 12px; border: 1px solid #d1d1d6; margin-bottom: 15px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="signature-info">
+                    <span class="serial-number" style="color: #007aff; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; margin-right: 10px;">{{ forloop.counter }}</span>
+                    <span class="signature-name" style="color: #000; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">{{ signature.name }}</span>
+                </div>
+                <a href="{% url 'delete_signature' signature.pk %}" class="btn btn-sm" style="border-radius: 15px; background: linear-gradient(45deg, #ff3b30, #ff6b6b); border: none; color: #fff; padding: 8px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </a>
+            </div>
+            <div class="signature-image text-center mt-2">
+                <img src="{{ signature.signature_image.url }}" alt="Signature" style="border-radius: 8px; border: 1px solid #d1d1d6; width: 100%; max-width: 150px; background-color: #f5f5f5;">
+            </div>
+            <div class="signature-dates mt-2" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 0.9rem; color: #8e8e93;">
+                <div>Created: {{ signature.date_created|date:"Y-m-d H:i" }} ({{ signature.date_created|timesince }})</div>
+                <div>Updated: {{ signature.date_updated|date:"Y-m-d H:i" }} ({{ signature.date_updated|timesince }})</div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center" style="background-color: #f5f5f5; border-radius: 12px; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #8e8e93;">
+            No signatures available.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .signature-list {
+        width: 100%;
+    }
+    .signature-card {
+        transition: transform 0.2s ease;
+    }
+    .signature-card:hover {
+        transform: translateY(-2px);
+    }
+    @media (max-width: 576px) {
+        .btn-lg {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        .btn-sm {
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .signature-card {
+            padding: 10px;
+        }
+        .signature-info {
+            font-size: 0.9rem;
+        }
+        .signature-image img {
+            max-width: 120px;
+        }
+        .signature-dates {
+            font-size: 0.8rem;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock content %}

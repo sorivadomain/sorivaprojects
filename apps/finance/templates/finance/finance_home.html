@@ -1,0 +1,336 @@
+{% extends base_template %}
+{% block title %}Finance Home{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">Finance Home</h3>
+        </div>
+    </div>
+
+    <!-- BUTTONS CONTAINER -->
+    <div class="buttons-container" style="width: 100%; margin: 0; padding: 0;">
+        <!-- 1) Create Fees Structure -->
+        {% if show_fees_create %}
+        <a href="{% url 'fees_structure_create' %}" class="iphone-button bg-fees" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Fees Structure</h3>
+                <p class="desc-info">Define a new fee structure</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>💰</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 2) Fees Structure List -->
+        {% if show_fees_list %}
+        <a href="{% url 'fees_structure_list' %}" class="iphone-button bg-fees-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Fees Structure List</h3>
+                <p class="desc-info">View all fees structures</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📋</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 3) Create New Invoice -->
+        {% if show_invoice_create %}
+        <a href="{% url 'fees_invoice_create' %}" class="iphone-button bg-invoice-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create New Invoice</h3>
+                <p class="desc-info">Generate a new invoice</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📝</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 4) Invoice List -->
+        {% if show_invoice_list %}
+        <a href="{% url 'fees_invoice_list' %}" class="iphone-button bg-invoice-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Invoice List</h3>
+                <p class="desc-info">View all invoices</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📋</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 5) Create School Income Category -->
+        {% if show_income_create %}
+        <a href="{% url 'income_category_create' %}" class="iphone-button bg-income-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create School Income Category</h3>
+                <p class="desc-info">Define income category</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>➕💸</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 6) School Income Category List -->
+        {% if show_income_list %}
+        <a href="{% url 'income_category_list' %}" class="iphone-button bg-income-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>School Income Category List</h3>
+                <p class="desc-info">View income categories</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊💸</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 7) School Income List by Category -->
+        {% if show_income_all %}
+        <a href="{% url 'all_school_incomes' %}" class="iphone-button bg-income-all" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>School Income List by Category</h3>
+                <p class="desc-info">View all school incomes by category</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📋💰</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 8) Create Expenditure Category -->
+        {% if show_expenditure_create %}
+        <a href="{% url 'expenditure_category_create' %}" class="iphone-button bg-expenditure-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Expenditure Category</h3>
+                <p class="desc-info">Define expenditure category</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>➕📉</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 9) Expenditure Category List -->
+        {% if show_expenditure_list %}
+        <a href="{% url 'expenditure_category_list' %}" class="iphone-button bg-expenditure-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Expenditure Category List</h3>
+                <p class="desc-info">View expenditure categories</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊📉</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 10) Expenditures by Category -->
+        {% if show_expenditure_all %}
+        <a href="{% url 'expenditure_all' %}" class="iphone-button bg-expenditure-all" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Expenditures by Category</h3>
+                <p class="desc-info">View all expenditures by category</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📋📉</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 11) Create Salary Payment -->
+        {% if show_salary_create %}
+        <a href="{% url 'salary-create' %}" class="iphone-button bg-salary-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Salary Payment</h3>
+                <p class="desc-info">Record salary payment</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>💼💵</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 12) Salary Payment List -->
+        {% if show_salary_list %}
+        <a href="{% url 'salary-list' %}" class="iphone-button bg-salary-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>{{ salary_list_text }}</h3>
+                <p class="desc-info">{{ salary_list_desc }}</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📜💵</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 13) Financial Analysis -->
+        {% if show_financial_analysis %}
+        <a href="{% url 'finance-analysis' %}" class="iphone-button bg-financial-analysis" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Financial Analysis</h3>
+                <p class="desc-info">Analyze financial trends</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊🔍</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to analyze</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- 14) Financial Report -->
+        {% if show_financial_report %}
+        <a href="{% url 'finance-report' %}" class="iphone-button bg-report" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Financial Report</h3>
+                <p class="desc-info">View financial reports</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📈</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 80px;
+        margin-bottom: 10px;
+        border-radius: 40px;
+        text-decoration: none;
+        color: #fff;
+        transition: transform 0.3s ease;
+        padding: 0 20px;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+    }
+    .button-left, .button-center, .button-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .button-left {
+        text-align: left;
+        flex: 1;
+        margin-right: 10px;
+    }
+    .button-center {
+        text-align: center;
+        flex: 1;
+    }
+    .button-right {
+        text-align: right;
+        flex: 1;
+        margin-left: 10px;
+    }
+    .button-left h3, .button-center h3, .button-right h3 {
+        margin: 3px 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .desc-info {
+        margin: 2px 0;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+    .bg-fees { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+    .bg-fees-list { background: linear-gradient(45deg, #00f260, #0575e6); }
+    .bg-invoice-create { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+    .bg-invoice-list { background: linear-gradient(45deg, #3b82f6, #1e3a8a); }
+    .bg-income-create { background: linear-gradient(45deg, #f7971e, #ffd200); }
+    .bg-income-list { background: linear-gradient(45deg, #8e2de2, #4a00e0); }
+    .bg-income-all { background: linear-gradient(45deg, #2dd4bf, #1d4ed8); }
+    .bg-expenditure-create { background: linear-gradient(45deg, #10b981, #065f46); }
+    .bg-expenditure-list { background: linear-gradient(45deg, #ec4899, #9d174d); }
+    .bg-expenditure-all { background: linear-gradient(45deg, #a855f7, #6d28d9); }
+    .bg-salary-create { background: linear-gradient(45deg, #f59e0b, #b45309); }
+    .bg-salary-list { background: linear-gradient(45deg, #06b6d4, #083344); }
+    .bg-financial-analysis { background: linear-gradient(45deg, #22d3ee, #0e7490); }
+    .bg-report { background: linear-gradient(45deg, #ef4444, #991b1b); }
+    @media (max-width: 576px) {
+        .header { padding: 15px; margin: 0 5px 15px 5px; }
+        .header h3 { font-size: 1.5rem; }
+        .iphone-button { min-height: 70px; padding: 0 15px; }
+        .button-left h3, .button-center h3, .button-right h3 { font-size: 16px; }
+        .desc-info { font-size: 12px; }
+        .back-btn { font-size: 20px; }
+    }
+</style>
+{% endblock content %}

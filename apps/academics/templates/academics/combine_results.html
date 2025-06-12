@@ -1,0 +1,73 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 100%; margin: 20px auto; padding: 20px;">
+    <!-- Header -->
+    <h1 style="text-align: center; font-size: 20px; color: #333; margin-bottom: 20px;">
+        {{ page_title }} for {{ current_session.name }}
+    </h1>
+
+    <!-- Display Message (Success/Error) -->
+    {% if messages %}
+        <div style="text-align: center; margin-bottom: 20px;">
+            {% for message in messages %}
+                <p style="font-size: 16px; color: {% if message.tags == 'success' %}#34c759{% else %}#ff2d55{% endif %};">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Form to Select Exams and Combine -->
+    <form method="POST" action="{% url 'combine_results' %}">
+        {% csrf_token %}
+        <table style="width: 100%; border-collapse: collapse; margin: 0 auto; max-width: 90vw;">
+            <thead>
+                <tr>
+                    <th style="padding: 10px; font-size: 16px; color: #555; text-align: center;">Select</th>
+                    <th style="padding: 10px; font-size: 16px; color: #555; text-align: left;">Exam</th>
+                    <th style="padding: 10px; font-size: 16px; color: #555; text-align: left;">Term</th>
+                    <th style="padding: 10px; font-size: 16px; color: #555; text-align: left;">Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr style="border-bottom: 1px solid #ccc;">
+                        <td style="padding: 10px; text-align: center;">
+                            <input type="checkbox" name="exam_ids" value="{{ result.exam.id }}">
+                        </td>
+                        <td style="padding: 10px; font-size: 14px; color: #333;">{{ result.exam.name }}</td>
+                        <td style="padding: 10px; font-size: 14px; color: #333;">{{ result.term.name }}</td>
+                        <td style="padding: 10px; font-size: 14px; color: #333;">{{ result.student_class.name }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 10px; text-align: center; font-size: 14px; color: #555;">
+                            No results found for the current session.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Combine Button -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button type="submit" style="padding: 10px 20px; border-radius: 25px; border: none; background-color: #34c759; color: white; font-size: 16px; cursor: pointer;">
+                Combine Selected Exams
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    button:hover {
+        background-color: #2ba84a;
+    }
+</style>
+{% endblock %}
