@@ -1,0 +1,137 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Header -->
+<div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="{{ finance_home_url }}" class="back-btn" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px; text-decoration: none;">⬅️</a>
+        <h3 class="flex-grow-1" style="margin: 0;">{{ page_title }}</h3>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form method="post" class="form-container">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {% for error in field.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --gradient-filter: linear-gradient(45deg, #2dd4bf, #1d4ed8);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Header */
+.header {
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+.form-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 10px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.form-control:hover {
+    transform: scale(1.01);
+}
+
+.btn-submit {
+    border-radius: 8px;
+    background: var(--gradient-yellow);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.btn-submit:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #fbbf24, #fef08a);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .form-container {
+        padding: 15px;
+    }
+    .form-control {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    .btn-submit {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+    .header {
+        padding: 15px;
+        margin: 0 5px 15px 5px;
+    }
+    .header h3 {
+        font-size: 1.5rem;
+    }
+    .back-btn {
+        font-size: 20px;
+    }
+}
+</style>
+{% endblock content %}

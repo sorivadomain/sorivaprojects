@@ -1,0 +1,612 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <!-- Filters -->
+    <div class="filters mb-5">
+        <div class="filter-group">
+            <label for="session-filter" class="form-label">Session</label>
+            <select id="session-filter" class="form-control">
+                {% for session in all_sessions %}
+                    <option value="{{ session.id }}" {% if session.id == current_session.id %}selected{% endif %}>{{ session.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="term-filter" class="form-label">Term</label>
+            <select id="term-filter" class="form-control">
+                {% for term in all_terms %}
+                    <option value="{{ term.id }}" {% if term.id == current_term.id %}selected{% endif %}>{{ term.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="exam-filter" class="form-label">Exam</label>
+            <select id="exam-filter" class="form-control">
+                {% for exam in all_exams %}
+                    <option value="{{ exam.id }}" {% if exam.id == current_exam.id %}selected{% endif %}>{{ exam.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="student-filter" class="form-label">Student Name</label>
+            <input type="text" id="student-filter" class="form-control student-filter" placeholder="Search by name...">
+        </div>
+    </div>
+
+    <!-- Completion Table (hidden for ParentUser) -->
+    {% if show_completion_table %}
+    <div class="completion-section mb-5">
+        <h3 class="section-title">Form Completion Status</h3>
+        <div class="table-container">
+            <table id="completion-table" class="result-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in completion_data %}
+                        <tr class="completion-row" data-session="{{ item.session.id|default:current_session.id }}" data-term="{{ item.term.id|default:current_term.id }}" data-exam="{{ item.exam.id|default:current_exam.id }}" data-student-name="{{ item.student.firstname|lower }} {{ item.student.middle_name|lower }} {{ item.student.surname|lower }}">
+                            <td>{{ item.student.firstname }} {{ item.student.middle_name }} {{ item.student.surname }}</td>
+                            <td class="status-cell">
+                                {% if item.status == 'complete' %}
+                                    <span class="status-complete">✔</span>
+                                {% else %}
+                                    <span class="status-incomplete">X</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="completion-stats">
+            <p>Completed Forms: <span id="completed-count">{{ completed_forms_count }}</span></p>
+            <p>Incomplete Forms: <span id="incomplete-count">{{ incomplete_forms_count }}</span></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Result Cards -->
+    <div id="result-cards">
+        {% for card in result_cards %}
+            <div class="result-card" data-session="{{ card.info.session.id|default:current_session.id }}" data-term="{{ card.info.term.id|default:current_term.id }}" data-exam="{{ card.info.exam.id|default:current_exam.id }}" data-student-name="{{ card.student.firstname|lower }} {{ card.student.middle_name|lower }} {{ card.student.surname|lower }}">
+                <!-- Header -->
+                <div class="school-header">
+                    <h1>PRESIDENT'S OFFICE - REGIONAL ADMINISTRATION AND LOCAL GOVERNMENT</h1>
+                    <h2>BUHIGWE DISTRICT COUNCIL</h2>
+                    <h3>MANUS DEI SECONDARY SCHOOL</h3>
+                    <h4>RESULT CARD FOR {{ card.student.firstname }} {{ card.student.middle_name }} {{ card.student.surname }}</h4>
+                    <p>{{ card.student.current_class.name }} - {{ card.info.exam.name|default:current_exam.name }} - {{ card.info.term.name|default:current_term.name }} - {{ card.info.session.name|default:current_session.name }}</p>
+                </div>
+
+                <!-- Profile Picture (only if present) -->
+                {% if card.student.passport %}
+                    <div class="profile-picture">
+                        <img src="{{ card.student.passport.url }}" alt="Profile Picture">
+                    </div>
+                {% endif %}
+
+                <!-- Results Table -->
+                <div class="table-container">
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in card.subjects_data %}
+                                <tr>
+                                    <td>{{ subject.subject_name }}</td>
+                                    <td>{{ subject.marks }}</td>
+                                    <td>{{ subject.grade }}</td>
+                                    <td>{{ subject.comments }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Additional Info -->
+                <div class="card-details">
+                    <p class="closing-dates">
+                        Shule imefungwa {{ card.info.date_of_closing|default:"-"|date:"d/m/Y" }}, na itafunguliwa {{ card.info.date_of_opening|default:"-"|date:"d/m/Y" }}.
+                    </p>
+                    <p class="grades">
+                        Nidhamu: {{ card.info.discipline|default:"-" }},
+                        Michezo: {{ card.info.sports_and_games|default:"-" }},
+                        Ushirikiano: {{ card.info.collaboration|default:"-" }},
+                        Dini: {{ card.info.religious|default:"-" }}
+                    </p>
+                    <p class="performance">
+                        Amekuwa wa {{ card.overall_position|default:"-" }} kati ya wanafunzi {{ card.total_students }},
+                        Wastani: {{ card.overall_average|default:"-" }} kati ya {{ card.total_possible_average|default:"-" }},
+                        Total Marks: {{ card.total_marks|default:"-" }} kati ya {{ card.overall_total_marks|default:"-" }},
+                        Division: {{ card.division|default:"-" }},
+                        Points: {{ card.points|default:"-" }}
+                    </p>
+                    <div class="comments">
+                        <p><strong>Maoni ya Mwalimu wa Darasa:</strong> <span>{{ card.info.class_teacher_comments|default:"-" }}</span></p>
+                        <p><strong>Maoni ya Mwalimu wa Taaruma:</strong> <span>{{ card.info.academic_comments|default:"-" }}</span></p>
+                        <p><strong>Maoni ya Mwalimu Mkuu:</strong> <span>{{ card.info.headmaster_comments|default:"-" }}</span></p>
+                    </div>
+                </div>
+            </div>
+            {% if not forloop.last %}
+                <hr class="card-separator">
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- JavaScript for Filtering -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sessionFilter = document.getElementById('session-filter');
+    const termFilter = document.getElementById('term-filter');
+    const examFilter = document.getElementById('exam-filter');
+    const studentFilter = document.getElementById('student-filter');
+    const resultCards = document.querySelectorAll('.result-card');
+    const completionRows = document.querySelectorAll('.completion-row');
+    const completedCountElement = document.getElementById('completed-count');
+    const incompleteCountElement = document.getElementById('incomplete-count');
+
+    function applyFilters() {
+        const selectedSession = sessionFilter.value;
+        const selectedTerm = termFilter.value;
+        const selectedExam = examFilter.value;
+        const searchName = studentFilter.value.toLowerCase().trim();
+
+        let completedCount = 0;
+        let incompleteCount = 0;
+
+        // Filter completion rows (if table is present)
+        if (completionRows.length > 0) {
+            completionRows.forEach(row => {
+                const rowSession = row.getAttribute('data-session');
+                const rowTerm = row.getAttribute('data-term');
+                const rowExam = row.getAttribute('data-exam');
+                const rowStudentName = row.getAttribute('data-student-name');
+
+                const matchesSession = selectedSession === '' || rowSession === selectedSession;
+                const matchesTerm = selectedTerm === '' || rowTerm === selectedTerm;
+                const matchesExam = selectedExam === '' || rowExam === selectedExam;
+                const matchesStudent = searchName === '' || rowStudentName.includes(searchName);
+
+                if (matchesSession && matchesTerm && matchesExam && matchesStudent) {
+                    row.style.display = 'table-row';
+                    const statusCell = row.querySelector('.status-cell span');
+                    if (statusCell.classList.contains('status-complete')) {
+                        completedCount++;
+                    } else {
+                        incompleteCount++;
+                    }
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (completedCountElement) completedCountElement.textContent = completedCount;
+            if (incompleteCountElement) incompleteCountElement.textContent = incompleteCount;
+        }
+
+        // Filter result cards
+        resultCards.forEach(card => {
+            const cardSession = card.getAttribute('data-session');
+            const cardTerm = card.getAttribute('data-term');
+            const cardExam = card.getAttribute('data-exam');
+            const cardStudentName = card.getAttribute('data-student-name');
+
+            const matchesSession = selectedSession === '' || cardSession === selectedSession;
+            const matchesTerm = selectedTerm === '' || cardTerm === selectedTerm;
+            const matchesExam = selectedExam === '' || cardExam === selectedExam;
+            const matchesStudent = searchName === '' || cardStudentName.includes(searchName);
+
+            if (matchesSession && matchesTerm && matchesExam && matchesStudent) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Attach event listeners to filters
+    sessionFilter.addEventListener('change', applyFilters);
+    termFilter.addEventListener('change', applyFilters);
+    examFilter.addEventListener('change', applyFilters);
+    studentFilter.addEventListener('input', applyFilters);
+
+    // Initial filter application
+    applyFilters();
+});
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f4f4f8;
+        color: #1d1d1f;
+    }
+
+    .container {
+        width: 100%;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    /* Filters */
+    .filters {
+        padding: 20px;
+        border-bottom: 2px solid #d1d1d6;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #1d1d1f;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 18px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 50px;
+        background-color: #f2f2f7;
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e');
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 16px;
+        transition: box-shadow 0.3s, border-color 0.3s, background-color 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007aff !important;
+        background-color: #fff;
+        box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
+    }
+
+    .student-filter {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 50px;
+        background-color: #f2f2f7;
+        transition: box-shadow 0.3s, border-color 0.3s, background-color 0.3s;
+    }
+
+    .student-filter:focus {
+        outline: none;
+        border-color: #007aff !important;
+        background-color: #fff;
+        box-shadow: 0 0 15px rgba(0, 122, 255, 0.3);
+    }
+
+    /* Completion Section */
+    .completion-section {
+        margin-bottom: 40px;
+        border-top: 2px solid #d1d1d6;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #1d1d1f;
+        text-align: center;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #d1d1d6;
+    }
+
+    .completion-stats {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .completion-stats p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1d1d1f;
+        margin: 8px 0;
+    }
+
+    /* Tables */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .result-table {
+        width: 100%;
+        min-width: 600px;
+        border-collapse: collapse;
+        background-color: #fff !important;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-table th, .result-table td {
+        padding: 14px 16px;
+        font-size: 16px;
+        border: 1px solid #d1d1d6 !important;
+        text-align: center;
+    }
+
+    .result-table th {
+        font-weight: 600;
+        color: #fff !important;
+        background: linear-gradient(135deg, #007aff, #00b7ff) !important;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+
+    .result-table td {
+        background-color: #f9f9fb !important;
+    }
+
+    .result-table tbody tr:hover td {
+        background-color: #f2f2f7 !important;
+        transition: background-color 0.3s;
+    }
+
+    .status-complete {
+        color: #34c759;
+        font-size: 20px;
+    }
+
+    .status-incomplete {
+        color: #ff2d55;
+        font-size: 20px;
+    }
+
+    /* Result Cards */
+    .result-card {
+        margin-bottom: 40px;
+        padding: 20px 0;
+        page-break-after: always;
+    }
+
+    .card-separator {
+        height: 4px;
+        border: none;
+        background: linear-gradient(90deg, #007aff, #00b7ff);
+        margin: 30px 0;
+    }
+
+    .school-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e8ecef;
+    }
+
+    .school-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1d1d1f;
+        margin-bottom: 12px;
+    }
+
+    .school-header h2, .school-header h3 {
+        font-size: 20px;
+        font-weight: 500;
+        color: #6e6e73;
+        margin-bottom: 10px;
+    }
+
+    .school-header h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1d1d1f;
+        margin-bottom: 10px;
+    }
+
+    .school-header p {
+        font-size: 16px;
+        color: #6e6e73;
+        margin-bottom: 0;
+    }
+
+    .profile-picture {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .profile-picture img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e8ecef;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-details {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #e8ecef;
+    }
+
+    .closing-dates, .grades, .performance {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: #3333d1;
+        margin: 12px 0;
+        line-height: 1.5;
+    }
+
+    .comments {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .comments p {
+        font-size: 16px;
+        color: #3333d3;
+        margin: 12px 0;
+        line-height: 1.5;
+    }
+
+    .comments strong {
+        font-weight: 600;
+    }
+
+    .comments span {
+        text-decoration: underline;
+        color: #007aff;
+    }
+
+    /* Print Styles */
+    @media print {
+        .container > *:not(#result-cards),
+        .container > *:not(#result-cards) * {
+            display: none !important;
+        }
+        .result-card {
+            page-break-after: always;
+            padding: 0;
+            margin: 0;
+        }
+        .card-separator {
+            display: none !important;
+        }
+        .result-table {
+            border: none !important;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #333 !important;
+        }
+        .result-table th {
+            background: none !important;
+            color: #333 !important;
+        }
+        .table-container {
+            overflow-x: visible;
+        }
+        .school-header, .card-details {
+            border: none;
+        }
+        .profile-picture img {
+            border: none;
+            box-shadow: none;
+        }
+        .comments span {
+            color: #000 !important;
+            text-decoration: underline;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 15px;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+
+        .form-control, .student-filter {
+            font-size: 14px;
+            padding: 10px 18px;
+            background-position: right 12px center;
+            background-size: 14px;
+        }
+
+        .section-title {
+            font-size: 20px;
+        }
+
+        .result-table th, .result-table td {
+            font-size: 14px;
+            padding: 10px 12px;
+        }
+
+        .school-header h1 {
+            font-size: 20px;
+        }
+
+        .school-header h2, .school-header h3 {
+            font-size: 16px;
+        }
+
+        .school-header h4 {
+            font-size: 14px;
+        }
+
+        .school-header p {
+            font-size: 12px;
+        }
+
+        .profile-picture img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .closing-dates, .grades, .performance, .comments p {
+            font-size: 14px;
+        }
+
+        .card-separator {
+            margin: 20px 0;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .result-table {
+            font-size: 12px;
+        }
+
+        .result-table th, .result-table td {
+            padding: 8px 10px;
+        }
+
+        .school-header h1 {
+            font-size: 18px;
+        }
+
+        .school-header h2, .school-header h3 {
+            font-size: 14px;
+        }
+
+        .school-header h4 {
+            font-size: 12px;
+        }
+
+        .profile-picture img {
+            width: 80px;
+            height: 80px;
+        }
+    }
+</style>
+
+{% endblock %}

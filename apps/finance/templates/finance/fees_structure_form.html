@@ -1,0 +1,145 @@
+{% extends base_template %}
+
+{% block title %}{% if is_update %}Update Fees Structure{% else %}Create Fees Structure{% endif %}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.location.href='{% url 'fees_structure_list' %}'" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">{% if is_update %}Update Fees Structure{% else %}Create Fees Structure{% endif %}</h3>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-container" style="width: 100%; max-width: 600px; margin: 0 auto; padding: 0 15px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.class_level.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.class_level.label }}</label>
+                {{ form.class_level }}
+                {% if form.class_level.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.class_level.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.amount.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.amount.label }}</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.amount.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="{{ form.description.id_for_label }}" style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div style="color: #dc2626; font-size: 12px;">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="iphone-button" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 60px; background: linear-gradient(45deg, #00c6ff, #0072ff); border-radius: 40px; color: #fff; font-size: 18px; font-weight: 600; border: none; cursor: pointer; transition: transform 0.3s ease;">
+                    {% if is_update %}✏️ Update{% else %}➕ Create{% endif %}
+                </button>
+                <a href="{% url 'fees_structure_list' %}" class="iphone-button" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 60px; background: linear-gradient(45deg, #6b7280, #9ca3af); border-radius: 40px; color: #fff; font-size: 18px; font-weight: 600; text-decoration: none; transition: transform 0.3s ease;">
+                    ❌ Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background: #f8f9fa;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 40px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #3a86ff;
+        box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+    }
+    .form-control::placeholder {
+        color: #6b7280;
+        opacity: 1;
+    }
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+        padding: 15px 20px;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 60px;
+        border-radius: 40px;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        text-decoration: none;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .form-container {
+            padding: 0 10px;
+        }
+        .form-control {
+            font-size: 14px;
+            padding: 10px 15px;
+        }
+        textarea.form-control {
+            min-height: 100px;
+            padding: 12px 15px;
+        }
+        .iphone-button {
+            min-height: 50px;
+            font-size: 16px;
+        }
+        .back-btn {
+            font-size: 20px;
+        }
+        div[style*="flex"] {
+            gap: 5px;
+        }
+    }
+</style>
+{% endblock content %}

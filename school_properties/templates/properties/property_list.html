@@ -1,0 +1,235 @@
+{% extends base_template %}
+
+{% block content %}
+<div class="container">
+    <!-- Add New Property Button -->
+    <a href="{% url 'add_property' %}" class="add-button">+ New Property</a>
+
+    <h1 class="title">Property List</h1>
+
+    <!-- Search Input -->
+    <input type="text" id="searchInput" placeholder="Search by name" class="search-input">
+
+    <!-- Table with Horizontal Scroll -->
+    <div class="table-wrapper">
+        <table class="property-table">
+            <thead>
+                <tr>
+                    <th>S/N</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Description</th>
+                    <th>Date Created</th>
+                    <th>Date Updated</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="propertyTableBody">
+                {% for property in properties %}
+                <tr>
+                    <td>{{ forloop.counter }}</td> <!-- Serial number column -->
+                    <td>{{ property.name }}</td>
+                    <td>{{ property.quantity }}</td>
+                    <td>{{ property.description }}</td>
+                    <td>{{ property.date_created|date:"Y-m-d H:i" }}</td> <!-- Format date as YYYY-MM-DD HH:MM -->
+                    <td>{{ property.date_updated|date:"Y-m-d H:i" }}</td> <!-- Format date as YYYY-MM-DD HH:MM -->
+                    <td>
+                        <a href="{% url 'property_detail' pk=property.pk %}" class="action-button view-button">
+                            <i class="fa fa-eye"></i> <!-- Eye icon -->
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'update_property' pk=property.pk %}" class="action-button edit-button">
+                            <i class="fa fa-edit"></i> <!-- Update (edit) icon -->
+                        </a>
+                        <form action="{% url 'delete_property' pk=property.pk %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="action-button delete-button">
+                                <i class="fa fa-trash"></i> <!-- Delete (trash) icon -->
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr id="totalRow" style="display: none;">
+                    <td style="color: brown;">Total Quantity:</td>
+                    <td id="totalQuantity" style="color: blue;"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('searchInput');
+    const propertyTableBody = document.getElementById('propertyTableBody');
+    const totalRow = document.getElementById('totalRow');
+    const totalQuantity = document.getElementById('totalQuantity');
+
+    const calculateTotalQuantity = () => {
+        const visibleProperties = propertyTableBody.querySelectorAll('tr:not([style*="display: none"])');
+        let total = 0;
+
+        for (let property of visibleProperties) {
+            const quantity = parseInt(property.getElementsByTagName('td')[2].innerText);
+            if (!isNaN(quantity)) {
+                total += quantity;
+            }
+        }
+
+        totalQuantity.innerText = total;
+        if (total > 0) {
+            totalRow.style.display = '';
+        } else {
+            totalRow.style.display = 'none';
+        }
+    };
+
+    searchInput.addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const properties = propertyTableBody.getElementsByTagName('tr');
+
+        for (let property of properties) {
+            const propertyName = property.getElementsByTagName('td')[1].innerText.toLowerCase();
+            if (propertyName.includes(searchQuery)) {
+                property.style.display = '';
+            } else {
+                property.style.display = 'none';
+            }
+        }
+
+        calculateTotalQuantity();
+    });
+
+    calculateTotalQuantity();
+});
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+    .title {
+        color: deepskyblue;
+        font-size: 2rem;
+        margin: 0 0 15px 0;
+    }
+    .add-button {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 50px;
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        margin-bottom: 15px;
+    }
+    .add-button:hover {
+        background-color: #218838;
+    }
+    .search-input {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 50px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        box-sizing: border-box;
+        margin-bottom: 15px;
+    }
+    .search-input:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .property-table {
+        width: 100%;
+        min-width: 800px; /* Ensures table has enough width for all columns */
+        border-collapse: collapse;
+    }
+    .property-table th,
+    .property-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .action-button {
+        display: inline-block;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .view-button {
+        background-color: #007bff;
+    }
+    .view-button:hover {
+        background-color: #0056b3;
+    }
+    .edit-button {
+        background-color: #ffc107;
+        margin-right: 8px;
+    }
+    .edit-button:hover {
+        background-color: #e0a800;
+    }
+    .delete-button {
+        background-color: #dc3545;
+    }
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+    @media (max-width: 576px) {
+        .container {
+            padding: 10px;
+        }
+        .title {
+            font-size: 1.5rem;
+        }
+        .add-button,
+        .search-input {
+            padding: 12px;
+            font-size: 14px;
+        }
+        .property-table th,
+        .property-table td {
+            padding: 8px;
+            font-size: 14px;
+        }
+        .action-button {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+    }
+</style>
+{% endblock content %}

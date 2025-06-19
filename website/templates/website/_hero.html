@@ -1,0 +1,235 @@
+{% load static %}
+<section class="hero">
+    <div class="hero-slideshow">
+        <img src="{% static 'images/DSC_0115.JPG' %}" alt="Slide 1" class="hero-slide active">
+        <img src="{% static 'images/DSC_0116.JPG' %}" alt="Slide 2" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0117.JPG' %}" alt="Slide 3" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0118.JPG' %}" alt="Slide 4" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0119.JPG' %}" alt="Slide 5" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0120.JPG' %}" alt="Slide 6" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0121.JPG' %}" alt="Slide 7" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0123.JPG' %}" alt="Slide 8" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0124.JPG' %}" alt="Slide 9" class="hero-slide" loading="lazy">
+        <img src="{% static 'images/DSC_0125.JPG' %}" alt="Slide 10" class="hero-slide" loading="lazy">
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-left">
+            <h1 class="hero-title">Welcome to Manus Dei Secondary School, we are so pleased to be with you, we are committed to shaping the future generation through education, innovation, social, and religious matters.</h1>
+        </div>
+        <div class="hero-right">
+            <div class="why-choose-us">
+                <h2 class="hero-subtitle">Why Choose Us</h2>
+                <ul class="hero-stats">
+                    <li><span>98%</span> Graduate with highest grades</li>
+                    <li><span>45+</span> International partners</li>
+                    <li><span>10+</span> Taught subjects</li>
+                    <li><span>98%</span> Excellent learning and living environment</li>
+                    <li><span>99%</span> Digital school</li>
+                    <li><span>15+</span> Years of teaching experience</li>
+                    <li><span>99%</span> Cooperative staff</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="hero-footer">
+        <p>Explore More Information Below</p>
+    </div>
+</section>
+<style>
+.hero {
+    position: relative;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+.hero-slideshow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+.hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.hero-slide.active {
+    opacity: 1;
+}
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+.hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 80px 60px 40px 60px; /* Added top padding for desktop */
+    flex-grow: 1;
+}
+.hero-left {
+    max-width: 50%;
+}
+.hero-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 2rem;
+    color: #FFFFFF;
+    line-height: 1.4;
+    margin: 0;
+    opacity: 0;
+    transform: translateX(-50px);
+    animation: slideInLeft 1.5s ease-out 0.5s forwards;
+}
+.hero-right {
+    max-width: 40%;
+    display: flex;
+    justify-content: flex-end;
+}
+.why-choose-us {
+    border: 1px solid #FFFFFF;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    max-width: 300px;
+}
+.hero-subtitle {
+    font-size: 1.8rem;
+    color: #FFFFFF;
+    margin: 0 0 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s ease-out 1s forwards;
+}
+.hero-stats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.hero-stats li {
+    font-size: 1.1rem;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+}
+.hero-stats li span {
+    font-weight: bold;
+    color: #F28C38;
+    margin-right: 8px;
+}
+.hero-stats li:not(:last-child)::after {
+    content: '';
+    display: block;
+    width: 80%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 10px auto;
+}
+.hero-stats li:nth-child(1) { animation: fadeUp 1s ease-out 1.2s forwards; }
+.hero-stats li:nth-child(2) { animation: fadeUp 1s ease-out 1.4s forwards; }
+.hero-stats li:nth-child(3) { animation: fadeUp 1s ease-out 1.6s forwards; }
+.hero-stats li:nth-child(4) { animation: fadeUp 1s ease-out 1.8s forwards; }
+.hero-stats li:nth-child(5) { animation: fadeUp 1s ease-out 2.0s forwards; }
+.hero-stats li:nth-child(6) { animation: fadeUp 1s ease-out 2.2s forwards; }
+.hero-stats li:nth-child(7) { animation: fadeUp 1s ease-out 2.4s forwards; }
+.hero-footer {
+    background: #007AFF;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 1.2rem;
+    z-index: 3;
+    position: relative;
+}
+@keyframes slideInLeft {
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        padding: 80px 20px 20px 20px; /* Preserve mobile top padding */
+        text-align: center;
+    }
+    .hero-left, .hero-right {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+    .hero-right {
+        justify-content: center;
+    }
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    .hero-subtitle {
+        font-size: 1.4rem;
+    }
+    .hero-stats li {
+        font-size: 1rem;
+    }
+    .why-choose-us {
+        padding: 20px;
+        max-width: 100%;
+    }
+    .hero-footer {
+        font-size: 1rem;
+        padding: 10px;
+    }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Preload images
+    const imageUrls = [
+        '{% static "images/DSC_0115.JPG" %}',
+        '{% static "images/DSC_0116.JPG" %}',
+        '{% static "images/DSC_0117.JPG" %}',
+        '{% static "images/DSC_0118.JPG" %}',
+        '{% static "images/DSC_0119.JPG" %}',
+        '{% static "images/DSC_0120.JPG" %}',
+        '{% static "images/DSC_0121.JPG" %}',
+        '{% static "images/DSC_0123.JPG" %}',
+        '{% static "images/DSC_0124.JPG" %}',
+        '{% static "images/DSC_0125.JPG" %}'
+    ];
+    imageUrls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+    });
+
+    // Slideshow logic
+    const slides = document.querySelectorAll('.hero-slide');
+    let currentSlide = 0;
+    function showNextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+    setInterval(showNextSlide, 3000);
+});
+</script>

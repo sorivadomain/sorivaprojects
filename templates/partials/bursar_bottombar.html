@@ -1,0 +1,281 @@
+<!-- bottombar.html -->
+{% load static %}
+
+<style>
+  .bottombar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background: linear-gradient(45deg, #001f3f, #00509d);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    box-sizing: border-box;
+  }
+  .bottombar-left {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .bottombar-right {
+    display: flex;
+    align-items: center;
+  }
+  .dark-mode-toggle {
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+  .press-icon {
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  /* Container for floating buttons */
+  .floating-menu {
+    position: fixed;
+    bottom: 60px; /* Just above the bottombar */
+    right: 20px;
+    z-index: 998; /* Below bottombar but above other content */
+    max-height: calc(100vh - 120px); /* Ensure it doesn't exceed viewport height minus bottombar and some padding */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center buttons horizontally */
+  }
+  /* Styles for buttons */
+  .bottombar-button {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center icon and label */
+    width: 120px; /* Smaller width for round buttons */
+    height: 36px; /* Smaller height for round buttons */
+    padding: 0; /* Remove padding to fit round shape */
+    margin-bottom: 6px;
+    border-radius: 18px; /* Fully round edges (height/2) */
+    text-decoration: none;
+  }
+  .button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .menu-icon-emoji {
+    font-size: 16px;
+    margin-right: 6px;
+  }
+  .button-label {
+    font-size: 12px; /* Smaller font size */
+    font-weight: 500;
+  }
+  /* Gradient backgrounds */
+  .bg-analysis { background: linear-gradient(45deg, #00f0ff, #007bff); color: #fff; }
+  .bg-settings { background: linear-gradient(45deg, #00ff99, #007bff); color: #fff; }
+  .bg-finance { background: linear-gradient(45deg, #9b59b6, #6e00ff); color: #fff; }
+  .bg-result { background: linear-gradient(45deg, #ff33cc, #660099); color: #fff; }
+  .bg-staffs { background: linear-gradient(45deg, #00e6b8, #0099cc); color: #fff; }
+  .bg-students { background: linear-gradient(45deg, #ff6666, #ff3399); color: #fff; }
+  .bg-attendance { background: linear-gradient(45deg, #00ccff, #ff9900); color: #fff; }
+  .bg-bursor { background: linear-gradient(45deg, #ff7733, #ff4d4d); color: #fff; }
+  .bg-events { background: linear-gradient(45deg, #00ccff, #0066cc); color: #fff; }
+  .bg-library { background: linear-gradient(45deg, #6633ff, #3399ff); color: #fff; }
+  .bg-meetings { background: linear-gradient(45deg, #ff3366, #cc33ff); color: #fff; }
+  .bg-sms { background: linear-gradient(45deg, #ffcc33, #ff6666); color: #fff; }
+  .bg-public-post { background: linear-gradient(45deg, #33ccff, #66cc99); color: #fff; }
+  .bg-details { background: linear-gradient(45deg, #ff99cc, #cc66ff); color: #fff; }
+  .bg-home { background: linear-gradient(45deg, #4CAF50, #2E7D32); color: #fff; }
+  .bg-update-profile { background: linear-gradient(45deg, #3399ff, #66ccff); color: #fff; } /* New gradient for Update Profile */
+  .bg-logout { background: linear-gradient(45deg, #ff4444, #cc0000); color: #fff; } /* Red gradient for Logout button */
+  /* Hover effect for buttons */
+  .bottombar-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  /* Custom scrollbar for floating menu */
+  .floating-menu::-webkit-scrollbar {
+    width: 6px;
+  }
+  .floating-menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .floating-menu::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  .floating-menu::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  /* Animation for the floating menu */
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  .floating-menu.show {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+</style>
+
+<div class="bottombar-container">
+  <div class="bottombar-left">
+    © <span id="currentYear"></span> Manus Dei School Management
+  </div>
+  <div class="bottombar-right">
+    <span class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">🌙</span>
+    <span class="press-icon" title="Show Menu" onclick="toggleBottomMenu()">⬆️</span>
+
+    <div class="floating-menu" id="bottomMenuDropdown" style="display: none;">
+      <!-- Home button (accessible by anybody) -->
+      <a href="{% url 'home' %}" class="bottombar-button bg-home">
+        <div class="button-content">
+          <span class="menu-icon-emoji">🏠</span>
+          <span class="button-label">Bursar home</span>
+        </div>
+      </a>
+
+      <!-- Details button (accessible by anybody) -->
+      <a href="{% url 'user-details' %}" class="bottombar-button bg-details">
+        <div class="button-content">
+          <span class="menu-icon-emoji">ℹ️</span>
+          <span class="button-label">View your details</span>
+        </div>
+      </a>
+
+      <!-- Settings -->
+      <a href="{% url 'settings_home' %}" class="bottombar-button bg-settings">
+        <div class="button-content">
+          <span class="menu-icon-emoji">⚙️</span>
+          <span class="button-label">Bursar settings</span>
+        </div>
+      </a>
+
+      <!-- Finance -->
+      <a href="{% url 'finance-home' %}" class="bottombar-button bg-finance">
+        <div class="button-content">
+          <span class="menu-icon-emoji">💰</span>
+          <span class="button-label">Finance</span>
+        </div>
+      </a>
+
+      <!-- Academics -->
+      <a href="{% url 'academics_home' %}" class="bottombar-button bg-result">
+        <div class="button-content">
+          <span class="menu-icon-emoji">📈</span>
+          <span class="button-label">Academics</span>
+        </div>
+      </a>
+
+      <!-- Attendance -->
+      <a href="{% url 'attendance_home' %}" class="bottombar-button bg-attendance">
+        <div class="button-content">
+          <span class="menu-icon-emoji">✅</span>
+          <span class="button-label">Attendance</span>
+        </div>
+      </a>
+
+
+      <!-- Events -->
+      <a href="{% url 'events-home' %}" class="bottombar-button bg-events">
+        <div class="button-content">
+          <span class="menu-icon-emoji">🎉</span>
+          <span class="button-label">Events</span>
+        </div>
+      </a>
+
+      <!-- Library -->
+      <a href="{% url 'library_home' %}" class="bottombar-button bg-library">
+        <div class="button-content">
+          <span class="menu-icon-emoji">📚</span>
+          <span class="button-label">Library</span>
+        </div>
+      </a>
+
+      <!-- SMS -->
+      <a href="{% url 'sms_home' %}" class="bottombar-button bg-sms">
+        <div class="button-content">
+          <span class="menu-icon-emoji">📱</span>
+          <span class="button-label">SMS</span>
+        </div>
+      </a>
+
+      <!-- Public Comment -->
+      <a href="{% url 'chat' %}" class="bottombar-button bg-public-post">
+        <div class="button-content">
+          <span class="menu-icon-emoji">📢✍️</span>
+          <span class="button-label">Comment</span>
+        </div>
+      </a>
+
+      <!-- Update Profile button -->
+      <a href="{% url 'update_profiles' %}" class="bottombar-button bg-update-profile">
+        <div class="button-content">
+          <span class="menu-icon-emoji">🧑‍💼</span>
+          <span class="button-label">Update Profile</span>
+        </div>
+      </a>
+
+      <!-- Logout button -->
+      <a href="{% url 'custom_login' %}" class="bottombar-button bg-logout">
+        <div class="button-content">
+          <span class="menu-icon-emoji">🚪</span>
+          <span class="button-label">Logout</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+  function toggleBottomMenu() {
+    const menu = document.getElementById('bottomMenuDropdown');
+    const pressIcon = document.querySelector('.press-icon');
+    if (menu.style.display === 'block') {
+      menu.style.display = 'none';
+      pressIcon.textContent = '⬆️'; // Arrow up when menu is hidden
+    } else {
+      menu.style.display = 'block';
+      pressIcon.textContent = '⬇️'; // Arrow down when menu is visible
+      menu.classList.add('show'); // Trigger the animation
+    }
+  }
+
+  document.addEventListener('click', function(event) {
+    const menu = document.getElementById('bottomMenuDropdown');
+    const pressIcon = document.querySelector('.press-icon');
+    if (!pressIcon.contains(event.target) && !menu.contains(event.target)) {
+      menu.style.display = 'none';
+      pressIcon.textContent = '⬆️'; // Reset to arrow up when clicked outside
+    }
+  });
+
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const bodyElement = document.body;
+
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    bodyElement.classList.add('dark-mode');
+    darkModeToggle.textContent = '☀️';
+  }
+
+  darkModeToggle.addEventListener('click', function() {
+    bodyElement.classList.toggle('dark-mode');
+    if (bodyElement.classList.contains('dark-mode')) {
+      localStorage.setItem('theme', 'dark');
+      darkModeToggle.textContent = '☀️';
+    } else {
+      localStorage.setItem('theme', 'light');
+      darkModeToggle.textContent = '🌙';
+    }
+  });
+</script>

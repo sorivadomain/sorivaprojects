@@ -1,0 +1,118 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; width: 100%; margin: 0; display: flex; align-items: center; justify-content: center;">
+    <span class="back-button" onclick="window.history.back()">🔙</span>
+    <h3>Delete Subject</h3>
+</div>
+
+<div class="form-container">
+    <form method="post">
+        {% csrf_token %}
+        <div class="confirm-message">
+            Are you sure you want to delete the subject "{{ subject.name }}"?
+        </div>
+        <div class="btn-container">
+            <button type="submit" class="btn-confirm">Yes, Delete</button>
+            <a href="{% url 'subject_list' %}" class="btn-cancel">No, Cancel</a>
+        </div>
+    </form>
+
+    <div class="back-link">
+        <a href="{% url 'subject_list' %}">Back to Subject List</a>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        width: 100vw;
+        height: 100vh;
+        overflow-x: hidden;
+    }
+    .header {
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        width: 100%;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    .back-button {
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 24px;
+    }
+    .form-container {
+        width: 100%;
+        padding: 20px;
+        margin: 0;
+    }
+    .confirm-message {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .btn-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn-confirm, .btn-cancel {
+        flex: 1;
+        padding: 15px;
+        border-radius: 25px;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        border: none;
+        transition: background 0.3s ease;
+    }
+    .btn-confirm {
+        background: linear-gradient(45deg, #dc3545, #ff6b6b);
+        color: #fff;
+    }
+    .btn-confirm:hover {
+        background: linear-gradient(45deg, #c82333, #e46060);
+    }
+    .btn-cancel {
+        background: linear-gradient(45deg, #6c757d, #adb5bd);
+        color: #fff;
+    }
+    .btn-cancel:hover {
+        background: linear-gradient(45deg, #5a6268, #9ea7af);
+    }
+    .back-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .back-link a {
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .back-link a:hover {
+        text-decoration: underline;
+    }
+    body.dark-mode .confirm-message {
+        color: #fff;
+    }
+    body.dark-mode .back-link a {
+        color: #66b0ff;
+    }
+</style>
+{% endblock content %}

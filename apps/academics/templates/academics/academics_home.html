@@ -1,0 +1,341 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Debug visible_buttons -->
+<div style="display: none;">
+  Visible Buttons: {{ visible_buttons|join:", " }}
+</div>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">{{ page_title }}</h3>
+        </div>
+    </div>
+
+    <!-- BUTTONS CONTAINER -->
+    <div class="buttons-container" style="width: 100%; margin: 0; padding: 0;">
+        {% if 'create_grading' in visible_buttons %}
+        <!-- 1) Create/Update Grading System -->
+        <a href="{% url 'grading_system_create_update' %}" class="iphone-button bg-create-grading" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create/Update Grades</h3>
+                <p class="desc-info">Set or modify grading criteria</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create/update</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'manage_grading' in visible_buttons %}
+        <!-- 2) Manage Grading System -->
+        <a href="{% url 'grading_system_list' %}" class="iphone-button bg-manage-grading" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Manage Grading System</h3>
+                <p class="desc-info">View or edit grading rules</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>🔧</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to manage</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'create_exam' in visible_buttons %}
+        <!-- 3) Create Exam -->
+        <a href="{% url 'exam_create_update' %}" class="iphone-button bg-create-exam" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Exam</h3>
+                <p class="desc-info">Add a new exam</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📝</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'manage_exams' in visible_buttons %}
+        <!-- 4) Manage Exams -->
+        <a href="{% url 'exam_list' %}" class="iphone-button bg-manage-exams" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Manage Exams</h3>
+                <p class="desc-info">View or edit exams</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📋</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to manage</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'create_result' in visible_buttons %}
+        <!-- 5) Create Result -->
+        <a href="{% url 'result_create_update' %}" class="iphone-button bg-create-result" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Result</h3>
+                <p class="desc-info">Add new student results</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📈</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'create_class_result' in visible_buttons %}
+        <!-- 5a) Create/Update Your Class Results -->
+        <a href="{% url 'result_entry' %}" class="iphone-button bg-create-result" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create/Update Your Class Results</h3>
+                <p class="desc-info">Add or modify results for your class</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📈</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create/update</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'manage_results' in visible_buttons %}
+        <!-- 6) Manage Results -->
+        <a href="{% url 'class_selection' %}" class="iphone-button bg-manage-results" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Manage Results</h3>
+                <p class="desc-info">View or edit results</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to manage</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'update_results' in visible_buttons %}
+        <!-- 7) Update Results -->
+        <a href="{% url 'update_results' %}" class="iphone-button bg-update-results" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Update Results</h3>
+                <p class="desc-info">Modify existing student results</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📝</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to update</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'combine_results' in visible_buttons %}
+        <!-- 8) Combine Results -->
+        <a href="{% url 'combine_results' %}" class="iphone-button bg-combine-results" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Combine Results</h3>
+                <p class="desc-info">Merge student results</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📚</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to combine</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'delete_results' in visible_buttons %}
+        <!-- 9) Delete Results -->
+        <a href="{% url 'delete_results' %}" class="iphone-button bg-delete-results" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Delete Results</h3>
+                <p class="desc-info">Remove student results</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>🗑️</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to delete</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'academic_analysis' in visible_buttons %}
+        <!-- 10) Academic Analysis -->
+        <a href="{% url 'academics_analysis' %}" class="iphone-button bg-academic-analysis" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Academic Analysis</h3>
+                <p class="desc-info">View academic performance insights</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📉</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to analyze</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        {% if 'academics_report' in visible_buttons %}
+        <!-- 11) Academics Report -->
+        <a href="{% url 'academic-report' %}" class="iphone-button bg-academics-report" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Academics Report</h3>
+                <p class="desc-info">View comprehensive academic reports</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📑</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 80px;
+        margin-bottom: 10px;
+        border-radius: 40px;
+        text-decoration: none;
+        color: #fff;
+        transition: transform 0.3s ease;
+        padding: 0 20px;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+    }
+    .button-left, .button-center, .button-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .button-left {
+        text-align: left;
+        flex: 1;
+        margin-right: 10px;
+    }
+    .button-center {
+        text-align: center;
+        flex: 1;
+    }
+    .button-right {
+        text-align: right;
+        flex: 1;
+        margin-left: 10px;
+    }
+    .button-left h3, .button-center h3, .button-right h3 {
+        margin: 3px 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .desc-info {
+        margin: 2px 0;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+    .bg-create-grading {
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+    }
+    .bg-manage-grading {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    }
+    .bg-create-exam {
+        background: linear-gradient(45deg, #00f260, #0575e6);
+    }
+    .bg-manage-exams {
+        background: linear-gradient(45deg, #f7971e, #ffd200);
+    }
+    .bg-create-result {
+        background: linear-gradient(45deg, #8e2de2, #4a00e0);
+    }
+    .bg-manage-results {
+        background: linear-gradient(45deg, #ff00cc, #333399);
+    }
+    .bg-update-results {
+        background: linear-gradient(45deg, #ff9800, #ff5722);
+    }
+    .bg-combine-results {
+        background: linear-gradient(45deg, #ffeb3b, #f44336);
+    }
+    .bg-delete-results {
+        background: linear-gradient(45deg, #c0392b, #8e0000);
+    }
+    .bg-academic-analysis {
+        background: linear-gradient(45deg, #ff6f61, #6b5b95);
+    }
+    .bg-academics-report {
+        background: linear-gradient(45deg, #4b0082, #00b7eb);
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .iphone-button {
+            min-height: 70px;
+            padding: 0 15px;
+        }
+        .button-left h3, .button-center h3, .button-right h3 {
+            font-size: 16px;
+        }
+        .desc-info {
+            font-size: 12px;
+        }
+        .back-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Our School</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #map-container {
+            position: relative;
+            height: 100vh;
+        }
+
+        #map {
+            height: 100%;
+        }
+
+        #map-controls {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 3px;
+            max-width: 100%;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+
+        #map-controls button, #map-controls a button {
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #map-controls a {
+            text-decoration: none;
+        }
+
+        #details-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        #details-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .details-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            text-align: center;
+        }
+
+        #close-details-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff3b30;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .details-container h1 {
+            font-size: 24px;
+            color: #007aff;
+            margin: 0 0 10px;
+        }
+
+        .details-container p.welcome-text {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .timetable {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .timetable h2 {
+            font-size: 18px;
+            color: #007aff;
+            margin-bottom: 10px;
+        }
+
+        .timetable table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .timetable th, .timetable td {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .timetable th {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .timetable .closed {
+            color: #ff3b30;
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 414px) {
+            #map-controls button, #map-controls a button {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+            .details-container h1 {
+                font-size: 20px;
+            }
+            .details-container p.welcome-text {
+                font-size: 14px;
+            }
+            .timetable table {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            #map-controls button, #map-controls a button {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+            .details-container {
+                width: 95%;
+                padding: 15px;
+            }
+            .details-container h1 {
+                font-size: 18px;
+            }
+            .timetable table {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map-controls">
+            <button id="current-location-btn" title="Show Current Location">📍</button>
+            <a href="{% url 'custom_login' %}">
+                <button id="login-btn" title="Login">🔑</button>
+            </a>
+            <button id="details-btn" title="View Details">ℹ️</button>
+        </div>
+        <div id="map"></div>
+    </div>
+    <div id="details-overlay" class="hidden">
+        <div class="details-container">
+            <button id="close-details-btn" title="Close">✖</button>
+            <h1>{{ location_data.school_name|default:"Our School" }}</h1>
+            <p class="welcome-text">
+                Welcome to our vibrant learning community! At {{ location_data.school_name|default:"our school" }}, we inspire young minds to soar with creativity and knowledge. Join us on a journey of discovery, where every day brings new opportunities to grow and shine!
+            </p>
+            <div class="timetable">
+                <h2>School Timetable</h2>
+                <table>
+                    <tr>
+                        <th>Day</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                    {% for day in schooldays_data %}
+                    <tr>
+                        <td>{{ day.day|capfirst }}</td>
+                        {% if day.status %}
+                        <td colspan="2" class="closed">{{ day.status }}</td>
+                        {% else %}
+                        <td>{{ day.start_time }}</td>
+                        <td>{{ day.end_time }}</td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">No timetable available</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            let schoolMarker = null;
+            let currentLocationMarker = null;
+            let polyline = null;
+            let distanceDisplay = null;
+            let movingDot = null;
+
+            const initialLocation = {% if location_data is None %}null{% else %}{{ location_data|safe }}{% endif %};
+            const schooldaysData = {{ schooldays_data|safe }};
+            console.log('Initial data:', { initialLocation, schooldaysData });
+
+            if (initialLocation) {
+                const { latitude, longitude, school_name } = initialLocation;
+                map.setView([latitude, longitude], 15);
+                schoolMarker = L.marker([latitude, longitude], {
+                    icon: L.icon({
+                        iconUrl: '/static/images/school.png',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -32]
+                    })
+                }).addTo(map).bindPopup(`<b>${school_name || 'Unnamed School'}</b>`).openPopup();
+                console.log('School marker added:', { latitude, longitude, school_name });
+            } else {
+                console.log('No location data, map centered at [0, 0]');
+            }
+
+            const currentLocationBtn = document.getElementById('current-location-btn');
+            const detailsBtn = document.getElementById('details-btn');
+            const detailsOverlay = document.getElementById('details-overlay');
+            const closeDetailsBtn = document.getElementById('close-details-btn');
+
+            // Animate moving dot along polyline
+            function animateDot(start, end, duration = 5000) {
+                if (movingDot) map.removeLayer(movingDot);
+                movingDot = L.circleMarker(start, {
+                    radius: 8,
+                    color: '#ff3b30',
+                    fillColor: '#ff3b30',
+                    fillOpacity: 1
+                }).addTo(map);
+
+                let startTime = null;
+                function animate(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const progress = (timestamp - startTime) / duration;
+                    if (progress < 1) {
+                        const lat = start[0] + (end[0] - start[0]) * progress;
+                        const lng = start[1] + (end[1] - start[1]) * progress;
+                        movingDot.setLatLng([lat, lng]);
+                        requestAnimationFrame(animate);
+                    } else {
+                        movingDot.setLatLng(end);
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+
+            currentLocationBtn.addEventListener('click', () => {
+                if (!initialLocation) {
+                    alert('No school location set');
+                    return;
+                }
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        console.log('Current location:', { latitude, longitude });
+
+                        // Calculate distance using Haversine formula
+                        function haversine(lat1, lon1, lat2, lon2) {
+                            const R = 6371; // Earth's radius in km
+                            const dLat = (lat2 - lat1) * Math.PI / 180;
+                            const dLon = (lon2 - lon1) * Math.PI / 180;
+                            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                                      Math.sin(dLon/2) * Math.sin(dLon/2);
+                            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                            return R * c;
+                        }
+
+                        const schoolLat = parseFloat(initialLocation.latitude);
+                        const schoolLon = parseFloat(initialLocation.longitude);
+                        const distance = haversine(latitude, longitude, schoolLat, schoolLon).toFixed(2);
+                        console.log('Distance:', distance, 'km');
+
+                        // Clear previous layers
+                        if (currentLocationMarker) map.removeLayer(currentLocationMarker);
+                        if (polyline) map.removeLayer(polyline);
+                        if (distanceDisplay) map.removeLayer(distanceDisplay);
+
+                        // Add current location marker
+                        currentLocationMarker = L.marker([latitude, longitude]).addTo(map)
+                            .bindPopup('Your Location').openPopup();
+
+                        // Draw polyline
+                        polyline = L.polyline([
+                            [latitude, longitude],
+                            [schoolLat, schoolLon]
+                        ], { color: 'blue' }).addTo(map);
+
+                        // Display distance
+                        distanceDisplay = L.popup()
+                            .setLatLng([(latitude + schoolLat) / 2, (longitude + schoolLon) / 2])
+                            .setContent(`Distance: ${distance} km`)
+                            .openOn(map);
+
+                        // Animate dot from current location to school
+                        animateDot([latitude, longitude], [schoolLat, schoolLon]);
+
+                        // Fit map to bounds
+                        map.fitBounds(polyline.getBounds());
+                        console.log('Geolocation displayed, distance:', distance);
+                    }, () => {
+                        console.error('Geolocation access denied');
+                        alert('Unable to retrieve your location');
+                    });
+                } else {
+                    console.error('Geolocation not supported');
+                    alert('Geolocation not supported');
+                }
+            });
+
+            detailsBtn.addEventListener('click', () => {
+                detailsOverlay.classList.remove('hidden');
+                console.log('Details overlay opened');
+            });
+
+            closeDetailsBtn.addEventListener('click', () => {
+                detailsOverlay.classList.add('hidden');
+                console.log('Details overlay closed');
+            });
+        });
+    </script>
+</body>
+</html>

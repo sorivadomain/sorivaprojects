@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Finance Analysis</title>
+</head>
+<body>
+    <h1>Finance Analysis</h1>
+
+    <h2>Expenditures Percentages by Category</h2>
+    <img src="data:image/png;base64,{{ graph1 }}" alt="Expenditures Percentages by Category">
+
+    <h2>Progress of Receipts, Uniforms, Salaries, and Expenditures</h2>
+    <img src="data:image/png;base64,{{ graph2 }}" alt="Progress of Receipts, Uniforms, Salaries, and Expenditures">
+
+    <h2>Advice</h2>
+    <p>{{ advice }}</p>
+</body>
+</html>
+{% endblock %}

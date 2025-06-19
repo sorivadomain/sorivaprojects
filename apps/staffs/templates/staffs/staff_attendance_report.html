@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        h2 {
+            color: #f7f9fc;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            animation: fadeInLeft 1s ease-in-out;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeInUp 1s ease-in-out;
+        }
+
+        .attendance-table th, .attendance-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .attendance-table th {
+            background-color: #007bff;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .attendance-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .attendance-table tr:hover td {
+            background-color: #e0eaff;
+        }
+
+        .blue-ticks {
+            color: #007bff;
+            font-size: 1.2rem;
+            animation: pulse 1s infinite;
+        }
+
+        .red-ticks {
+            color: #dc3545;
+            font-size: 1.2rem;
+            animation: pulse 1s infinite;
+        }
+
+        .absent-circle {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        td {
+            color: #4a4a4a;
+        }
+
+        td:first-child {
+            font-weight: bold;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Staff Attendance Report</h1>
+
+    {% for date, records in grouped_attendance.items %}
+    <h2>{{ date }}</h2>
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Staff Name</th>
+                <th>Present/Absent</th>
+                <th>Time of Arrival</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    {% if record.user.teacheruser %}
+                        {{ record.user.teacheruser.staff.firstname }} {{ record.user.teacheruser.staff.middle_name }} {{ record.user.teacheruser.staff.surname }}
+                    {% elif record.user.bursoruser %}
+                        {{ record.user.bursoruser.staff.firstname }} {{ record.user.bursoruser.staff.middle_name }} {{ record.user.bursoruser.staff.surname }}
+                    {% elif record.user.secretaryuser %}
+                        {{ record.user.secretaryuser.staff.firstname }} {{ record.user.secretaryuser.staff.middle_name }} {{ record.user.secretaryuser.staff.surname }}
+                    {% elif record.user.academicuser %}
+                        {{ record.user.academicuser.staff.firstname }} {{ record.user.academicuser.staff.middle_name }} {{ record.user.academicuser.staff.surname }}
+                    {% else %}
+                        Unknown Staff
+                    {% endif %}
+                </td>
+                <td>
+                    {% if record.is_present %}
+                        <span class="{{ record.tick_color }}">✔✔</span>
+                    {% else %}
+                        <span class="absent-circle">A</span> Absent
+                    {% endif %}
+                </td>
+                <td>{{ record.time_of_arrival|date:"H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</body>
+</html>
+{% endblock %}

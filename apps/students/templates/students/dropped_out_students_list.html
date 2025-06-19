@@ -1,0 +1,425 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">{{ title }}</h3>
+            <div class="header-actions" style="display: flex; align-items: center;">
+                <a href="{% url 'student_create' %}" class="add-btn" style="font-size: 20px; color: #fff; background: linear-gradient(45deg, #00c6ff, #0072ff); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; text-decoration: none; margin-right: 10px; transition: transform 0.3s ease;">➕</a>
+                <a href="{% url 'students_home' %}" class="home-btn" style="font-size: 24px; color: #fff; cursor: pointer; text-decoration: none;">🏠</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-container" style="max-width: 800px; margin: 0 auto 20px; padding: 0 10px;">
+        <div class="filter-row" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <input type="text" id="nameFilter" class="form-control" placeholder="Filter by Name or Parent ID" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ced4da; font-size: 1rem;">
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <select id="classFilter" class="form-control" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ced4da; font-size: 1rem;">
+                    <option value="">All Classes</option>
+                    <option value="Not assigned">Not assigned</option>
+                    {% for class in classes %}
+                        <option value="{{ class.name }}">{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <select id="genderFilter" class="form-control" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ced4da; font-size: 1rem;">
+                    <option value="">All Genders</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="totals-container" style="max-width: 800px; margin: 0 auto 20px; padding: 0 10px; text-align: center;">
+        <div class="totals-row" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div class="total-item" style="padding: 10px; background: #f8f9fa; border-radius: 10px; min-width: 120px;">
+                <strong style="color: #6c757d;">Males:</strong>
+                <span id="maleTotal">0</span>
+            </div>
+            <div class="total-item" style="padding: 10px; background: #f8f9fa; border-radius: 10px; min-width: 120px;">
+                <strong style="color: #6c757d;">Females:</strong>
+                <span id="femaleTotal">0</span>
+            </div>
+            <div class="total-item" style="padding: 10px; background: #f8f9fa; border-radius: 10px; min-width: 120px;">
+                <strong style="color: #6c757d;">Total:</strong>
+                <span id="overallTotal">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE CONTAINER -->
+    <div class="table-container" style="width: 100%; margin: 0; padding: 0 10px;">
+        {% if students %}
+            <div class="table-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative;">
+                <table class="table table-bordered" style="border-radius: 15px; overflow: hidden; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 1400px;">
+                    <thead style="background: linear-gradient(45deg, #ff416c, #ff4b2b); color: #fff;">
+                        <tr>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">S/N</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px; cursor: pointer;" id="genderHeader">Gender <span class="sort-arrow">↑</span></th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Passport</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Parent Student ID</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px; cursor: pointer;" id="nameHeader">Full Name <span class="sort-arrow">↑</span></th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Current Class</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Status</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Registration Number</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Father | Mother Mobile</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Date Created | Date Updated</th>
+                            <th style="padding: 12px; text-align: center; font-size: 14px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        {% for student in students %}
+                            <tr data-name="{{ student.firstname }} {% if student.middle_name %}{{ student.middle_name }} {% endif %}{{ student.surname }}"
+                                data-parent-id="{{ student.parent_student_id }}"
+                                data-class="{% if student.current_class %}{{ student.current_class.name }}{% else %}Not assigned{% endif %}"
+                                data-gender="{{ student.gender }}">
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{{ forloop.counter }}</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{% if student.gender == 'male' %}M{% else %}F{% endif %}</td>
+                                <td style="padding: 12px; text-align: center;">
+                                    <img src="{% if student.passport %}{{ student.passport.url }}{% else %}{% if student.gender == 'male' %}{% static 'images/male.png' %}{% else %}{% static 'images/female.png' %}{% endif %}{% endif %}" alt="Passport" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                </td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{{ student.parent_student_id }}</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">
+                                    {{ student.firstname }}
+                                    {% if student.middle_name %}{{ student.middle_name }}{% endif %}
+                                    {{ student.surname }}
+                                </td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{{ student.current_class|default:"Not assigned" }}</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">❌</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{{ student.registration_number }}</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">{{ student.father_mobile_number }} | {{ student.mother_mobile_number }}</td>
+                                <td style="padding: 12px; text-align: center; font-size: 13px;">
+                                    {{ student.date_created|date:"Y-m-d H:i" }} ({{ student.date_created|timesince }}) | 
+                                    {{ student.date_updated|date:"Y-m-d H:i" }} ({{ student.date_updated|timesince }})
+                                </td>
+                                <td style="padding: 12px; text-align: center;">
+                                    <a href="{% url 'student_update' student.pk %}" class="btn btn-sm" style="border-radius: 10px; background: linear-gradient(45deg, #00c6ff, #0072ff); color: #fff; padding: 5px 10px; margin: 2px; font-size: 12px; text-decoration: none;">📝 Update</a>
+                                    <a href="{% url 'student_detail' student.pk %}" class="btn btn-sm" style="border-radius: 10px; background: linear-gradient(45deg, #f7971e, #ffd200); color: #fff; padding: 5px 10px; margin: 2px; font-size: 12px; text-decoration: none;">🔍 View Details</a>
+                                    <a href="{% url 'student_delete' student.pk %}" class="btn btn-sm" style="border-radius: 10px; background: linear-gradient(45deg, #ff416c, #ff4b2b); color: #fff; padding: 5px 10px; margin: 2px; font-size: 12px; text-decoration: none;">🗑️ Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #6c757d; font-size: 16px; margin-top: 20px;">No dropped out students found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Base styles */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        color: #212529;
+        background: #ffffff;
+        transition: color 0.3s ease;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .filter-container, .totals-container, .table-container {
+        width: 100%;
+        margin: 0;
+        padding: 0 10px;
+    }
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+    }
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 1400px;
+    }
+    .table th, .table td {
+        border: 1px solid #dee2e6;
+        vertical-align: middle;
+    }
+    .table thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .btn-sm, .add-btn {
+        transition: transform 0.3s ease;
+    }
+    .btn-sm:hover, .add-btn:hover {
+        transform: scale(1.05);
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        font-size: 1rem;
+        color: #000;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .form-control:focus {
+        border-color: #007aff;
+        box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
+        outline: none;
+    }
+    .form-control::placeholder {
+        color: #8e8e93;
+    }
+    .sort-arrow {
+        display: inline-block;
+        width: 12px;
+        text-align: center;
+    }
+    th {
+        position: relative;
+    }
+    th:hover {
+        background: linear-gradient(45deg, #ff6c89, #ff6b4e);
+    }
+    /* Scroll indicators */
+    .table-wrapper::before,
+    .table-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .table-wrapper::before {
+        left: 0;
+        background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+    }
+    .table-wrapper::after {
+        right: 0;
+        background: linear-gradient(to left, rgba(0,0,0,0.1), transparent);
+    }
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        body {
+            color: #000000;
+        }
+        .header h3, .header .back-btn, .header .home-btn, .header .add-btn {
+            color: #000000;
+        }
+        .table th, .table td {
+            color: #000000;
+        }
+        .btn-sm {
+            color: #000000 !important;
+        }
+        .form-control {
+            background-color: #fff;
+            color: #000000;
+        }
+        .total-item, .total-item strong, .total-item span {
+            background-color: #fff;
+            color: #000000;
+        }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .filter-container, .totals-container, .table-container {
+            padding: 0 5px;
+        }
+        .filter-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-control {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+        .totals-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .total-item {
+            min-width: 100px;
+            padding: 8px;
+        }
+        .table th, .table td {
+            padding: 8px;
+            font-size: 12px;
+        }
+        .table th {
+            font-size: 12px;
+        }
+        .table img {
+            width: 40px;
+            height: 40px;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+            margin: 1px;
+        }
+        .add-btn {
+            width: 26px;
+            height: 26px;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameFilter = document.getElementById('nameFilter');
+        const classFilter = document.getElementById('classFilter');
+        const genderFilter = document.getElementById('genderFilter');
+        const tableBody = document.getElementById('studentTableBody');
+        const maleTotal = document.getElementById('maleTotal');
+        const femaleTotal = document.getElementById('femaleTotal');
+        const overallTotal = document.getElementById('overallTotal');
+        const genderHeader = document.getElementById('genderHeader');
+        const nameHeader = document.getElementById('nameHeader');
+        const rows = Array.from(tableBody.getElementsByTagName('tr'));
+
+        // Store original order for resetting
+        const originalRows = rows.map(row => ({
+            element: row,
+            name: row.dataset.name,
+            gender: row.dataset.gender
+        }));
+
+        let genderSortState = 0; // 0: default, 1: female first, 2: male first
+        let nameSortState = 0;   // 0: default, 1: A-Z, 2: Z-A
+
+        function updateTable() {
+            const nameValue = nameFilter.value.trim().toLowerCase();
+            const classValue = classFilter.value;
+            const genderValue = genderFilter.value;
+
+            let visibleRows = rows;
+            let maleCount = 0;
+            let femaleCount = 0;
+
+            // Apply filters
+            if (nameValue) {
+                visibleRows = visibleRows.filter(row => {
+                    const name = row.dataset.name.toLowerCase();
+                    const parentId = row.dataset.parentId.toLowerCase();
+                    return name.includes(nameValue) || parentId.includes(nameValue);
+                });
+            }
+            if (classValue) {
+                visibleRows = visibleRows.filter(row => row.dataset.class === classValue);
+            }
+            if (genderValue) {
+                visibleRows = visibleRows.filter(row => row.dataset.gender === genderValue);
+            }
+
+            // Apply sorting
+            let sortedRows = [...visibleRows];
+            if (genderSortState === 1) {
+                // Female first (F, M)
+                sortedRows.sort((a, b) => a.dataset.gender.localeCompare(b.dataset.gender));
+            } else if (genderSortState === 2) {
+                // Male first (M, F)
+                sortedRows.sort((a, b) => b.dataset.gender.localeCompare(a.dataset.gender));
+            } else if (nameSortState === 1) {
+                // A-Z
+                sortedRows.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+            } else if (nameSortState === 2) {
+                // Z-A
+                sortedRows.sort((a, b) => b.dataset.name.localeCompare(a.dataset.name));
+            }
+
+            // Clear and re-append rows to maintain order
+            tableBody.innerHTML = '';
+            sortedRows.forEach(row => tableBody.appendChild(row));
+
+            // Show/hide rows and count genders
+            rows.forEach(row => {
+                if (visibleRows.includes(row)) {
+                    row.style.display = '';
+                    const gender = row.dataset.gender;
+                    if (gender === 'male') maleCount++;
+                    else if (gender === 'female') femaleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update totals
+            maleTotal.textContent = maleCount;
+            femaleTotal.textContent = femaleCount;
+            overallTotal.textContent = maleCount + femaleCount;
+        }
+
+        // Gender sorting
+        genderHeader.addEventListener('click', () => {
+            genderSortState = (genderSortState + 1) % 3;
+            nameSortState = 0; // Reset name sorting
+            const arrow = genderHeader.querySelector('.sort-arrow');
+            const nameArrow = nameHeader.querySelector('.sort-arrow');
+            if (genderSortState === 1) {
+                arrow.textContent = '↓'; // Female first
+            } else if (genderSortState === 2) {
+                arrow.textContent = '↑'; // Male first
+            } else {
+                arrow.textContent = '↑'; // Default
+            }
+            nameArrow.textContent = '↑'; // Reset name arrow
+            updateTable();
+        });
+
+        // Name sorting
+        nameHeader.addEventListener('click', () => {
+            nameSortState = (nameSortState + 1) % 3;
+            genderSortState = 0; // Reset gender sorting
+            const arrow = nameHeader.querySelector('.sort-arrow');
+            const genderArrow = document.getElementById('genderHeader').querySelector('.sort-arrow');
+            if (nameSortState === 1) {
+                arrow.textContent = '↑'; // A-Z
+            } else if (nameSortState === 2) {
+                arrow.textContent = '↓'; // Z-A
+            } else {
+                arrow.textContent = '↑'; // Default
+            }
+            genderArrow.textContent = '↑'; // Reset gender arrow
+            updateTable();
+        });
+
+        // Initial update to set totals
+        updateTable();
+
+        // Event listeners for filters
+        nameFilter.addEventListener('input', updateTable);
+        classFilter.addEventListener('change', updateTable);
+        genderFilter.addEventListener('change', updateTable);
+    });
+</script>
+{% endblock content %}

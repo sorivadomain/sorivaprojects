@@ -1,0 +1,592 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- Loading Bar (Hidden by Default) -->
+    <div id="loading-bar-container" class="loading-bar-container" style="display: none;">
+        <div id="loading-bar" class="loading-bar">0%</div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            {% if can_send_sms %}
+                <span id="send-message-btn" class="send-message-btn">📩</span>
+            {% else %}
+                <span class="spacer"> </span>
+            {% endif %}
+            <h3 class="flex-grow-1">{{ title }}</h3>
+            <span class="spacer"> </span>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters mb-5">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="session_filter" class="form-label">Session</label>
+                <select id="session_filter" class="form-control">
+                    {% for session in sessions %}
+                        <option value="{{ session.id }}" {% if session.id == selected_session.id %}selected{% endif %}>{{ session.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="term_filter" class="form-label">Term</label>
+                <select id="term_filter" class="form-control">
+                    {% for term in terms %}
+                        <option value="{{ term.id }}" {% if term.id == selected_term.id %}selected{% endif %}>{{ term.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="exam_filter" class="form-label">Exam</label>
+                <select id="exam_filter" class="form-control">
+                    {% for exam in exams %}
+                        <option value="{{ exam.id }}" {% if exam.id == selected_exam.id %}selected{% endif %}>{{ exam.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message or Results -->
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- School Header -->
+        <div class="school-header text-center mb-5">
+            <h4 class="mb-1">PRESIDENT'S OFFICE - REGIONAL ADMINISTRATION AND LOCAL GOVERNMENT</h4>
+            <h5 class="mb-1">BUHIGWE DISTRICT COUNCIL</h5>
+            <h5 class="mb-1">MANUS DEI SECONDARY SCHOOL</h5>
+            <h5 class="mb-0">{{ student_class.name|upper }} {{ selected_exam.name }} - {{ selected_session.name|slice:"0:4" }}</h5>
+        </div>
+
+        <!-- Division Performance -->
+        <h5 class="section-title mt-5 mb-3">Division Performance</h5>
+        <div id="division-performance-table" class="table-container mb-5">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Division</th>
+                        <th>Male</th>
+                        <th>Female</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for div, counts in division_counts.items %}
+                        <tr>
+                            <td>{{ div }}</td>
+                            <td>{{ counts.male }}</td>
+                            <td>{{ counts.female }}</td>
+                            <td>{{ counts.total }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td><strong>Total</strong></td>
+                        <td><strong>{{ gender_counts.male }}</strong></td>
+                        <td><strong>{{ gender_counts.female }}</strong></td>
+                        <td><strong>{{ gender_counts.total }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Results Table with Filter -->
+        <div class="mb-4 filter-container">
+            <label for="student_filter" class="form-label">Filter by Student Name:</label>
+            <input type="text" id="student_filter" class="form-control student-filter" placeholder="Type student name...">
+        </div>
+        <div id="results-table" class="table-container">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>C/No</th>
+                        <th>Student Name</th>
+                        <th>Sex</th>
+                        {% for subject in subjects %}
+                            <th colspan="2">{{ subject.name }}</th>
+                        {% endfor %}
+                        <th>Average</th>
+                        <th>Avg Grade</th>
+                        <th>Position</th>
+                        <th>Points</th>
+                        <th>Division</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_data in students_data %}
+                        <tr>
+                            <td>{{ forloop.counter|add:0|stringformat:"04d" }}</td>
+                            <td>
+                                {% with student=student_data.student %}
+                                    {% if is_parent and parent_student_id == student.id %}
+                                        <a href="/academics/result-detail/{{ student.id }}/{{ student_class.id }}/{{ selected_session.id }}/{{ selected_term.id }}/{{ selected_exam.id }}/" style="text-decoration: none; color: inherit;">
+                                            {{ student.firstname }}
+                                            {% if student.middle_name %} {{ student.middle_name }} {% endif %}
+                                            {{ student.surname }}
+                                        </a>
+                                    {% elif not is_parent %}
+                                        <a href="/academics/result-detail/{{ student.id }}/{{ student_class.id }}/{{ selected_session.id }}/{{ selected_term.id }}/{{ selected_exam.id }}/" style="text-decoration: none; color: inherit;">
+                                            {{ student.firstname }}
+                                            {% if student.middle_name %} {{ student.middle_name }} {% endif %}
+                                            {{ student.surname }}
+                                        </a>
+                                    {% else %}
+                                        {{ student.firstname }}
+                                        {% if student.middle_name %} {{ student.middle_name }} {% endif %}
+                                        {{ student.surname }}
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>{% if student_data.student.gender == 'female' %}F{% else %}M{% endif %}</td>
+                            {% for sr in student_data.subject_results %}
+                                <td>{% if sr.marks is not None %}{{ sr.marks }}{% else %}-{% endif %}</td>
+                                <td>{{ sr.grade|default:"-" }}</td>
+                            {% endfor %}
+                            <td>{% if student_data.average != "undefined" %}{{ student_data.average }}{% else %}-{% endif %}</td>
+                            <td>{{ student_data.average_grade|default:"-" }}</td>
+                            <td>{{ student_data.position }}</td>
+                            <td>{{ student_data.points }}</td>
+                            <td>{{ student_data.division|default:"-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Subject Performance Table -->
+        <h5 class="section-title mt-5 mb-3">Subject Performance</h5>
+        <div id="subject-performance-table" class="table-container mb-5">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Subject Name</th>
+                        <th>Faculty Name</th>
+                        <th>Overall Average</th>
+                        <th>Overall Grade</th>
+                        <th>GPA</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sp in subject_performance %}
+                        <tr>
+                            <td>{{ forloop.counter|add:0|stringformat:"04d" }}</td>
+                            <td>{{ sp.subject.name }}</td>
+                            <td>{{ sp.teacher_name }}</td>
+                            <td>{{ sp.overall_average }}</td>
+                            <td>{{ sp.overall_grade|default:"-" }}</td>
+                            <td>{{ sp.gpa }}</td>
+                            <td>{{ sp.position }}</td>
+                            <td>{{ sp.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Result Cards Button -->
+        {% if can_view_result_cards %}
+            <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+                <a href="{% url 'student_result_cards' class_id=student_class.id %}" class="result-cards-btn">Result Cards</a>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sessionFilter = document.getElementById('session_filter');
+        const termFilter = document.getElementById('term_filter');
+        const examFilter = document.getElementById('exam_filter');
+        const divisionTable = document.getElementById('division-performance-table');
+        const resultsTable = document.getElementById('results-table');
+        const subjectTable = document.getElementById('subject-performance-table');
+        const studentFilter = document.getElementById('student_filter');
+        const sendMessageBtn = document.getElementById('send-message-btn');
+        const loadingBarContainer = document.getElementById('loading-bar-container');
+        const loadingBar = document.getElementById('loading-bar');
+        const classId = '{{ student_class.id }}';
+
+        function reapplyTableStyles() {
+            const tables = [
+                divisionTable.querySelector('table'),
+                resultsTable.querySelector('table'),
+                subjectTable.querySelector('table')
+            ];
+            tables.forEach(table => {
+                if (table) {
+                    table.classList.add('result-table');
+                    const lastRow = table.querySelector('tbody tr:last-child');
+                    if (lastRow && lastRow.querySelector('td strong')) {
+                        lastRow.classList.add('total-row');
+                    }
+                }
+            });
+        }
+
+        function fetchResults() {
+            const sessionId = sessionFilter.value;
+            const termId = termFilter.value;
+            const examId = examFilter.value;
+
+            console.log('Fetching results for:', { classId, sessionId, termId, examId });
+
+            fetch(`/academics/get_results_data/?class_id=${classId}&session_id=${sessionId}&term_id=${termId}&exam_id=${examId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Results fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Results fetch response data:', data);
+                if (data.error) {
+                    divisionTable.innerHTML = '';
+                    resultsTable.innerHTML = '<div class="error-message">' + data.error + '</div>';
+                    subjectTable.innerHTML = '';
+                } else if (data.division_table && data.results_table && data.subject_table) {
+                    divisionTable.innerHTML = data.division_table;
+                    resultsTable.innerHTML = data.results_table;
+                    subjectTable.innerHTML = data.subject_table;
+                    reapplyTableStyles();
+                    applyStudentFilter();
+                } else {
+                    divisionTable.innerHTML = '<div class="error-message">Failed to load division performance.</div>';
+                    resultsTable.innerHTML = '<div class="error-message">Failed to load results table.</div>';
+                    subjectTable.innerHTML = '<div class="error-message">Failed to load subject performance table.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching results:', error);
+                divisionTable.innerHTML = '';
+                resultsTable.innerHTML = '<div class="error-message">An error occurred while loading results.</div>';
+                subjectTable.innerHTML = '';
+            });
+        }
+
+        function applyStudentFilter() {
+            const filterValue = studentFilter.value.toLowerCase();
+            const rows = resultsTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const nameCell = row.getElementsByTagName('td')[1];
+                const nameText = nameCell.textContent.toLowerCase();
+                if (nameText.includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+
+        function animateLoadingBar() {
+            let progress = 0;
+            loadingBarContainer.style.display = 'block';
+            const interval = setInterval(() => {
+                progress += 1;
+                loadingBar.style.width = progress + '%';
+                loadingBar.textContent = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingBarContainer.style.display = 'none';
+                    }, 500);
+                }
+            }, 30);
+        }
+
+        if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', () => {
+                const confirmSend = confirm('Are you ready to send the message?');
+                if (confirmSend) {
+                    const sessionId = sessionFilter.value;
+                    const termId = termFilter.value;
+                    const examId = examFilter.value;
+
+                    animateLoadingBar();
+
+                    setTimeout(() => {
+                        fetch(`/academics/send_results_sms/?class_id=${classId}&session_id=${sessionId}&term_id=${termId}&exam_id=${examId}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            }
+                        })
+                        .then(response => {
+                            console.log('SMS send response status:', response.status);
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('SMS send response data:', data);
+                            if (data.success) {
+                                alert('Messages sent successfully to all parents!');
+                            } else {
+                                alert('Failed to send messages: ' + (data.error || 'Unknown error'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error sending SMS:', error);
+                            alert('An error occurred while sending messages.');
+                        });
+                    }, 3500);
+                }
+            });
+        }
+
+        sessionFilter.addEventListener('change', fetchResults);
+        termFilter.addEventListener('change', fetchResults);
+        examFilter.addEventListener('change', fetchResults);
+        studentFilter.addEventListener('input', applyStudentFilter);
+
+        fetchResults();
+    });
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    .container {
+        width: 100%;
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .loading-bar-container {
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        height: 8px;
+        overflow: hidden;
+    }
+
+    .loading-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(135deg, #007aff, #00b7ff);
+        color: #fff;
+        text-align: center;
+        font-size: 12px;
+        border-radius: 12px;
+        transition: width 0.03s linear;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #007aff, #00b7ff);
+        color: #fff;
+        padding: 20px;
+        margin: 0 0 30px 0;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .back-btn, .send-message-btn, .spacer {
+        font-size: 24px;
+        color: #fff;
+        cursor: pointer;
+        padding: 0 10px;
+        transition: opacity 0.3s;
+    }
+
+    .send-message-btn:hover, .back-btn:hover {
+        opacity: 0.8;
+    }
+
+    .filters {
+        padding: 20px 0;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 16px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 30px 12px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        min-height: 44px;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 50px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e');
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 18px;
+        overflow: visible;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007aff !important;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    }
+
+    .filter-container {
+        max-width: 400px;
+    }
+
+    .student-filter {
+        padding: 12px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        min-height: 44px;
+        border: 1px solid #d1d1d6 !important;
+        border-radius: 50px;
+        background-color: #f2f2f7;
+        overflow: visible;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .student-filter:focus {
+        outline: none;
+        border-color: #007aff !important;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .form-control {
+            font-size: 14px;
+            min-height: 48px;
+            background-size: 16px;
+            padding: 12px 28px 12px 16px;
+            background-position: right 8px center;
+        }
+
+        .student-filter {
+            font-size: 14px;
+            min-height: 48px;
+            padding: 12px 16px;
+        }
+
+        .form-label {
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 15px;
+        }
+
+        .header h3 {
+            font-size: 20px;
+        }
+    }
+
+    .school-header h4 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .school-header h5 {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+
+    .result-table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-table th, .result-table td {
+        padding: 12px 15px;
+        text-align: center;
+        font-size: 14px;
+        border: 1px solid #d1d1d6;
+    }
+
+    .result-table th {
+        background: #007aff;
+        font-weight: 600;
+        color: #fff;
+    }
+
+
+    .total-row td {
+        background: #e6ab0a;
+        font-weight: bold;
+    }
+
+    .result-cards-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #007aff, #00b7ff);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+    .result-cards-btn:hover {
+        background: linear-gradient(135deg, #005bb5, #0096d6);
+        transform: translateY(-2px);
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        text-align: center;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}

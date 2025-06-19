@@ -1,0 +1,143 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #007aff; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; margin: 0;">{{ title }}</h2>
+        <a href="{% url 'settings_home' %}" class="home-btn" style="font-size: 24px; color: #007aff; cursor: pointer; padding-right: 10px; text-decoration: none;">🏠</a>
+    </div>
+
+    <div class="form-container">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="mb-4">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 0.9rem;">
+                        {{ form.name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.subjects.id_for_label }}">Subjects</label>
+                <input type="text" id="subject-filter" placeholder="Filter subjects" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ced4da; background-color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 1rem; color: #000; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                {{ form.subjects }}
+                {% if form.subjects.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 0.9rem;">
+                        {{ form.subjects.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-lg" style="border-radius: 15px; background: linear-gradient(45deg, #007aff, #00d4ff); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                    <i class="fas fa-save"></i> Update Class
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 1rem;
+        color: #000;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .form-control:focus {
+        border-color: #007aff;
+        box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
+        outline: none;
+    }
+    select.form-control {
+        height: 150px;
+        padding: 8px;
+    }
+    .invalid-feedback {
+        display: none;
+    }
+    .form-control.is-invalid {
+        border-color: #ff3b30;
+    }
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    #subject-filter::placeholder {
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 1rem;
+    }
+    @media (max-width: 576px) {
+        .btn-lg {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .form-control {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        #subject-filter {
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<script>
+    // Bootstrap-like validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Subject filter
+    document.getElementById('subject-filter').addEventListener('input', function() {
+        const filterValue = this.value.toLowerCase();
+        const select = document.getElementById('{{ form.subjects.id_for_label }}');
+        const options = select.options;
+
+        for (let i = 0; i < options.length; i++) {
+            const optionText = options[i].text.toLowerCase();
+            options[i].style.display = optionText.includes(filterValue) ? '' : 'none';
+        }
+    });
+</script>
+{% endblock content %}

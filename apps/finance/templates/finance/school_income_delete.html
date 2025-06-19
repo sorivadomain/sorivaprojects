@@ -1,0 +1,167 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <span class="nav-btn back-btn" onclick="window.history.back()" title="Go Back">⬅️</span>
+    <h3 class="title">{{ page_title }}</h3>
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Delete Confirmation -->
+<div class="delete-container">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-4">Confirm Deletion</h5>
+            <p class="text-center">
+                Are you sure you want to delete the income from <strong>{{ object.obtained_from }}</strong> 
+                amounting to <strong>{{ object.amount_obtained|floatformat:2 }}</strong> 
+                provided on <strong>{{ object.date_provided|date:"Y-m-d" }}</strong>?
+            </p>
+            <form method="post" class="text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-delete mx-2">Confirm 🗑️</button>
+                <a href="{% url 'school_income_list' category_id=category_id %}" class="btn btn-cancel mx-2">Cancel ❌</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --border-radius: 50px;
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Delete Container Styles */
+.delete-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-cancel {
+    background: var(--gradient-blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-delete:hover, .btn-cancel:hover {
+    transform: scale(1.05);
+    color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .delete-container {
+        padding: 15px;
+    }
+    .card-body {
+        padding: 15px;
+    }
+    .card-title {
+        font-size: 1.1rem;
+    }
+    .btn-delete, .btn-cancel {
+        padding: 8px 15px;
+        font-size: 0.85rem;
+    }
+}
+</style>
+{% endblock content %}

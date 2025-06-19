@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Page Title -->
+    <h1 class="text-center mb-5 text-primary fw-bold" style="font-family: 'Helvetica Neue', sans-serif;">💵 Expenditure Analysis of {{ current_year }}</h1>
+
+    <div class="row g-4">
+        <!-- Heatmap Section -->
+        <div class="col-lg-6">
+            {% if heatmap %}
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-center text-secondary fw-bold">
+                            <i class="fas fa-chart-pie me-2" style="color: #ffc107;"></i>Expenditure Heatmap
+                        </h4>
+                        <img src="data:image/png;base64,{{ heatmap }}" alt="Expenditure Heatmap" class="img-fluid rounded">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="card bg-light shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-dark fw-bold">
+                                <i class="fas fa-wallet me-2" style="color: #28a745;"></i>Total Initial Balance
+                            </h5>
+                            <p class="text-center text-success fs-4">TZS {{ total_initial_balance|floatformat:2 }}</p>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light shadow-sm border-0 mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-dark fw-bold">
+                                <i class="fas fa-list-ul me-2" style="color: #17a2b8;"></i>Expenditures by Category
+                            </h5>
+                            <ul class="list-group">
+                                {% for category, amount in category_expenditures.items %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-secondary">{{ category }}</span>
+                                        <span class="badge bg-primary rounded-pill">TZS {{ amount|floatformat:2 }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light shadow-sm border-0 mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title text-center text-dark fw-bold">
+                                <i class="fas fa-balance-scale me-2" style="color: #ff5733;"></i>Remaining Balance
+                            </h5>
+                            <p class="text-center fs-4" style="color: {% if remaining_balance > 0 %}#28a745{% elif remaining_balance < 0 %}#dc3545{% else %}#6c757d{% endif %};">
+                                TZS {{ remaining_balance|floatformat:2 }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center mt-4">
+                    <i class="fas fa-exclamation-circle me-2"></i>No expenditure data available.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Waterfall Section -->
+        <div class="col-lg-6">
+            {% if waterfall %}
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h4 class="card-title text-center text-secondary fw-bold">
+                            <i class="fas fa-water me-2" style="color: #007bff;"></i>Waterfall Chart
+                        </h4>
+                        <img src="data:image/png;base64,{{ waterfall }}" alt="Expenditure Waterfall" class="img-fluid rounded">
+                    </div>
+                </div>
+
+                <div class="card bg-light shadow-sm border-0 mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-center text-dark fw-bold">
+                            <i class="fas fa-comments me-2" style="color: #6f42c1;"></i>Graph Analysis and Advice:
+                        </h5>
+                        <p style="text-align: justify; font-size: 1rem; line-height: 1.6;">
+                            {{ trend_description }}
+                        </p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center mt-4">
+                    <i class="fas fa-exclamation-circle me-2"></i>No expenditure data available.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    h1 {
+        font-size: 2.8rem;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+    }
+
+    .card-body p {
+        font-size: 1.2rem;
+    }
+
+    .list-group-item {
+        background-color: #f8f9fa;
+        border: none;
+        font-size: 1rem;
+    }
+
+    .list-group-item:hover {
+        background-color: #eef2f7;
+    }
+
+    .badge {
+        font-size: 1rem;
+    }
+
+    .alert {
+        font-size: 1.1rem;
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}

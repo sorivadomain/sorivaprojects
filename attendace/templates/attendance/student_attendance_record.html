@@ -1,0 +1,484 @@
+{% extends base_template %}
+{% load static %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon to suppress 404 -->
+    <link rel="icon" href="data:;base64,=">
+{% endblock %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            <h3 class="header-title">{{ title }}</h3>
+        </div>
+    </div>
+
+    <!-- FORM AND FILTER -->
+    <div class="form-container">
+        <p class="message">Please select all fields to load attendance records.</p>
+        <form method="post" id="attendanceForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_session">Session:</label>
+                    <select name="session" id="id_session" class="iphone-select" required>
+                        {% for session in sessions %}
+                            <option value="{{ session.id }}" {% if session.id == default_session.id %}selected{% endif %}>{{ session.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_term">Term:</label>
+                    <select name="term" id="id_term" class="iphone-select" required>
+                        {% for term in terms %}
+                            <option value="{{ term.id }}" {% if term.id == default_term.id %}selected{% endif %}>{{ term.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_class_field">Class:</label>
+                    <select name="class_field" id="id_class_field" class="iphone-select" required>
+                        {% for class in classes %}
+                            <option value="{{ class.id }}" {% if class.id == selected_class %}selected{% endif %}>{{ class.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_student">Student:</label>
+                    <select name="student" id="id_student" class="iphone-select" required>
+                        {% for student in students %}
+                            <option value="{{ student.id }}" {% if student.id == selected_student.id %}selected{% endif %}>{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <!-- Date Filter -->
+        <div class="search-container" style="display: none;" id="searchContainer">
+            <input type="date" id="dateFilter" class="iphone-input">
+        </div>
+
+        <!-- Attendance Records and Totals -->
+        <div id="attendanceContainer">
+            <div class="totals" id="totals">
+                <p>Dominant Status: <span id="dominantStatus">-</span></p>
+                <p>Total Present: <span id="totalPresent">0</span> <span class="status-icon present">✔️</span></p>
+                <p>Total Permission: <span id="totalPermission">0</span> <span class="status-icon permission">🅿️</span></p>
+                <p>Total Absent: <span id="totalAbsent">0</span> <span class="status-icon absent">❌</span></p>
+            </div>
+            <div class="attendance-list" id="attendanceList">
+                {% for record in attendance_records %}
+                    <div class="attendance-card" data-date="{{ record.date|date:'Y-m-d' }}">
+                        <div class="attendance-info">
+                            <span class="sn">{{ forloop.counter }}.</span>
+                            <img src="{% if record.student.passport %}{{ record.student.passport.url }}{% else %}{% static 'images/'|add:record.student.gender|add:'.png' %}{% endif %}" alt="{{ record.student.firstname }}" class="student-passport">
+                            <div class="student-details">
+                                <span class="student-name">{{ record.student.firstname }} {{ record.student.middle_name }} {{ record.student.surname }}</span>
+                                <span class="attendance-date">{{ record.date|date:'Y-m-d' }}</span>
+                            </div>
+                        </div>
+                        <div class="status-selection">
+                            <span class="status-icon {{ record.status }}">
+                                {% if record.status == 'present' %}✔️
+                                {% elif record.status == 'has_permission' %}🅿️
+                                {% elif record.status == 'absent' %}❌
+                                {% else %}⬜
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% if not forloop.last %}<hr class="attendance-separator">{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        background: transparent;
+        overflow-x: hidden;
+    }
+    .container {
+        width: 100%;
+        margin: 0 auto;
+        max-width: 600px;
+        padding: 0;
+    }
+    .header {
+        padding: 20px;
+        text-align: center;
+        margin: 0;
+    }
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin: 0;
+        padding: 0 15px;
+    }
+    .back-btn {
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .header-title {
+        margin: 0;
+        font-size: 20px;
+        flex-grow: 1;
+    }
+    .form-container {
+        padding: 15px 0;
+        margin: 0;
+        width: 100%;
+    }
+    .message {
+        color: #555;
+        text-align: center;
+        margin: 15px 0;
+        padding: 0 15px;
+    }
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 0;
+        padding: 0;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 0 15px;
+    }
+    .form-group label {
+        margin-bottom: 5px;
+        font-weight: 600;
+        text-align: left;
+    }
+    .iphone-select, .iphone-input {
+        padding: 15px 20px;
+        width: 100%;
+        font-size: 16px;
+        border-radius: 50px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E');
+        background-repeat: no-repeat;
+        background-position: right 20px center;
+        background-size: 12px;
+    }
+    .iphone-input {
+        background-image: none;
+    }
+    .search-container {
+        margin: 20px 0;
+        padding: 0 15px;
+        width: 100%;
+    }
+    .attendance-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 0;
+        padding: 0 15px 20px;
+    }
+    .attendance-card {
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.3s ease;
+    }
+    .attendance-card:hover {
+        transform: scale(1.02);
+    }
+    .attendance-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+    }
+    .sn {
+        font-weight: bold;
+        color: #555;
+    }
+    .student-passport {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    .student-details {
+        display: flex;
+        flex-direction: column;
+    }
+    .student-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    .attendance-date {
+        font-size: 14px;
+        color: #777;
+    }
+    .status-selection {
+        display: flex;
+        gap: 15px;
+    }
+    .status-icon {
+        font-size: 24px;
+        padding: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+    .present {
+        color: #34c759;
+    }
+    .permission {
+        color: #007aff;
+    }
+    .absent {
+        color: #ff3b30;
+    }
+    .attendance-separator {
+        border: 0;
+        height: 4px;
+        background: #888;
+        margin: 0;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .totals {
+        padding: 15px;
+        margin: 0 15px 20px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .totals p {
+        margin: 5px 0;
+        font-weight: 600;
+    }
+    @media (max-width: 576px) {
+        .form-row {
+            gap: 10px;
+        }
+        .form-group {
+            padding: 0 10px;
+        }
+        .iphone-select, .iphone-input {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        .search-container {
+            padding: 0 10px;
+        }
+        .attendance-list {
+            padding: 0 10px 15px;
+        }
+        .attendance-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .status-selection {
+            width: 100%;
+            justify-content: space-around;
+        }
+        .status-icon {
+            font-size: 20px;
+            width: 36px;
+            height: 36px;
+        }
+        .header {
+            padding: 15px;
+        }
+        .back-btn {
+            font-size: 20px;
+        }
+        .container {
+            max-width: none;
+        }
+    }
+</style>
+
+<script>
+    function filterAndUpdateTotals() {
+        const dateFilter = document.getElementById('dateFilter').value;
+        const attendanceCards = document.getElementsByClassName('attendance-card');
+        let presentCount = 0, permissionCount = 0, absentCount = 0;
+
+        for (let i = 0; i < attendanceCards.length; i++) {
+            const attendanceDate = attendanceCards[i].getAttribute('data-date');
+            const statusIcon = attendanceCards[i].querySelector('.status-icon');
+            const status = statusIcon.className.includes('present') ? 'present' :
+                          statusIcon.className.includes('permission') ? 'has_permission' :
+                          statusIcon.className.includes('absent') ? 'absent' : '';
+            const dateMatch = !dateFilter || attendanceDate === dateFilter;
+
+            if (dateMatch) {
+                attendanceCards[i].style.display = '';
+                if (status === 'present') presentCount++;
+                else if (status === 'has_permission') permissionCount++;
+                else if (status === 'absent') absentCount++;
+            } else {
+                attendanceCards[i].style.display = 'none';
+            }
+        }
+
+        document.getElementById('totalPresent').textContent = presentCount;
+        document.getElementById('totalPermission').textContent = permissionCount;
+        document.getElementById('totalAbsent').textContent = absentCount;
+
+        const counts = {
+            'Presentism': presentCount,
+            'Permissions': permissionCount,
+            'Absentism': absentCount
+        };
+        const dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, 'None');
+        document.getElementById('dominantStatus').textContent = dominant;
+    }
+
+    function updateStudentDropdown(classId) {
+        const studentSelect = document.getElementById('id_student');
+        if (!classId) {
+            studentSelect.innerHTML = '<option value="">Select a student</option>';
+            return;
+        }
+        fetch(`/attendace/get-students-by-class/?class_field=${classId}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                studentSelect.innerHTML = '<option value="">Select a student</option>';
+                if (data.students) {
+                    data.students.forEach(student => {
+                        const option = document.createElement('option');
+                        option.value = student.id;
+                        option.textContent = student.name;
+                        studentSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading students:', error);
+                studentSelect.innerHTML = '<option value="">Error loading students</option>';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const sessionSelect = document.getElementById('id_session');
+        const termSelect = document.getElementById('id_term');
+        const classSelect = document.getElementById('id_class_field');
+        const studentSelect = document.getElementById('id_student');
+        const attendanceList = document.getElementById('attendanceList');
+        const searchContainer = document.getElementById('searchContainer');
+        const message = document.querySelector('.message');
+        const attendanceContainer = document.getElementById('attendanceContainer');
+
+        function updateAttendance() {
+            const session = sessionSelect.value;
+            const term = termSelect.value;
+            const classField = classSelect.value;
+            const student = studentSelect.value;
+
+            if (session && term && classField && student) {
+                fetch(`/attendace/get-student-attendance-data/?session=${session}&term=${term}&class_field=${classField}&student=${student}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            attendanceList.innerHTML = `<p style="color: red; text-align: center;">${data.error}</p>`;
+                            searchContainer.style.display = 'none';
+                            attendanceContainer.style.display = 'none';
+                            message.textContent = 'Error loading attendance records.';
+                            message.style.color = 'red';
+                            return;
+                        }
+                        let html = '';
+                        data.attendance.forEach((record, index) => {
+                            html += `
+                                <div class="attendance-card" data-date="${record.date}">
+                                    <div class="attendance-info">
+                                        <span class="sn">${index + 1}.</span>
+                                        <img src="${record.student.passport ? record.student.passport : `/static/images/${record.student.gender}.png`}" alt="${record.student.firstname}" class="student-passport">
+                                        <div class="student-details">
+                                            <span class="student-name">${record.student.firstname} ${record.student.middle_name} ${record.student.surname}</span>
+                                            <span class="attendance-date">${record.date}</span>
+                                        </div>
+                                    </div>
+                                    <div class="status-selection">
+                                        <span class="status-icon ${record.status === 'present' ? 'present' : record.status === 'has_permission' ? 'permission' : record.status === 'absent' ? 'absent' : ''}">
+                                            ${record.status === 'present' ? '✔️' : record.status === 'has_permission' ? '🅿️' : record.status === 'absent' ? '❌' : '⬜'}
+                                        </span>
+                                    </div>
+                                </div>
+                                ${index < data.attendance.length - 1 ? '<hr class="attendance-separator">' : ''}
+                            `;
+                        });
+                        attendanceList.innerHTML = html;
+                        document.getElementById('totalPresent').textContent = data.total_present;
+                        document.getElementById('totalPermission').textContent = data.total_permission;
+                        document.getElementById('totalAbsent').textContent = data.total_absent;
+                        document.getElementById('dominantStatus').textContent = data.dominant_status;
+                        searchContainer.style.display = 'block';
+                        attendanceContainer.style.display = 'block';
+                        message.textContent = 'Attendance records loaded successfully.';
+                        message.style.color = '#34c759';
+                        filterAndUpdateTotals();
+                    })
+                    .catch(error => {
+                        attendanceList.innerHTML = `<p style="color: red; text-align: center;">Error loading attendance records</p>`;
+                        searchContainer.style.display = 'none';
+                        attendanceContainer.style.display = 'none';
+                        message.textContent = 'Error loading attendance records.';
+                        message.style.color = 'red';
+                        console.error('Error:', error);
+                    });
+            } else {
+                attendanceList.innerHTML = '';
+                attendanceContainer.style.display = 'none';
+                searchContainer.style.display = 'none';
+                message.textContent = 'Please select all fields to load attendance records.';
+                message.style.color = '#555';
+            }
+        }
+
+        classSelect.addEventListener('change', function() {
+            updateStudentDropdown(this.value);
+            updateAttendance();
+        });
+        [sessionSelect, termSelect, studentSelect].forEach(el => {
+            el.addEventListener('change', updateAttendance);
+        });
+
+        // Initial load
+        updateStudentDropdown(classSelect.value);
+        updateAttendance();
+
+        // Attach date filter
+        const dateFilter = document.getElementById('dateFilter');
+        if (dateFilter) dateFilter.addEventListener('change', filterAndUpdateTotals);
+    });
+</script>
+{% endblock content %}

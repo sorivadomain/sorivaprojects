@@ -1,0 +1,371 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">{% if object.pk %}Update Staff{% else %}Add New Staff{% endif %}</h2>
+        <span></span>
+    </div>
+
+    <!-- Form -->
+    <form method="post" enctype="multipart/form-data" id="staffForm">
+        {% csrf_token %}
+
+        <!-- Personal Information -->
+        <div class="section mb-5">
+            <h3 class="section-title">Personal Information</h3>
+            <div class="field">
+                <label class="form-label" for="{{ form.firstname.id_for_label }}">First Name</label>
+                {{ form.firstname }}
+                {{ form.firstname.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.middle_name.id_for_label }}">Middle Name</label>
+                {{ form.middle_name }}
+                {{ form.middle_name.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.surname.id_for_label }}">Surname</label>
+                {{ form.surname }}
+                {{ form.surname.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.gender.id_for_label }}">Gender</label>
+                {{ form.gender }}
+                {{ form.gender.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                {{ form.date_of_birth }}
+                {{ form.date_of_birth.errors }}
+            </div>
+        </div>
+
+        <!-- Employment Details -->
+        <div class="section mb-5">
+            <h3 class="section-title">Employment Details</h3>
+            <div class="field">
+                <label class="form-label" for="{{ form.occupation.id_for_label }}">Occupation</label>
+                {{ form.occupation }}
+                {{ form.occupation.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.current_status.id_for_label }}">Status</label>
+                {{ form.current_status }}
+                {{ form.current_status.errors }}
+            </div>
+            {% if can_view_salary %}
+            <div class="field">
+                <label class="form-label" for="{{ form.salary.id_for_label }}">Salary</label>
+                {{ form.salary }}
+                {{ form.salary.errors }}
+            </div>
+            {% endif %}
+            <div class="field">
+                <label class="form-label" for="{{ form.date_of_admission.id_for_label }}">Admission Date</label>
+                {{ form.date_of_admission }}
+                {{ form.date_of_admission.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.contract_start_date.id_for_label }}">Contract Start Date</label>
+                {{ form.contract_start_date }}
+                {{ form.contract_start_date.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.contract_end_date.id_for_label }}">Contract End Date</label>
+                {{ form.contract_end_date }}
+                {{ form.contract_end_date.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.contract_duration.id_for_label }}">Contract Duration</label>
+                {{ form.contract_duration }}
+                {{ form.contract_duration.errors }}
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="section mb-5">
+            <h3 class="section-title">Contact Information</h3>
+            <div class="field">
+                <label class="form-label" for="{{ form.mobile_number.id_for_label }}">Mobile Number</label>
+                {{ form.mobile_number }}
+                {{ form.mobile_number.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.guarantor.id_for_label }}">Guarantor</label>
+                {{ form.guarantor }}
+                {{ form.guarantor.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.address.id_for_label }}">Address</label>
+                {{ form.address }}
+                {{ form.address.errors }}
+            </div>
+        </div>
+
+        <!-- Identification -->
+        <div class="section mb-5">
+            <h3 class="section-title">Identification</h3>
+            <div class="field">
+                <label class="form-label" for="{{ form.nida_id.id_for_label }}">NIDA ID</label>
+                {{ form.nida_id }}
+                {{ form.nida_id.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.tin_number.id_for_label }}">TIN Number</label>
+                {{ form.tin_number }}
+                {{ form.tin_number.errors }}
+            </div>
+            <div class="field">
+                <label class="form-label" for="{{ form.passport_photo.id_for_label }}">Passport Photo</label>
+                {{ form.passport_photo }}
+                {{ form.passport_photo.errors }}
+                <div id="photo-preview" class="mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="section mb-5">
+            <h3 class="section-title">Additional Information</h3>
+            <div class="field">
+                <label class="form-label" for="{{ form.others.id_for_label }}">Additional Notes</label>
+                {{ form.others }}
+                {{ form.others.errors }}
+            </div>
+        </div>
+
+        <!-- Teaching Information -->
+        <div class="section mb-5">
+            <h3 class="section-title">Teaching Information</h3>
+            <div class="field">
+                <div class="form-check">
+                    {{ form.is_subject_teacher }}
+                    <label class="form-check-label ms-2" for="{{ form.is_subject_teacher.id_for_label }}">Is Subject Teacher?</label>
+                    {{ form.is_subject_teacher.errors }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-flex justify-content-end mb-4">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">💾 Save Staff</button>
+        </div>
+    </form>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.container-fluid {
+    width: 100%;
+    padding: 0;
+}
+.header {
+    border-radius: 0;
+    width: 100%;
+}
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin: 20px 15px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 5px;
+}
+.field {
+    margin: 0 15px 15px;
+    width: calc(100% - 30px);
+}
+.form-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 5px;
+    display: block;
+}
+.form-control, .form-select {
+    border: none !important;
+    outline: 1px solid #e5e7eb;
+    border-radius: 50px !important;
+    background: #fefefe;
+    padding: 8px 20px;
+    font-size: 1rem;
+    color: #1f2937;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: outline-color 0.3s, background 0.3s;
+}
+.form-control:focus, .form-select:focus {
+    outline: 2px solid #a855f7;
+    background: #f8fafc;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+.form-control::placeholder {
+    color: #6b7280;
+}
+.form-control[readonly] {
+    background: #e5e7eb;
+    outline: 1px solid #d1d5db;
+    cursor: not-allowed;
+}
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280' width='16px' height='16px'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 20px center;
+}
+.form-select:disabled {
+    background: #e5e7eb;
+    outline: 1px solid #d1d5db;
+    cursor: not-allowed;
+}
+.form-check-input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background: #fefefe;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: background-color 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+.form-check-input:checked {
+    background-color: #a855f7;
+    border-color: #a855f7;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white' width='16px' height='16px'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /%3E%3C/svg%3E");
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.form-check-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
+}
+.form-check-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+.btn-primary {
+    background: linear-gradient(45deg, #6b7280, #a855f7);
+    border: none;
+    font-size: 1rem;
+    padding: 8px 20px;
+    border-radius: 50px;
+}
+.btn-primary:hover {
+    background: linear-gradient(45deg, #5b6270, #9855e7);
+}
+.d-flex.justify-content-end {
+    margin: 0 15px 15px;
+}
+textarea.form-control {
+    padding: 8px 20px;
+    font-size: 1rem;
+    line-height: 1.4;
+    border-radius: 20px !important;
+}
+#photo-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    display: block;
+    margin: 10px auto 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+#photo-preview p {
+    font-size: 0.9rem;
+    color: #dc3545;
+    text-align: center;
+    margin: 10px 0 0;
+}
+@media (max-width: 576px) {
+    .form-control, .form-select {
+        padding: 6px 16px;
+        font-size: 0.9rem;
+    }
+    .form-select {
+        background-position: right 16px center;
+    }
+    .section-title {
+        font-size: 1.1rem;
+    }
+    .btn-primary {
+        width: 100%;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    .form-check-input {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+    textarea.form-control {
+        padding: 6px 16px;
+    }
+    #photo-preview img {
+        max-width: 120px;
+        max-height: 120px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Passport Photo Preview
+    const photoInput = document.querySelector('#id_passport_photo');
+    const photoPreview = document.querySelector('#photo-preview');
+
+    photoInput.addEventListener('change', function() {
+        photoPreview.innerHTML = '';
+        const file = this.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                photoPreview.innerHTML = '<p>🚫 Please select an image file.</p>';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Passport Photo Preview';
+                photoPreview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Debug is_subject_teacher checkbox
+    const subjectTeacherCheckbox = document.querySelector('#id_is_subject_teacher');
+    subjectTeacherCheckbox.addEventListener('change', function() {
+        console.log('is_subject_teacher changed:', {
+            checked: this.checked,
+            value: this.value,
+            id: this.id
+        });
+    });
+
+    // Log initial state
+    console.log('is_subject_teacher initial state:', {
+        checked: subjectTeacherCheckbox.checked,
+        value: subjectTeacherCheckbox.value,
+        id: subjectTeacherCheckbox.id
+    });
+
+    // Show existing image for edit mode
+    {% if form.instance.passport_photo %}
+    photoPreview.innerHTML = '<img src="{{ form.instance.passport_photo.url }}" alt="Current Passport Photo" style="max-width: 150px; max-height: 150px; border-radius: 10px; object-fit: cover; display: block; margin: 10px auto 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
+    {% endif %}
+});
+</script>
+{% endblock %}

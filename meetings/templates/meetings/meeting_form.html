@@ -1,0 +1,231 @@
+{% extends base_template %}
+{% block title %}{% if meeting %}Update Meeting{% else %}Create Meeting{% endif %}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            <h3>{% if meeting %}Update Meeting{% else %}Create Meeting{% endif %}</h3>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if meeting %}
+            <div class="meeting-url">
+                <label>Meeting URL</label>
+                <a href="{{ meeting.meeting_url }}" target="_blank">{{ meeting.meeting_url }}</a>
+            </div>
+        {% endif %}
+        <form method="post" id="meetingForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_title">Meeting Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="error">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_status">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="error">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_from_date">Start Date</label>
+                {{ form.from_date }}
+                {% if form.from_date.errors %}
+                    <div class="error">{{ form.from_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_start_time">Start Time</label>
+                {{ form.start_time }}
+                {% if form.start_time.errors %}
+                    <div class="error">{{ form.start_time.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_to_date">End Date</label>
+                {{ form.to_date }}
+                {% if form.to_date.errors %}
+                    <div class="error">{{ form.to_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_to_time">End Time</label>
+                {{ form.to_time }}
+                {% if form.to_time.errors %}
+                    <div class="error">{{ form.to_time.errors }}</div>
+                {% endif %}
+            </div>
+            {% if form.non_field_errors %}
+                <div class="error">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <button type="submit">{% if meeting %}Update{% else %}Create{% endif %}</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+    .header {
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        border-radius: 15px;
+        margin-bottom: 15px;
+    }
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .back-btn {
+        font-size: 24px;
+        cursor: pointer;
+        padding-left: 10px;
+    }
+    .header h3 {
+        margin: 0;
+        flex-grow: 1;
+        font-size: 1.5rem;
+    }
+    .form-container {
+        padding: 15px;
+    }
+    .messages {
+        margin-bottom: 15px;
+    }
+    .alert {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        color: #fff;
+        padding: 8px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+    }
+    .alert-success {
+        background: linear-gradient(45deg, #34c759, #3a86ff);
+    }
+    .alert-warning {
+        background: linear-gradient(45deg, #ff9800, #f57c00);
+    }
+    .meeting-url {
+        margin-bottom: 15px;
+    }
+    .meeting-url label, .form-group label {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .meeting-url a {
+        color: #3a86ff;
+        font-size: 0.875rem;
+        word-break: break-all;
+        text-decoration: none;
+    }
+    .meeting-url a:hover {
+        text-decoration: underline;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-control {
+        width: 100%;
+        border-radius: 20px;
+        background: linear-gradient(45deg, #e0e0e0, #ffffff);
+        border: none;
+        padding: 10px;
+        font-size: 0.875rem;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .error {
+        color: #ff4b2b;
+        font-size: 0.75rem;
+        margin-top: 5px;
+    }
+    button {
+        background: linear-gradient(45deg, #34c759, #3a86ff);
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.3s ease;
+    }
+    button:hover {
+        transform: scale(1.02);
+    }
+    @media (max-width: 576px) {
+        .container {
+            padding: 5px;
+        }
+        .header {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .header h3 {
+            font-size: 1.2rem;
+        }
+        .form-container {
+            padding: 10px;
+        }
+        .form-group, .meeting-url {
+            margin-bottom: 10px;
+        }
+        .form-group label, .meeting-url label {
+            font-size: 0.875rem;
+            margin-bottom: 5px;
+        }
+        .form-control, .meeting-url a {
+            padding: 8px;
+            font-size: 0.75rem;
+            border-radius: 15px;
+        }
+        .alert {
+            padding: 6px;
+            font-size: 0.75rem;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 0.875rem;
+            border-radius: 25px;
+        }
+        .error {
+            font-size: 0.625rem;
+        }
+        .back-btn {
+            font-size: 18px;
+            padding-left: 5px;
+        }
+    }
+</style>
+{% endblock content %}

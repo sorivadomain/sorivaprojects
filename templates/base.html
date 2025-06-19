@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>Manus Dei | {% block title %}Home{% endblock title %}</title>
+
+  <!-- ====== CSS & Links (Bootstrap, FontAwesome, etc.) ====== -->
+
+  <!-- Bootstrap CSS (CDN or local) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
+
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+
+  <!-- DataTables -->
+  <link rel="stylesheet" href="{% static 'plugins/Datatables/datatables.min.css' %}"/>
+
+  <!-- AdminLTE theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+  {% block head %}{% endblock head %}
+
+  <style>
+    /* Offsets for fixed top & bottom bars */
+    .main-container {
+      /* Enough top margin so content won't hide behind the topbar */
+      margin-top: 60px;
+
+      /* Enough bottom margin so content won't hide behind the bottombar */
+      margin-bottom: 60px;
+
+      /* General padding for content spacing */
+      padding: 20px;
+    }
+
+    /* ==============================
+       Dark Mode Overrides for Entire Page
+       ============================== */
+    body.dark-mode {
+      background-color: #121212; /* overall dark background */
+      color: #fff;              /* default text color */
+    }
+
+    /* Topbar dark override – ensures topbar gradient goes dark in dark mode */
+    body.dark-mode .topbar-container {
+      background: linear-gradient(45deg, #222, #444) !important;
+      color: #fff !important;
+    }
+
+    /* Bottombar dark override – ensures bottombar gradient goes dark in dark mode */
+    body.dark-mode .bottombar-container {
+      background: linear-gradient(45deg, #222, #444) !important;
+      color: #fff !important;
+    }
+
+    /* If you have any other containers (cards, panels, etc.)
+       you can add their .dark-mode overrides here, e.g.:
+       body.dark-mode .card {
+         background: #2a2a2a;
+       } 
+       body.dark-mode .card-header {
+         background: #333;
+       } etc.
+    */
+  </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+
+  {# TOPBAR partial (fixed at top) #}
+  {% include 'partials/topbar.html' %}
+
+  {# MAIN CONTENT AREA #}
+  <div class="main-container">
+    {% block content %}
+    <!-- Page-specific content goes here -->
+    {% endblock content %}
+  </div>
+
+  {# BOTTOMBAR partial (fixed at bottom) #}
+  {% include 'partials/bottombar.html' %}
+
+  <!-- ===== JS & Scripts ===== -->
+  <!-- jQuery -->
+  <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+  <!-- Bootstrap 5 (bundle) -->
+  <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- overlayScrollbars -->
+  <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+
+  <!-- AdminLTE App & optional demo -->
+  <script src="{% static 'dist/js/adminlte.js' %}"></script>
+  <script src="{% static 'dist/js/demo.js' %}"></script>
+
+  <!-- Toastr -->
+  <script src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+
+  <!-- DataTables -->
+  <script src="{% static 'plugins/Datatables/datatables.min.js' %}"></script>
+
+  {% block scripts %}{% endblock scripts %}
+  {% block morejs %}{% endblock morejs %}
+</body>
+</html>

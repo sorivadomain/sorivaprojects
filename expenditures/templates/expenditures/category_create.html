@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="animated-functionality">
+    <!-- Animation here -->
+    <h1 class="my-5 red-heading">Create Category</h1>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_name" class="form-label green-label">Category Name</label>
+        {{ form.name }}
+      </div>
+      <button id="submitBtn" type="submit" class="btn btn-primary">Create Category</button>
+    </form>
+  </div>
+</div>
+<style>
+  /* Inline CSS styles */
+  body {
+    background-color: #f8f9fa; /* Set background color for the entire page */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .container {
+    text-align: center;
+  }
+
+  .animated-functionality {
+    background-color: #ffffff; /* Set background color for the container */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow effect */
+    margin-top: 20px; /* Add margin to the top */
+    animation: slide-in 0.5s ease-out forwards;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .green-label {
+    color: green; /* Set green color for the labels */
+  }
+
+  .red-heading {
+    color: red; /* Set red color for the heading */
+  }
+
+  /* Increase the width of the form field */
+  input[type="text"] {
+    width: 400px; /* Adjust the width as needed */
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  // JavaScript to add border when form field is focused
+  document.addEventListener("DOMContentLoaded", function() {
+    const formField = document.querySelector("#id_name");
+    formField.addEventListener("focus", function() {
+      formField.style.border = "2px solid green";
+    });
+    formField.addEventListener("blur", function() {
+      formField.style.border = "";
+    });
+
+    // JavaScript to change button color randomly every 5 seconds
+    const submitBtn = document.getElementById("submitBtn");
+    setInterval(function() {
+      const randomColor = getRandomColor();
+      submitBtn.style.backgroundColor = randomColor;
+    }, 5000);
+
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+  });
+</script>
+{% endblock %}

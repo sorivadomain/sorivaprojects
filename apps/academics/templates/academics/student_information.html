@@ -1,0 +1,80 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 20px;">
+    <a href="{% url 'academics_home' %}" style="display: inline-block; padding: 12px 20px; background-color: #007aff; color: white; border-radius: 25px; font-size: 24px; text-decoration: none; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+        🏠
+    </a>
+</div>
+<div class="container" style="max-width: 100%; margin: 20px auto; padding: 20px;">
+    <h2 style="text-align: center; font-size: 24px; color: #333; margin-bottom: 20px;">{{ student.firstname }} {{ student.surname }} - Information</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if field.name in visible_fields %}
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <label style="display: block; font-size: 16px; color: #555; margin-bottom: 5px;">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button type="submit" name="action" value="save" style="background-color: #007aff; color: white; padding: 12px 24px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin-right: 10px;">Save</button>
+            <button type="submit" name="action" value="save_all_class" style="background-color: #34c759; color: white; padding: 12px 24px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; margin-right: 10px;">Save for All Class</button>
+            <button type="submit" name="action" value="save_all_students" style="background-color: #ff2d55; color: white; padding: 12px 24px; border: none; border-radius: 25px; font-size: 16px; cursor: pointer;">Save for All Students</button>
+        </div>
+    </form>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="text-align: center; color: #34c759; margin-top: 10px;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<style>
+    .rounded-full {
+        border-radius: 25px !important;
+        padding: 12px !important;
+        font-size: 16px !important;
+        width: 100% !important;
+        max-width: 90vw !important;
+        border: none !important;
+        background-color: #f0f0f0 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        text-align: center !important;
+    }
+    .rounded-full:focus {
+        outline: none !important;
+        background-color: #e0e0e0 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+    }
+    select.rounded-full {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='gray' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 15px center !important;
+        text-align: center !important;
+        text-align-last: center !important;
+    }
+    textarea.rounded-full {
+        height: 100px !important;
+        resize: vertical !important;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    a[style*="🏠"] {
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    a[style*="🏠"]:hover {
+        background-color: #005bb5;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}

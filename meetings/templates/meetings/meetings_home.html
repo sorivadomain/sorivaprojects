@@ -1,0 +1,154 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">{{ title }}</h3>
+        </div>
+    </div>
+
+    <!-- BUTTONS CONTAINER -->
+    <div class="buttons-container" style="width: 100%; margin: 0; padding: 0;">
+        <!-- 1) Create Meeting -->
+        <a href="{% url 'create_meeting' %}" class="iphone-button bg-create-meeting" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Create Meeting</h3>
+                <p class="desc-info">Schedule a new meeting</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>🕒➕</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to create</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- 2) Manage Meetings -->
+        <a href="{% url 'meeting_list' %}" class="iphone-button bg-manage-meetings" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Manage Meetings</h3>
+                <p class="desc-info">View all meetings</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📅</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- 3) Meetings Reports & Analytics -->
+        <a href="#" class="iphone-button bg-meetings-reports" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Meetings Reports & Analytics</h3>
+                <p class="desc-info">View meeting insights</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📊</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to view</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 80px;
+        margin-bottom: 10px;
+        border-radius: 40px;
+        text-decoration: none;
+        color: #fff;
+        transition: transform 0.3s ease;
+        padding: 0 20px;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+    }
+    .button-left, .button-center, .button-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .button-left {
+        text-align: left;
+        flex: 1;
+        margin-right: 10px;
+    }
+    .button-center {
+        text-align: center;
+        flex: 1;
+    }
+    .button-right {
+        text-align: right;
+        flex: 1;
+        margin-left: 10px;
+    }
+    .button-left h3, .button-center h3, .button-right h3 {
+        margin: 3px 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .desc-info {
+        margin: 2px 0;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+    /* Shiny gradient backgrounds for each button */
+    .bg-create-meeting {
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+    }
+    .bg-manage-meetings {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    }
+    .bg-meetings-reports {
+        background: linear-gradient(45deg, #00f260, #0575e6);
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .iphone-button {
+            min-height: 70px;
+            padding: 0 15px;
+        }
+        .button-left h3, .button-center h3, .button-right h3 {
+            font-size: 16px;
+        }
+        .desc-info {
+            font-size: 12px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock content %}

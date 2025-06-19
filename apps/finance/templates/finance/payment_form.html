@@ -1,0 +1,163 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}
+    {% if is_update %}Update Payment{% else %}Create Payment{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px;">⬅️</span>
+            <h3 class="flex-grow-1" style="margin: 0;">
+                {% if is_update %}Update Payment{% else %}Create Payment{% endif %} for Invoice {{ invoice.invoice_id }}
+            </h3>
+            <div class="header-actions" style="display: flex; align-items: center;">
+                <a href="{% url 'fees_invoice_list' %}" class="home-btn" style="font-size: 24px; color: #fff; cursor: pointer; text-decoration: none;">🏠</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVOICE DETAILS -->
+    <div class="invoice-details" style="max-width: 600px; margin: 0 auto 20px; padding: 0 10px;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <p style="margin: 0; font-size: 14px;"><strong>Student:</strong> {{ invoice.student.firstname }} {% if invoice.student.middle_name %}{{ invoice.student.middle_name }} {% endif %}{{ invoice.student.surname }}</p>
+            <p style="margin: 0; font-size: 14px;"><strong>Class:</strong> {{ invoice.class_level.name }}</p>
+            <p style="margin: 0; font-size: 14px;"><strong>Period:</strong> {{ invoice.session.name }}-{{ invoice.term.name }}-{{ invoice.installment.name }}</p>
+            <p style="margin: 0; font-size: 14px;"><strong>Total Amount:</strong> {{ invoice.total_invoice_amount|floatformat:2 }} TZS</p>
+            <p style="margin: 0; font-size: 14px;"><strong>Status:</strong> {{ invoice.status }}</p>
+        </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-container" style="max-width: 600px; margin: 0 auto; padding: 0 10px;">
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="{{ form.amount_paid.id_for_label }}" style="font-weight: 600; color: #212529;">Amount Paid (TZS)</label>
+                {{ form.amount_paid }}
+                {% if form.amount_paid.errors %}
+                    <div style="color: #dc3545; font-size: 12px;">{{ form.amount_paid.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="{{ form.payment_date.id_for_label }}" style="font-weight: 600; color: #212529;">Payment Date</label>
+                {{ form.payment_date }}
+                {% if form.payment_date.errors %}
+                    <div style="color: #dc3545; font-size: 12px;">{{ form.payment_date.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="{{ form.method.id_for_label }}" style="font-weight: 600; color: #212529;">Payment Method</label>
+                {{ form.method }}
+                {% if form.method.errors %}
+                    <div style="color: #dc3545; font-size: 12px;">{{ form.method.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-actions" style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn btn-sm" style="border-radius: 50px; background: linear-gradient(45deg, #00c6ff, #0072ff); color: #fff; padding: 12px 24px; font-size: 14px; transition: transform 0.3s ease;">✅ {% if is_update %}Update{% else %}Create{% endif %}</button>
+                <a href="{% url 'fees_invoice_list' %}" class="btn btn-sm" style="border-radius: 50px; background: linear-gradient(45deg, #ff416c, #ff4b2b); color: #fff; padding: 12px 24px; font-size: 14px; text-decoration: none; margin-left: 10px; transition: transform 0.3s ease;">🚫 Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Base styles */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        color: #212529;
+        background: #ffffff;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-container {
+        width: 100%;
+        margin: 0;
+        padding: 0 10px;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 20px;
+        border-radius: 50px;
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        font-size: 1rem;
+        color: #000;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #007aff;
+        box-shadow: 0 0 0 3px rgba(0,122,255,0.2), inset 0 2px 4px rgba(0,0,0,0.05);
+        outline: none;
+    }
+    .btn-sm {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-sm:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        body {
+            color: #000000;
+        }
+        .header h3, .header .back-btn, .header .home-btn {
+            color: #000000;
+        }
+        .invoice-details, .form-group label {
+            color: #000000;
+        }
+        .btn-sm {
+            color: #000000 !important;
+        }
+        .form-group input, .form-group select {
+            background-color: #fff;
+            color: #000000;
+        }
+    }
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .invoice-details, .form-container {
+            padding: 0 5px;
+        }
+        .form-group input, .form-group select {
+            font-size: 0.9rem;
+            padding: 10px 16px;
+        }
+        .form-group label {
+            font-size: 0.9rem;
+        }
+        .btn-sm {
+            padding: 10px 20px;
+            font-size: 12px;
+        }
+        .form-actions a {
+            margin-left: 5px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,439 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px; border-radius: 0;">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+        <h2 class="m-0">Inactive Staff List</h2>
+        <a href="{% url 'staff-add' %}" class="btn btn-light rounded-pill px-3 py-1">➕ Add Staff</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="d-flex gap-1 full-width-filters">
+        <div class="filter-group">
+            <label for="searchInput" class="form-label">Search by ID or Name</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Enter ID or Name">
+        </div>
+        <div class="filter-group">
+            <label for="occupationFilter" class="form-label">Occupation</label>
+            <select id="occupationFilter" class="form-select">
+                <option value="">All</option>
+                {% for value, label in occupation_choices %}
+                <option value="{{ label }}">{{ label }}</option>
+                {% endfor %}
+                <option value="N/A">N/A</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="genderFilter" class="form-label">Gender</label>
+            <select id="genderFilter" class="form-select">
+                <option value="">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Totals Display -->
+    <div class="totals-display d-flex gap-1">
+        <span id="totalMales">Total Males: 0</span>
+        <span id="totalFemales">Total Females: 0</span>
+        <span id="overallTotal">Overall Total: 0</span>
+    </div>
+
+    <!-- Staff Table -->
+    <div class="table-responsive m-3">
+        <table class="table table-hover table-bordered" id="staffTable">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">S/N</th>
+                    <th scope="col">Staff User ID</th>
+                    <th scope="col">Passport Photo</th>
+                    <th scope="col">Full Name <span id="nameSortArrow" class="sort-arrow">↑</span></th>
+                    <th scope="col">Occupation</th>
+                    <th scope="col">Gender <span id="genderSortArrow" class="sort-arrow">↑</span></th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Mobile Number</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="staffTableBody">
+                {% for staff in staff_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ staff.staff_user_id }}</td>
+                    <td>
+                        <img src="{% if staff.passport_photo %}{{ staff.passport_photo.url }}{% elif staff.gender == 'male' %}{% static 'images/male.png' %}{% else %}{% static 'images/female.png' %}{% endif %}" alt="{{ staff.firstname }}'s Photo" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                    </td>
+                    <td>{{ staff.firstname }} {% if staff.middle_name %}{{ staff.middle_name }} {% endif %}{{ staff.surname }}</td>
+                    <td>{{ staff.get_occupation_display|default:"N/A" }}</td>
+                    <td>{{ staff.gender|slice:":1"|upper }}</td>
+                    <td>
+                        <span style="color: #dc3545; font-size: 1.2rem;">❌</span>
+                    </td>
+                    <td>{{ staff.mobile_number }}</td>
+                    <td>
+                        <a href="{% url 'staff-edit' pk=staff.pk %}" class="btn btn-sm btn-outline-primary rounded-pill mx-1" title="Update">✏️</a>
+                        <a href="{% url 'staff-detail' pk=staff.pk %}" class="btn btn-sm btn-outline-info rounded-pill mx-1" title="View Details">👁️</a>
+                        <a href="{% url 'staff-delete' pk=staff.pk %}" class="btn btn-sm btn-outline-danger rounded-pill mx-1" title="Delete">🗑️</a>
+                        {% if staff.is_subject_teacher %}
+                        <a href="{% url 'staff-assign-subjects' pk=staff.pk %}" class="btn btn-sm btn-outline-success rounded-pill mx-1" title="Assign Subjects">📚</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="no-records">
+                    <td colspan="9" class="text-center">No inactive staff records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+    overflow-x: hidden;
+}
+.container-fluid {
+    width: 100%;
+    padding: 0;
+}
+.header {
+    border-radius: 0;
+    width: 100%;
+}
+.table {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.table thead th {
+    background: #343a40;
+    color: #fff;
+    border: none;
+}
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+.table td, .table th {
+    vertical-align: middle;
+    text-align: center;
+}
+.btn-outline-primary {
+    border-color: #a855f7;
+    color: #a855f7;
+}
+.btn-outline-primary:hover {
+    background: #a855f7;
+    color: #fff;
+}
+.btn-outline-info {
+    border-color: #17a2b8;
+    color: #17a2b8;
+}
+.btn-outline-info:hover {
+    background: #17a2b8;
+    color: #fff;
+}
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+.btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+}
+.btn-outline-success:hover {
+    background: #28a745;
+    color: #fff;
+}
+.btn-light {
+    background: #fff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+.btn-light:hover {
+    background: #f8fafc;
+    color: #a855f7;
+}
+.full-width-filters {
+    width: 100vw;
+    margin: 0;
+    padding: 0 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+.filter-group {
+    flex: 0 0 auto;
+    max-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.form-label {
+    font-size: 0.85rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+.form-control, .form-select {
+    border: none;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    background: #f2f2f7;
+    border-radius: 20px;
+    height: 40px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+.form-control:focus, .form-select:focus {
+    background: #e8ecef;
+    outline: 2px solid #007aff;
+    box-shadow: none;
+}
+.form-control::placeholder {
+    color: #8e8e93;
+}
+.totals-display {
+    width: 100vw;
+    margin: 10px 0;
+    padding: 0 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    background: #f2f2f7;
+    font-size: 0.85rem;
+    color: #1f2937;
+    border-radius: 10px;
+}
+.totals-display span {
+    padding: 8px 12px;
+    border-radius: 20px;
+    background: #e8ecef;
+    flex: 0 0 auto;
+}
+.sort-arrow {
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 5px;
+    transition: transform 0.2s ease;
+}
+.sort-arrow:hover {
+    color: #007aff;
+}
+@media (max-width: 576px) {
+    .table td, .table th {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    .rounded-circle {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    .full-width-filters {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0;
+        justify-content: flex-start;
+        width: 100%;
+    }
+    .filter-group {
+        width: 100%;
+        max-width: none;
+    }
+    .totals-display {
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        gap: 0.5rem;
+        margin: 15px 0;
+    }
+    .totals-display span {
+        width: 100%;
+        text-align: center;
+    }
+    .sort-arrow {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const occupationFilter = document.getElementById('occupationFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    const table = document.getElementById('staffTable');
+    const tbody = document.getElementById('staffTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.no-records)'));
+    const noRecordsRow = tbody.querySelector('tr.no-records');
+    const totalMalesSpan = document.getElementById('totalMales');
+    const totalFemalesSpan = document.getElementById('totalFemales');
+    const overallTotalSpan = document.getElementById('overallTotal');
+    const nameSortArrow = document.getElementById('nameSortArrow');
+    const genderSortArrow = document.getElementById('genderSortArrow');
+
+    let fullNameSortState = 'asc'; // asc, desc, random
+    let genderSortState = 'asc'; // asc, desc, random
+
+    function applyFilters() {
+        const searchText = searchInput.value.trim().toLowerCase();
+        const occupationValue = occupationFilter.value;
+        const genderValue = genderFilter.value;
+
+        // Map dropdown gender values to table display values
+        const genderMap = {
+            'male': 'M',
+            'female': 'F'
+        };
+        const mappedGenderValue = genderMap[genderValue] || '';
+
+        let visibleRows = 0;
+        let totalMales = 0;
+        let totalFemales = 0;
+
+        rows.forEach(row => {
+            const userId = row.cells[1].textContent.trim().toLowerCase();
+            const fullName = row.cells[3].textContent.trim().toLowerCase();
+            const occupation = row.cells[4].textContent.trim();
+            const gender = row.cells[5].textContent.trim();
+
+            const matchesSearch = !searchText || userId.includes(searchText) || fullName.includes(searchText);
+            const matchesOccupation = !occupationValue || occupation === occupationValue;
+            const matchesGender = !mappedGenderValue || gender === mappedGenderValue;
+
+            row.dataset.visible = matchesSearch && matchesOccupation && matchesGender ? 'true' : 'false';
+
+            if (row.dataset.visible === 'true') {
+                visibleRows++;
+                if (gender === 'M') totalMales++;
+                if (gender === 'F') totalFemales++;
+            }
+        });
+
+        // Update totals display
+        totalMalesSpan.textContent = `Total Males: ${totalMales}`;
+        totalFemalesSpan.textContent = `Total Females: ${totalFemales}`;
+        overallTotalSpan.textContent = `Overall Total: ${visibleRows}`;
+
+        // Show/hide no-records row
+        if (noRecordsRow) {
+            noRecordsRow.style.display = visibleRows === 0 && rows.length > 0 ? 'table-row' : 'none';
+        }
+
+        // Apply sorting
+        applySorting();
+    }
+
+    function applySorting() {
+        let sortedRows = [...rows];
+
+        // Apply sorting based on the active sort state
+        if (fullNameSortState !== 'none') {
+            sortedRows.sort((a, b) => {
+                const nameA = a.cells[3].textContent.trim().toLowerCase();
+                const nameB = b.cells[3].textContent.trim().toLowerCase();
+                if (fullNameSortState === 'asc') {
+                    return nameA.localeCompare(nameB);
+                } else if (fullNameSortState === 'desc') {
+                    return nameB.localeCompare(nameA);
+                } else if (fullNameSortState === 'random') {
+                    return Math.random() - 0.5;
+                }
+                return 0;
+            });
+        } else if (genderSortState !== 'none') {
+            sortedRows.sort((a, b) => {
+                const genderA = a.cells[5].textContent.trim();
+                const genderB = b.cells[5].textContent.trim();
+                if (genderSortState === 'asc') {
+                    return genderA === 'F' ? -1 : 1;
+                } else if (genderSortState === 'desc') {
+                    return genderA === 'M' ? -1 : 1;
+                } else if (genderSortState === 'random') {
+                    return Math.random() - 0.5;
+                }
+                return 0;
+            });
+        }
+
+        // Re-render visible rows in sorted order
+        tbody.innerHTML = '';
+        sortedRows.forEach(row => {
+            if (row.dataset.visible === 'true') {
+                row.style.display = 'table-row';
+                tbody.appendChild(row);
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Append no-records row if needed
+        if (noRecordsRow) {
+            tbody.appendChild(noRecordsRow);
+        }
+    }
+
+    function toggleNameSort() {
+        if (fullNameSortState === 'asc') {
+            fullNameSortState = 'desc';
+            nameSortArrow.textContent = '↓';
+        } else if (fullNameSortState === 'desc') {
+            fullNameSortState = 'asc';
+            nameSortArrow.textContent = '↑';
+        } else if (fullNameSortState === 'random') {
+            fullNameSortState = 'asc';
+            nameSortArrow.textContent = '↑';
+        } else {
+            fullNameSortState = 'random';
+            nameSortArrow.textContent = '→';
+        }
+        genderSortState = 'none'; // Reset gender sort
+        genderSortArrow.textContent = '↑';
+        applySorting();
+    }
+
+    function toggleGenderSort() {
+        if (genderSortState === 'asc') {
+            genderSortState = 'desc';
+            genderSortArrow.textContent = '↓';
+        } else if (genderSortState === 'desc') {
+            genderSortState = 'asc';
+            genderSortArrow.textContent = '↑';
+        } else if (genderSortState === 'random') {
+            genderSortState = 'asc';
+            genderSortArrow.textContent = '↑';
+        } else {
+            genderSortState = 'random';
+            genderSortArrow.textContent = '→';
+        }
+        fullNameSortState = 'none'; // Reset name sort
+        nameSortArrow.textContent = '↑';
+        applySorting();
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    occupationFilter.addEventListener('change', applyFilters);
+    genderFilter.addEventListener('change', applyFilters);
+    nameSortArrow.addEventListener('click', toggleNameSort);
+    genderSortArrow.addEventListener('click', toggleGenderSort);
+
+    // Apply filters and sorting on page load
+    applyFilters();
+});
+</script>
+{% endblock %}

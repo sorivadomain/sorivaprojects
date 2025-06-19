@@ -1,0 +1,231 @@
+{% load static %}
+<section class="about">
+    <h1 class="about-main-title">About Us</h1>
+    <div class="about-container">
+        <!-- Row 1: Two blocks -->
+        <div class="about-row">
+            <div class="about-item">
+                <div class="about-card">
+                    <div class="subheader-wrapper">
+                        <svg class="subheader-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        </svg>
+                        <h2 class="about-title">About Us</h2>
+                    </div>
+                    <p class="about-text">Manus Dei Secondary School is a co-educational Roman Catholic boarding school located in Kibwigwa, Kigoma, Tanzania. Founded under the guidance of Father Ferdinand Barugize, our school combines academic excellence with strong moral and spiritual formation.</p>
+                </div>
+            </div>
+            <div class="about-item">
+                <div class="about-card">
+                    <div class="subheader-wrapper">
+                        <svg class="subheader-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                            <path d="M12 2l-10 6v10l10-6 10 6V8l-10-6zm0 15.5l-8 4.8V10.7l8-4.8v11.6zm2-11.6l8 4.8v11.5l-8-4.8V5.9z"/>
+                        </svg>
+                        <h2 class="about-title">Academic Achievement</h2>
+                    </div>
+                    <p class="about-text">We are recognized for consistently delivering high performance in national examinations, both in science and arts subjects. Over recent years, a significant proportion of our students have earned Division I and II results in CSEE.</p>
+                    <a href="https://matokeo.necta.go.tz/results/2024/csee/CSEE2024/CSEE2024/results/s5482.htm" target="_blank" class="about-button">CSEE Results 2024</a>
+                </div>
+            </div>
+        </div>
+        <div class="row-divider"></div>
+        <!-- Row 2: One block, full width -->
+        <div class="about-row">
+            <div class="about-item full-width">
+                <div class="about-card">
+                    <div class="subheader-wrapper">
+                        <svg class="subheader-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        </svg>
+                        <h2 class="about-title">Our Catholic Identity</h2>
+                    </div>
+                    <p class="about-text">As part of the diocesan education system, we are committed to nurturing not only the minds but also the hearts and souls of our learners. Our educational approach is deeply rooted in Catholic values, emphasizing discipline, faith, service, and love for our neighbors.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row-divider"></div>
+        <!-- Row 3: Two blocks -->
+        <div class="about-row">
+            <div class="about-item">
+                <div class="about-card">
+                    <div class="subheader-wrapper">
+                        <svg class="subheader-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                            <path d="M12 2l-10 6v10l10-6 10 6V8l-10-6zm0 15.5l-8 4.8V10.7l8-4.8v11.6zm2-11.6l8 4.8v11.5l-8-4.8V5.9z"/>
+                        </svg>
+                        <h2 class="about-title">Our Commitment</h2>
+                    </div>
+                    <p class="about-text">Our mission is to create a safe, respectful, and inclusive learning environment where students are empowered to grow intellectually, morally, and spiritually—preparing them to serve God and society as responsible citizens and future leaders.</p>
+                </div>
+            </div>
+            <div class="about-item">
+                <div class="about-card">
+                    <div class="subheader-wrapper">
+                        <svg class="subheader-icon" width="20" height="20" viewBox="0 0 24 24" fill="#F28C38">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        </svg>
+                        <h2 class="about-title">Our Vision</h2>
+                    </div>
+                    <p class="about-text">To become a leading Catholic educational institution nurturing academically excellent, morally upright, and spiritually grounded young men and women who are prepared to transform society through faith, knowledge, and service.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+.about {
+    width: 100vw;
+    padding: 60px 0;
+    background: linear-gradient(180deg, #F5F5F5, #E8ECEF); /* Darker gradient */
+    text-align: center;
+    border-top: 2px solid #F28C38; /* Carrot border */
+    border-bottom: 2px solid #F28C38;
+}
+.about-main-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #007AFF; /* Blue */
+    margin: 0 auto 40px;
+    border-bottom: 2px solid #007AFF;
+    padding-bottom: 10px;
+    display: block;
+    width: fit-content;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.1s forwards;
+}
+.about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.about-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 30px; /* Wider gap */
+    margin-bottom: 20px;
+}
+.full-width {
+    grid-column: 1 / -1; /* Span both columns */
+}
+.about-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out forwards;
+}
+.about-item:nth-child(1) { animation-delay: 0.2s; }
+.about-item:nth-child(2) { animation-delay: 0.3s; }
+.about-item:nth-child(3) { animation-delay: 0.4s; }
+.about-item:nth-child(4) { animation-delay: 0.5s; }
+.about-item:nth-child(5) { animation-delay: 0.6s; }
+.about-card {
+    background: rgba(255, 255, 255, 1);
+    border: 1px solid #F28C38; /* Carrot border */
+    border-radius: 10px;
+    padding: 25px; /* More padding */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+.about-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+.subheader-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #F28C38; /* Carrot underline */
+    padding-bottom: 5px;
+}
+.subheader-icon {
+    width: 20px;
+    height: 20px;
+}
+.about-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #F28C38; /* Carrot */
+    margin: 0;
+}
+.about-text {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: #333333;
+    line-height: 1.6;
+    margin: 0 0 15px;
+    text-align: left;
+}
+.about-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #007AFF, #4DA8FF); /* Button gradient */
+    color: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    text-decoration: none;
+    border: 2px solid #F28C38; /* Carrot */
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    animation: pulse 2s infinite;
+}
+.about-button:hover {
+    background: linear-gradient(45deg, #005BB5, #3A8CFF);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation-play-state: paused;
+}
+.row-divider {
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #F28C38, transparent);
+    margin: 20px auto;
+}
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+@media (max-width: 768px) {
+    .about {
+        padding: 40px 0;
+    }
+    .about-main-title {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+    .about-row {
+        grid-template-columns: 1fr; /* Single column */
+        gap: 20px;
+    }
+    .full-width {
+        grid-column: 1; /* Reset for mobile */
+    }
+    .about-title {
+        font-size: 1.4rem;
+    }
+    .about-text {
+        font-size: 0.95rem;
+    }
+    .about-button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    .about-card {
+        padding: 20px;
+    }
+    .subheader-icon {
+        width: 18px;
+        height: 18px;
+    }
+    .row-divider {
+        width: 90%;
+    }
+}
+</style>

@@ -1,0 +1,155 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style scoped>
+    .admission-trends {
+        max-width: 100%;
+    }
+    .chart-container {
+        max-width: 800px;
+        margin: 0 auto 40px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    .stat-card {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .stat-card h3 {
+        font-size: 1.2rem;
+        color: #333;
+        margin: 0 0 10px;
+    }
+    .stat-card p {
+        font-size: 1.5rem;
+        color: #00509d;
+        margin: 0;
+    }
+    .analysis-container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+    }
+    .analysis-container h3 {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 0 0 15px;
+    }
+    .analysis-container p {
+        font-size: 1rem;
+        color: #555;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    .trend-increasing {
+        color: #28a745;
+        font-weight: bold;
+    }
+    .trend-decreasing {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .trend-constant {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    @media (max-width: 576px) {
+        .chart-container {
+            padding: 15px;
+        }
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+        .stat-card h3 {
+            font-size: 1.1rem;
+        }
+        .stat-card p {
+            font-size: 1.3rem;
+        }
+        .analysis-container {
+            padding: 15px;
+        }
+        .analysis-container h3 {
+            font-size: 1.3rem;
+        }
+        .analysis-container p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+<div class="admission-trends">
+    {% if admission_data.years %}
+    <div class="chart-container">
+        <canvas id="admissionTrendsChart"></canvas>
+    </div>
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Highest Admission Year</h3>
+            <p>{{ admission_data.highest_year }} ({{ admission_data.highest_count }})</p>
+        </div>
+        <div class="stat-card">
+            <h3>Lowest Admission Year</h3>
+            <p>{{ admission_data.lowest_year }} ({{ admission_data.lowest_count }})</p>
+        </div>
+    </div>
+    <div class="analysis-container">
+        <h3>Trend Analysis: <span class="trend-{{ admission_data.trend|lower }}">{{ admission_data.trend }}</span></h3>
+        <p>{{ admission_data.trend_description }}</p>
+        <h3>Comments</h3>
+        <p>{{ admission_data.comments }}</p>
+        <h3>Advice</h3>
+        <p>{{ admission_data.advice }}</p>
+    </div>
+    {% else %}
+    <div class="analysis-container">
+        <h3>No Admission Data Available</h3>
+        <p>No student admission records found. Please ensure student data is entered in the system.</p>
+    </div>
+    {% endif %}
+</div>
+<script>
+(function() {
+    {% if admission_data.years %}
+    const ctxAdmissions = document.getElementById('admissionTrendsChart').getContext('2d');
+    new Chart(ctxAdmissions, {
+        type: 'line',
+        data: {
+            labels: {{ admission_data.years|safe }},
+            datasets: [{
+                label: 'Total Admissions',
+                data: {{ admission_data.admission_counts|safe }},
+                borderColor: '#00509d',
+                backgroundColor: 'rgba(0, 80, 157, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Number of Students' }
+                },
+                x: {
+                    title: { display: true, text: 'Year' }
+                }
+            },
+            plugins: {
+                legend: { display: true, position: 'top' },
+                title: { display: true, text: 'Student Admissions by Year' }
+            }
+        }
+    });
+    {% endif %}
+})();
+</script>

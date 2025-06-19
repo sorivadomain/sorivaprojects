@@ -1,0 +1,270 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}Upload Profile Picture{% endblock title %}
+
+{% block head %}
+<style>
+    .profile-upload-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+    .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .back-button {
+        position: absolute;
+        left: 0;
+        font-size: 24px;
+        cursor: pointer;
+        color: #007aff;
+        transition: color 0.2s;
+    }
+    .back-button:hover {
+        color: #0053a6;
+    }
+    .profile-upload-container h2 {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+        text-align: center;
+        flex-grow: 1;
+    }
+    .profile-upload-container form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .profile-image-container {
+        margin: 20px 0;
+        text-align: center;
+    }
+    .profile-image-container img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e0e0e0;
+    }
+    .profile-image-container .profile-initial {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+        font-weight: bold;
+        color: #fff;
+        text-transform: uppercase;
+        border: 2px solid #e0e0e0;
+    }
+    /* Background colors based on first letter */
+    .profile-image-container .initial-a, .profile-image-container .initial-b, .profile-image-container .initial-c { background-color: #ff6f61; } /* Coral */
+    .profile-image-container .initial-d, .profile-image-container .initial-e, .profile-image-container .initial-f { background-color: #6b5b95; } /* Purple */
+    .profile-image-container .initial-g, .profile-image-container .initial-h, .profile-image-container .initial-i { background-color: #88b04b; } /* Green */
+    .profile-image-container .initial-j, .profile-image-container .initial-k, .profile-image-container .initial-l { background-color: #f7cac9; } /* Light Pink */
+    .profile-image-container .initial-m, .profile-image-container .initial-n, .profile-image-container .initial-o { background-color: #92a8d1; } /* Light Blue */
+    .profile-image-container .initial-p, .profile-image-container .initial-q, .profile-image-container .initial-r { background-color: #f4a261; } /* Orange */
+    .profile-image-container .initial-s, .profile-image-container .initial-t, .profile-image-container .initial-u { background-color: #d5a6bd; } /* Mauve */
+    .profile-image-container .initial-v, .profile-image-container .initial-w, .profile-image-container .initial-x { background-color: #b565a7; } /* Magenta */
+    .profile-image-container .initial-y, .profile-image-container .initial-z { background-color: #009b77; } /* Teal */
+    .custom-file-upload {
+        display: inline-block;
+        background: linear-gradient(45deg, #007aff, #0053a6);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        margin: 15px 0;
+        transition: transform 0.2s;
+    }
+    .custom-file-upload:hover {
+        transform: scale(1.05);
+    }
+    .hidden {
+        display: none;
+    }
+    .profile-upload-container .upload-button {
+        background: linear-gradient(45deg, #007aff, #0053a6);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        margin-top: 10px;
+        width: 120px;
+    }
+    .profile-upload-container .remove-button {
+        background: linear-gradient(45deg, #d9534f, #a94442);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        margin-top: 10px;
+        width: 120px;
+    }
+    .profile-upload-container button:hover {
+        transform: scale(1.05);
+    }
+    .profile-upload-container .error-message {
+        color: #d9534f;
+        text-align: center;
+        font-weight: 500;
+        margin: 15px 0;
+    }
+    .profile-upload-container .success-message {
+        color: #28a745;
+        text-align: center;
+        font-weight: 500;
+        margin: 15px 0;
+    }
+    @media (max-width: 768px) {
+        .profile-upload-container {
+            padding: 10px;
+            max-width: 90%;
+        }
+        .header-container {
+            margin-bottom: 15px;
+        }
+        .back-button {
+            font-size: 20px;
+        }
+        .profile-upload-container h2 {
+            font-size: 18px;
+        }
+        .profile-image-container img,
+        .profile-image-container .profile-initial {
+            width: 100px;
+            height: 100px;
+            font-size: 40px;
+        }
+        .custom-file-upload {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 18px;
+        }
+        .profile-upload-container .upload-button,
+        .profile-upload-container .remove-button {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 18px;
+            width: 100px;
+        }
+    }
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="profile-upload-container">
+    <div class="header-container">
+        <span class="back-button" onclick="window.history.back()">⬅️</span>
+        <h2>Upload Profile Picture</h2>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <p class="message {% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
+    <div class="profile-image-container">
+        {% if request.user.profile_picture and request.user.profile_picture.url %}
+            <img id="profile-image-preview" src="{{ request.user.profile_picture.url }}" alt="Profile Picture">
+        {% else %}
+            {% with first_letter=request.user.username|slice:":1"|lower %}
+                <div id="profile-image-preview" class="profile-initial initial-{{ first_letter }}">{{ first_letter|upper }}</div>
+            {% endwith %}
+        {% endif %}
+    </div>
+    <form method="POST" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
+        {{ form.profile_picture }}
+        <label for="id_profile_picture" class="custom-file-upload">Choose Image</label>
+        <button type="submit" class="upload-button">Upload</button>
+    </form>
+    {% if request.user.profile_picture %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="remove_picture" value="true">
+            <button type="submit" class="remove-button">Remove Picture</button>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('id_profile_picture').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('profile-image-preview');
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.id = 'profile-image-preview';
+                img.src = e.target.result;
+                img.alt = 'Preview Image';
+                img.style.width = '120px';
+                img.style.height = '120px';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                img.style.border = '2px solid #e0e0e0';
+                previewContainer.parentNode.replaceChild(img, previewContainer);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // Revert to profile picture or initial
+            {% if request.user.profile_picture and request.user.profile_picture.url %}
+            {
+                const img = document.createElement('img');
+                img.id = 'profile-image-preview';
+                img.src = '{{ request.user.profile_picture.url }}';
+                img.alt = 'Profile Picture';
+                img.style.width = '120px';
+                img.style.height = '120px';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                img.style.border = '2px solid #e0e0e0';
+                previewContainer.parentNode.replaceChild(img, previewContainer);
+            }
+            {% else %}
+            {
+                const initialDiv = document.createElement('div');
+                initialDiv.id = 'profile-image-preview';
+                initialDiv.className = 'profile-initial initial-{{ request.user.username|slice:":1"|lower }}';
+                initialDiv.textContent = '{{ request.user.username|slice:":1"|upper }}';
+                initialDiv.style.display = 'flex';
+                initialDiv.style.alignItems = 'center';
+                initialDiv.style.justifyContent = 'center';
+                initialDiv.style.margin = '0 auto';
+                initialDiv.style.borderRadius = '50%';
+                initialDiv.style.width = '120px';
+                initialDiv.style.height = '120px';
+                initialDiv.style.fontSize = '48px';
+                initialDiv.style.fontWeight = 'bold';
+                initialDiv.style.color = '#fff';
+                initialDiv.style.textTransform = 'uppercase';
+                initialDiv.style.border = '2px solid #e0e0e0';
+                previewContainer.parentNode.replaceChild(initialDiv, previewContainer);
+            }
+            {% endif %}
+        }
+    });
+</script>
+{% endblock content %}

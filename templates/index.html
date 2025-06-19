@@ -1,0 +1,374 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ sub_header }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #00ff88, #00b7ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <h3>{{ main_header }}</h3>
+        <h4>{{ sub_header }}</h4>
+        <span class="time-display" id="time-display"></span>
+        <span class="date-display" id="date-display"></span>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="buttons-container" style="width: 100%; margin: 0; padding: 0;">
+        <!-- View Details -->
+        <a href="{% url 'user-details' %}" class="iphone-button bg-user-details" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>{{ view_details_text }}</h3>
+                <p class="desc-info">{{ view_details_desc }}</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>👤</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- Settings -->
+        {% if show_settings %}
+        <a href="{% url 'settings_home' %}" class="iphone-button bg-settings" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>{{ settings_text }}</h3>
+                <p class="desc-info">{{ settings_desc }}</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>⚙️</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Finance -->
+        <a href="{% url 'finance-home' %}" class="iphone-button bg-finance" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Finance</h3>
+                <p class="desc-info">Billing & financial data</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>💰</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- Academics -->
+        <a href="{% url 'academics_home' %}" class="iphone-button bg-result" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Academics</h3>
+                <p class="desc-info">Academic performance</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📈</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- Staffs -->
+        {% if show_staffs %}
+        <a href="{% url 'staff-home' %}" class="iphone-button bg-staffs" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Staffs</h3>
+                <p class="desc-info">Teaching & Non-teaching</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>👨‍🏫</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Students -->
+        {% if show_students %}
+        <a href="{% url 'students_home' %}" class="iphone-button bg-students" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Students</h3>
+                <p class="desc-info">Manage all students</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>👨‍🎓</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Attendance -->
+        {% if show_attendance %}
+        <a href="{% url 'attendance_home' %}" class="iphone-button bg-attendance" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Attendance</h3>
+                <p class="desc-info">Track presence</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>✅</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Properties -->
+        {% if show_properties %}
+        <a href="{% url 'properties_home' %}" class="iphone-button bg-bursor" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Properties</h3>
+                <p class="desc-info">Manage school properties</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>💼</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜"></p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Events -->
+        {% if show_events %}
+        <a href="{% url 'events-home' %}" class="iphone-button bg-events" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow: 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Events</h3>
+                <p class="desc-info">School calendar</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: center; flex: 1;">
+                <h3>🎉</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: right; margin-left: 1; flex: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Library -->
+        <a href="{% url 'library_home' %}" class="iphone-button bg-library" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Library</h3>
+                <p class="desc-info">Books & references</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: center; flex: 1;">
+                <h3>📚</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: right; margin-left: flex; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+            <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+
+        <!-- Meetings -->
+        {% if show_meetings %}
+        <a href="{% url 'meetings_home' %}" class="iphone-button bg-meetings" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Meetings</h3>
+                <p class="desc-info">Schedule & records</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>👥</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- SMS -->
+        {% if show_sms %}
+        <a href="{% url 'sms_home' %}" class="iphone-button bg-sms" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>SMS</h3>
+                <p class="desc-info">Send quick messages</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>📱</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Update Profile (Admin only) -->
+        {% if is_admin %}
+        <a href="{% url 'update_profile' %}" class="iphone-button bg-update-profile" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Update Your Profile</h3>
+                <p class="desc-info">Modify admin account details</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>🔄</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to update</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Update Own Profile (Headmaster/Second Master only) -->
+        {% if is_headmaster_or_second_master %}
+        <a href="{% url 'update_profiles' %}" class="iphone-button bg-update-own-profile" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Update Our Own Profile</h3>
+                <p class="desc-info">Update profile picture</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>🖼️</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap to update</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+
+        <!-- Public Comments -->
+        {% if show_public_comments %}
+        <a href="{% url 'chat' %}" class="iphone-button bg-public-comments" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease, box-shadow 0.3s ease; padding: 0 20px;">
+            <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                <h3>Public Comments</h3>
+                <p class="desc-info">Share or view public feedback{% if notification_count > 0 %} ({{ notification_count }} new){% endif %}</p>
+            </div>
+            <div class="button-center" style="text-align: center; flex: 1;">
+                <h3>💬</h3>
+            </div>
+            <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                <p class="desc-info">Tap for more info</p>
+                <p class="desc-info" style="font-size: 20px;">➜</p>
+            </div>
+        </a>
+        {% endif %}
+    </div>
+
+
+    <!-- FOOTER -->
+    <div class="footer" style="text-align: center; margin-top: 30px; font-style: italic; color: #00b7ff;">
+        <p>Moto: No one should be left behind</p>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 80px;
+        margin-bottom: 10px;
+        border-radius: 40px;
+        text-decoration: none;
+        color: #fff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding: 0 20px;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .button-left, .button-center, .button-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .button-left {
+        text-align: left;
+        flex: 1;
+        margin-right: 10px;
+    }
+    .button-center {
+        text-align: center;
+        flex: 1;
+        margin: 0 10px;
+    }
+    .button-right {
+        text-align: right;
+        flex: 1;
+        margin-left: 10px;
+    }
+    .button-left h3, .button-center h3, .button-right h3 {
+        margin: 3px 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .desc-info {
+        margin: 2px 0;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+    .bg-user-details { background: linear-gradient(45deg, #33ccff, #0066ff); }
+    .bg-settings { background: linear-gradient(45deg, #00ff99, #007bff); }
+    .bg-finance { background: linear-gradient(45deg, #9b59b6, #6e00ff); }
+    .bg-result { background: linear-gradient(45deg, #ff33cc, #660099); }
+    .bg-staffs { background: linear-gradient(45deg, #00e6b8, #0099cc); }
+    .bg-students { background: linear-gradient(45deg, #ff6666, #ff3399); }
+    .bg-attendance { background: linear-gradient(45deg, #00ccff, #ff9900); }
+    .bg-bursor { background: linear-gradient(45deg, #ff7733, #ff4d4d); }
+    .bg-events { background: linear-gradient(45deg, #00ccff, #0066cc); }
+    .bg-library { background: linear-gradient(45deg, #6633ff, #3399ff); }
+    .bg-meetings { background: linear-gradient(45deg, #ff3366, #cc33ff); }
+    .bg-sms { background: linear-gradient(45deg, #ffcc33, #ff6666); }
+    .bg-update-profile { background: linear-gradient(45deg, #ff9900, #ff5500); }
+    .bg-update-own-profile { background: linear-gradient(45deg, #33cc99, #009966); }
+    .bg-public-comments { background: linear-gradient(45deg, #66ff66, #33cc33); }
+    @media (max-width: 576px) {
+        .header { padding: 15px; margin: 0 5px 15px 5px; }
+        .header h3 { font-size: 1.5rem; }
+        .time-display, .date-display { font-size: 16px; }
+        .iphone-button { min-height: 70px; padding: 0 15px; }
+        .button-left h3, .button-center h3, .button-right h3 { font-size: 16px; }
+        .desc-info { font-size: 12px; }
+    }
+</style>
+
+<!-- Real-time Clock Display -->
+<script>
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+        document.getElementById('time-display').textContent = timeString;
+        const dateString = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+        const daySuffix = getDaySuffix(now.getDate());
+        document.getElementById('date-display').textContent = dateString.replace(now.getDate(), now.getDate() + daySuffix);
+    }
+    function getDaySuffix(day) {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) { case 1: return 'st'; case 2: return 'nd'; case 3: return 'rd'; default: return 'th'; }
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+{% endblock content %}

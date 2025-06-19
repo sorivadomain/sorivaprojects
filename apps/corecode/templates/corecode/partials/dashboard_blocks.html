@@ -1,0 +1,576 @@
+{% load static %}
+<div class="dashboard-blocks-container">
+    <!-- Block 1: Sessions Graph -->
+    <div class="dashboard-block graph-block">
+        <h3>Academic Sessions</h3>
+        <div class="chart-container">
+            <canvas id="sessionsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Block 2: Terms Graph -->
+    <div class="dashboard-block graph-block">
+        <h3>Academic Terms</h3>
+        <div class="chart-container">
+            <canvas id="termsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Block 3: Installments Graph -->
+    <div class="dashboard-block graph-block">
+        <h3>Installments</h3>
+        <div class="chart-container">
+            <canvas id="installmentsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Block 4: Exams Graph -->
+    <div class="dashboard-block graph-block">
+        <h3>Exams</h3>
+        <div class="chart-container">
+            <canvas id="examsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Block 5: Subjects Table -->
+    <div class="dashboard-block">
+        <h3>Subjects</h3>
+        <div class="table-container">
+            <table class="subjects-table">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Subject Code</th>
+                        <th>Subject Name</th>
+                        <th>Date Created</th>
+                        <th>Date Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in subjects %}
+                    <tr>
+                        <td>{{ subject.id }}</td>
+                        <td>{{ subject.subject_code }}</td>
+                        <td>{{ subject.name }}</td>
+                        <td>{{ subject.date_created }}</td>
+                        <td>{{ subject.date_updated }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No subjects available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Block 6: School Location Map -->
+    <div class="dashboard-block">
+        <h3>School Location</h3>
+        {% if location %}
+        <div id="schoolMap" class="map-container"></div>
+        {% else %}
+        <p>No school location data available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Block 7: School Timetable Table -->
+    <div class="dashboard-block">
+        <h3>School Timetable</h3>
+        <div class="table-container">
+            <table class="timetable-table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Working Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in school_days %}
+                    <tr>
+                        <td>{{ day.day }}</td>
+                        <td>{{ day.start_time }}</td>
+                        <td>{{ day.end_time }}</td>
+                        <td {% if day.working_hours == 'X Closed' %}class="closed"{% endif %}>
+                            {{ day.working_hours }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No timetable data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Block 8: Support Contacts -->
+    <div class="dashboard-block">
+        <h3>Support Contacts</h3>
+        <ul class="contacts-list">
+            {% for contact in support_contacts %}
+            <li>
+                <span>{{ contact.role }}: </span>
+                <a href="#" class="contact-link" data-number="{{ contact.number }}">{{ contact.number }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h3>Contact Options</h3>
+            <p>Contact <span id="modalNumber"></span></p>
+            <button id="whatsappBtn" class="modal-btn">WhatsApp</button>
+            <button id="contactsBtn" class="modal-btn">Call</button>
+        </div>
+    </div>
+</div>
+
+<!-- JSON Data -->
+{{ sessions|json_script:"sessions-data" }}
+{{ terms|json_script:"terms-data" }}
+{{ installments|json_script:"installments-data" }}
+{{ exams|json_script:"exams-data" }}
+{{ school_days|json_script:"school-days-data" }}
+{% if location %}
+{{ location|json_script:"location-data" }}
+{% endif %}
+
+<!-- CDN Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- JavaScript for Charts, Map, and Contacts -->
+<script>
+    function initChart(ctx, type, data, options) {
+        try {
+            new Chart(ctx, { type, data, options });
+        } catch (e) {
+            console.error(`Chart initialization failed: ${e}`);
+        }
+    }
+
+    const sessionsData = JSON.parse(document.getElementById('sessions-data').textContent);
+    const sessionsCtx = document.getElementById('sessionsChart').getContext('2d');
+    initChart(sessionsCtx, 'bar', {
+        labels: sessionsData.map(s => s.name),
+        datasets: [{
+            label: 'Sessions',
+            data: sessionsData.map(s => s.current === 'true' ? 20 : 10),
+            backgroundColor: sessionsData.map(s => s.current === 'true' ? '#00cc00' : '#3399ff'),
+            barPercentage: 0.4,
+            categoryPercentage: 0.8,
+        }]
+    }, {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const session = sessionsData[ctx.dataIndex];
+                        return `${session.name} ${session.current === 'true' ? '(Current)' : ''}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: { display: false, min: 0, max: 25 },
+            x: { display: true }
+        }
+    });
+
+    const termsData = JSON.parse(document.getElementById('terms-data').textContent);
+    const termsCtx = document.getElementById('termsChart').getContext('2d');
+    initChart(termsCtx, 'bar', {
+        labels: termsData.map(t => t.name),
+        datasets: [{
+            label: 'Terms',
+            data: termsData.map(t => t.current === 'true' ? 20 : 10),
+            backgroundColor: termsData.map(t => t.current === 'true' ? '#00cc00' : '#3399ff'),
+            barPercentage: 0.4,
+            categoryPercentage: 0.8,
+        }]
+    }, {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const term = termsData[ctx.dataIndex];
+                        return `${term.name} ${term.current === 'true' ? '(Current)' : ''}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: { display: false, min: 0, max: 25 },
+            x: { display: true }
+        }
+    });
+
+    const installmentsData = JSON.parse(document.getElementById('installments-data').textContent);
+    const installmentsCtx = document.getElementById('installmentsChart').getContext('2d');
+    initChart(installmentsCtx, 'bar', {
+        labels: installmentsData.map(i => i.name),
+        datasets: [{
+            label: 'Installments',
+            data: installmentsData.map(i => i.current === 'true' ? 20 : 10),
+            backgroundColor: installmentsData.map(i => i.current === 'true' ? '#00cc00' : '#3399ff'),
+            barPercentage: 0.4,
+            categoryPercentage: 0.8,
+        }]
+    }, {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const installment = installmentsData[ctx.dataIndex];
+                        return `${installment.name} ${installment.current === 'true' ? '(Current)' : ''}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: { display: false, min: 0, max: 25 },
+            x: { display: true }
+        }
+    });
+
+    const examsData = JSON.parse(document.getElementById('exams-data').textContent);
+    const examsCtx = document.getElementById('examsChart').getContext('2d');
+    initChart(examsCtx, 'bar', {
+        labels: examsData.map(e => e.name),
+        datasets: [{
+            label: 'Exams',
+            data: examsData.map(e => e.is_current === 'true' ? 20 : 10),
+            backgroundColor: examsData.map(e => e.is_current === 'true' ? '#00cc00' : '#3399ff'),
+            barPercentage: 0.4,
+            categoryPercentage: 0.8,
+        }]
+    }, {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: (ctx) => {
+                        const exam = examsData[ctx.dataIndex];
+                        return `${exam.name} ${exam.is_current === 'true' ? '(Current)' : ''}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: { display: false, min: 0, max: 25 },
+            x: { display: true }
+        }
+    });
+
+    {% if location %}
+    try {
+        const locationData = JSON.parse(document.getElementById('location-data').textContent);
+        const schoolMap = L.map('schoolMap').setView([locationData.latitude, locationData.longitude], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(schoolMap);
+        L.marker([locationData.latitude, locationData.longitude], {
+            icon: L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconSize: [25, 41],
+                popupAnchor: [0, -15]
+            })
+        }).addTo(schoolMap)
+          .bindPopup(locationData.school_name)
+          .openPopup();
+        setTimeout(() => {
+            schoolMap.invalidateSize();
+        }, 100);
+    } catch (e) {
+        console.error(`Map initialization failed: ${e}`);
+        document.getElementById('schoolMap').innerHTML = '<p>Failed to load map.</p>';
+    }
+    {% endif %}
+
+    const modal = document.getElementById('contactModal');
+    const modalNumberSpan = document.getElementById('modalNumber');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+    const contactsBtn = document.getElementById('contactsBtn');
+    const closeBtn = document.getElementsByClassName('close')[0];
+    const contactLinks = document.getElementsByClassName('contact-link');
+
+    Array.from(contactLinks).forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const number = link.dataset.number;
+            modalNumberSpan.textContent = number;
+            modal.style.display = 'flex';
+            whatsappBtn.onclick = () => {
+                window.open(`https://wa.me/${number}`, '_blank');
+                modal.style.display = 'none';
+            };
+            contactsBtn.onclick = () => {
+                window.location.href = `tel:${number}`;
+                modal.style.display = 'none';
+            };
+        });
+    });
+
+    closeBtn.onclick = () => {
+        modal.style.display = 'none';
+    };
+
+    window.onclick = (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+</script>
+
+<!-- Isolated CSS -->
+<style scoped>
+    :root {
+        --container-padding: 15px; /* Match .container padding from index.html */
+    }
+
+    .dashboard-blocks-container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .dashboard-block {
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        flex: 0 0 calc(50% - 10px); /* Two blocks per row */
+        box-sizing: border-box;
+    }
+
+    .dashboard-block:not(:nth-child(2n))::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: -10px;
+        width: 1px;
+        height: 100%;
+    }
+
+    .dashboard-block:not(:nth-last-child(-n+2))::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: #ddd;
+    }
+
+    .dashboard-block h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .chart-container {
+        flex-grow: 1;
+        max-height: calc(100% - 30px);
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .chart-container canvas {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .table-container {
+        flex-grow: 1;
+        max-height: calc(100% - 30px);
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .subjects-table, .timetable-table {
+        width: 100%;
+        min-width: 600px;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .subjects-table th, .subjects-table td,
+    .timetable-table th, .timetable-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .subjects-table th, .timetable-table th {
+        background: #007bff;
+        color: #fff;
+    }
+
+    .timetable-table td.closed {
+        color: #ff4444;
+        font-weight: bold;
+    }
+
+    .map-container {
+        flex-grow: 1;
+        max-height: calc(100% - 30px);
+        height: 350px;
+    }
+
+    .contacts-list {
+        list-style: none;
+        padding: 0;
+        text-align: left;
+        overflow-y: auto;
+        max-height: calc(100% - 30px);
+    }
+
+    .contacts-list li {
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    .contact-link {
+        color: #007bff;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .contact-link:hover {
+        text-decoration: underline;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+    }
+
+    .modal-content h3 {
+        margin: 0 0 10px;
+    }
+
+    .close {
+        float: right;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .modal-btn {
+        margin: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    #whatsappBtn {
+        background: #25d366;
+        color: #fff;
+    }
+
+    #contactsBtn {
+        background: #007bff;
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-blocks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100vw;
+            margin-left: calc(-1 * var(--container-padding));
+            margin-right: calc(-1 * var(--container-padding));
+            padding: 0 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .dashboard-block {
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            width: 100%;
+            height: 400px; /* Default height for non-graph blocks */
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .graph-block {
+            height: 450px; /* Taller height for graph blocks */
+        }
+        .dashboard-block:not(:nth-child(2n))::after,
+        .dashboard-block:not(:nth-last-child(-n+2))::after {
+            display: none;
+        }
+        .dashboard-block h3 {
+            font-size: 18px;
+        }
+        .subjects-table th, .subjects-table td,
+        .timetable-table th, .timetable-table td {
+            font-size: 12px;
+            padding: 6px;
+        }
+        .contacts-list li {
+            font-size: 12px;
+        }
+        .modal-content {
+            padding: 15px;
+            max-width: 250px;
+        }
+        .map-container {
+            height: 350px; /* Match non-graph block height */
+        }
+    }
+</style>

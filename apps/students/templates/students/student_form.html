@@ -1,0 +1,336 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <div class="header d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 30px; color: #007aff; cursor: pointer;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 700; color: #000; margin: 0; font-size: 26px;">{{ title }}</h2>
+        <a href="{% url 'students_home' %}" class="home-btn" style="font-size: 30px; color: #007aff; cursor: pointer; text-decoration: none;">🏠</a>
+    </div>
+
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="form-group mb-4">
+                {{ form.current_status.label_tag }}
+                {{ form.current_status }}
+                {% if form.current_status.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.current_status.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.registration_number.label_tag }}
+                {{ form.registration_number }}
+                {% if form.registration_number.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.registration_number.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.firstname.label_tag }}
+                {{ form.firstname }}
+                {% if form.firstname.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.firstname.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.middle_name.label_tag }}
+                {{ form.middle_name }}
+                {% if form.middle_name.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.middle_name.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.surname.label_tag }}
+                {{ form.surname }}
+                {% if form.surname.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.surname.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.gender.label_tag }}
+                {{ form.gender }}
+                {% if form.gender.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.gender.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.date_of_birth.label_tag }}
+                {{ form.date_of_birth }}
+                {% if form.date_of_birth.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.date_of_birth.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.current_class.label_tag }}
+                {{ form.current_class }}
+                {% if form.current_class.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.current_class.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.date_of_admission.label_tag }}
+                {{ form.date_of_admission }}
+                {% if form.date_of_admission.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.date_of_admission.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.father_mobile_number.label_tag }}
+                {{ form.father_mobile_number }}
+                {% if form.father_mobile_number.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.father_mobile_number.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.mother_mobile_number.label_tag }}
+                {{ form.mother_mobile_number }}
+                {% if form.mother_mobile_number.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.mother_mobile_number.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.address.label_tag }}
+                {{ form.address }}
+                {% if form.address.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.address.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.other_details.label_tag }}
+                {{ form.other_details }}
+                {% if form.other_details.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.other_details.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="form-group mb-4">
+                {{ form.passport.label_tag }}
+                {{ form.passport }}
+                <div class="passport-preview mt-2" style="display: none;">
+                    <img id="passport-preview-img" src="#" alt="Passport Preview" style="width: 120px; height: 120px; border-radius: 15px; object-fit: cover;">
+                </div>
+                {% if form.passport.errors %}
+                    <div class="invalid-feedback" style="color: #ff3b30; font-size: 1rem;">
+                        {{ form.passport.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="submit-container">
+                <button type="submit" class="btn btn-lg" style="width: 100%; border-radius: 30px; border: none; color: #007aff; padding: 18px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; font-size: 20px; background: transparent; border-bottom: 2px solid #007aff;">
+                    <i class="fas fa-save"></i> {{ title|lower|slice:"0:6" }} Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden;
+    }
+    .header {
+        padding: 0 15px;
+    }
+    .form-container {
+        width: 100%;
+        margin: 0;
+        padding: 0 15px;
+        box-sizing: border-box;
+    }
+    .form-group {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .form-control, select, textarea, input[type="date"], input[type="file"] {
+        width: 100% !important;
+        min-height: 50px;
+        border: none !important;
+        border-bottom: 2px solid #d1d1d6 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 20px;
+        color: #000;
+        padding: 18px 10px;
+        margin-bottom: 10px;
+        border-radius: 0;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+    }
+    select.form-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e8e93'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 20px;
+    }
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    input[type="file"].form-control {
+        padding: 18px 0;
+    }
+    .form-control:focus, select:focus, textarea:focus, input[type="date"]:focus, input[type="file"]:focus {
+        outline: none;
+        border-bottom: 2px solid #007aff !important;
+        box-shadow: none !important;
+    }
+    .form-control::placeholder {
+        color: #8e8e93;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 20px;
+    }
+    label {
+        display: block;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f21ec;
+        margin-bottom: 12px;
+        margin-left: 10px;
+    }
+    .invalid-feedback {
+        display: none;
+        margin-left: 10px;
+        font-size: 16px;
+        color: #ff3b30;
+    }
+    .form-control.is-invalid, select.is-invalid, textarea.is-invalid, input[type="date"].is-invalid, input[type="file"].is-invalid {
+        border-bottom: 2px solid #ff3b30 !important;
+    }
+    .form-control.is-invalid ~ .invalid-feedback, select.is-invalid ~ .invalid-feedback, textarea.is-invalid ~ .invalid-feedback, input[type="date"].is-invalid ~ .invalid-feedback, input[type="file"].is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    .passport-preview {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    .submit-container {
+        padding: 0 15px;
+        margin-top: 30px;
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 0 10px;
+        }
+        .form-container {
+            padding: 0 10px;
+        }
+        .submit-container {
+            padding: 0 10px;
+        }
+        .btn-lg {
+            font-size: 18px;
+            padding: 16px;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        .back-btn, .home-btn {
+            font-size: 26px;
+        }
+        .form-control, select, textarea, input[type="date"], input[type="file"] {
+            font-size: 18px;
+            padding: 16px 8px;
+            min-height: 45px;
+        }
+        textarea.form-control {
+            min-height: 80px;
+        }
+        select.form-control {
+            background-size: 18px;
+        }
+        .form-control::placeholder {
+            font-size: 18px;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .invalid-feedback {
+            font-size: 14px;
+        }
+        .passport-preview img {
+            width: 100px;
+            height: 100px;
+        }
+    }
+</style>
+
+<script>
+    // Bootstrap-like validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Passport preview logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const passportInput = document.querySelector('#id_passport');
+        const previewContainer = document.querySelector('.passport-preview');
+        const previewImg = document.querySelector('#passport-preview-img');
+
+        passportInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock content %}

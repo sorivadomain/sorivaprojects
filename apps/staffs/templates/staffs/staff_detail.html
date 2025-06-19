@@ -1,0 +1,279 @@
+{% extends base_template %}
+{% load static %}
+
+{% block content %}
+<!-- Header -->
+<div class="header d-flex align-items-center justify-content-between mb-4" style="background: linear-gradient(135deg, #6b7280, #a855f7); color: #fff; padding: 15px 20px;">
+    <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; cursor: pointer;">⬅️</span>
+    <h2 class="m-0">Staff Details</h2>
+    <a href="{% url 'staff-edit' pk=staff.pk %}" class="btn btn-light rounded-pill px-3 py-1">✏️ Edit Staff</a>
+</div>
+
+<!-- Staff Details -->
+<div class="content mx-auto" style="max-width: 1200px; padding: 20px;">
+    <div class="row">
+        <!-- Passport Photo -->
+        <div class="col-md-3 text-center">
+            <img src="{% if staff.passport_photo %}{{ staff.passport_photo.url }}{% elif staff.gender == 'male' %}{% static 'images/male.png' %}{% else %}{% static 'images/female.png' %}{% endif %}" 
+                 alt="{{ staff.firstname }}'s Photo" 
+                 class="rounded-circle mb-3 passport-photo" 
+                 style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;"
+                 onclick="showFullScreenImage(this.src)">
+            <h5>{{ staff.firstname }} {% if staff.middle_name %}{{ staff.middle_name }} {% endif %}{{ staff.surname }}</h5>
+            <p class="text-muted">{{ staff.staff_user_id }}</p>
+        </div>
+        <!-- Details -->
+        <div class="col-md-9">
+            <h4 class="mb-3">Personal Information</h4>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <strong>First Name:</strong> {{ staff.firstname }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Middle Name:</strong> {{ staff.middle_name|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Surname:</strong> {{ staff.surname }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Gender:</strong> {{ staff.gender|capfirst }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Date of Birth:</strong> {{ staff.date_of_birth|date:"d M Y" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Age:</strong> {{ age }} years
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Employment Details</h4>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <strong>Status:</strong>
+                    {% if staff.current_status == 'active' %}
+                    <span style="color: green; font-size: 1.2rem;">✔✔</span>
+                    {% else %}
+                    <span style="color: #dc3545; font-size: 1.2rem;">❌</span>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Occupation:</strong> {{ staff.get_occupation_display|default:"N/A" }}
+                </div>
+                {% if can_view_salary %}
+                <div class="col-md-6 mb-2">
+                    <strong>Salary:</strong> {{ staff.salary|floatformat:2 }}
+                </div>
+                {% endif %}
+                <div class="col-md-6 mb-2">
+                    <strong>Date of Admission:</strong> {{ staff.date_of_admission|date:"d M Y" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Contract Start Date:</strong> {{ staff.contract_start_date|date:"d M Y" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Contract End Date:</strong> {{ staff.contract_end_date|date:"d M Y"|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Contract Duration:</strong> {{ staff.contract_duration|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Is Subject Teacher:</strong>
+                    {% if staff.is_subject_teacher %}
+                    <span style="color: #28a745; font-size: 1.2rem;">✔</span>
+                    {% else %}
+                    <span style="color: #dc3545; font-size: 1.2rem;">🔴</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Contact Information</h4>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <strong>Mobile Number:</strong> {{ staff.mobile_number|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Address:</strong> {{ staff.address|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>Guarantor:</strong> {{ staff.guarantor|default:"N/A" }}
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Identification</h4>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <strong>NIDA ID:</strong> {{ staff.nida_id|default:"N/A" }}
+                </div>
+                <div class="col-md-6 mb-2">
+                    <strong>TIN Number:</strong> {{ staff.tin_number|default:"N/A" }}
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3">Additional Information</h4>
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <strong>Notes:</strong> {{ staff.others|default:"N/A" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teaching Assignments -->
+    <h4 class="mt-4 mb-3">Teaching Assignments</h4>
+    {% if staff.is_subject_teacher and assignments %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">S/N</th>
+                    <th scope="col">Class</th>
+                    <th scope="col">Subject</th>
+                    <th scope="col">Date Assigned</th>
+                    <th scope="col">Date Updated</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ assignment.student_class }}</td>
+                    <td>{{ assignment.subject }}</td>
+                    <td>{{ assignment.date_assigned|date:"d M Y H:i" }}</td>
+                    <td>{{ assignment.date_updated|date:"d M Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'staff-subject-assignment-delete' pk=staff.pk assignment_id=assignment.pk %}" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete Assignment">🗑️</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted">{% if staff.is_subject_teacher %}No subjects assigned.{% else %}Not a subject teacher.{% endif %}</p>
+    {% endif %}
+</div>
+
+<!-- Full-Screen Image Overlay -->
+<div id="fullscreen-image-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 1000; overflow: hidden;">
+    <img id="fullscreen-image" src="" alt="Full Screen Image" style="width: 100%; height: 100%; object-fit: contain;">
+    <button id="close-fullscreen" style="position: absolute; top: 20px; right: 20px; background: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+</div>
+
+<style>
+body {
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #1f2937;
+    margin: 0;
+}
+.header {
+    width: 100%;
+}
+.content {
+    width: 100%;
+}
+.content h4 {
+    color: #6b7280;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 5px;
+}
+.content .row .mb-2 {
+    font-size: 0.95rem;
+}
+.content strong {
+    color: #343a40;
+}
+.table thead th {
+    background: #343a40;
+    color: #fff;
+    border: none;
+}
+.table tbody tr:hover {
+    background: #f8fafc;
+}
+.table td, .table th {
+    vertical-align: middle;
+    text-align: center;
+}
+.btn-light {
+    background: #fff;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+.btn-light:hover {
+    color: #a855f7;
+}
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+.text-muted {
+    font-style: italic;
+}
+.passport-photo:hover {
+    opacity: 0.8;
+}
+#fullscreen-image-overlay {
+    display: none;
+}
+#close-fullscreen:hover {
+    background: #f8f9fa;
+    color: #a855f7;
+}
+@media (max-width: 576px) {
+    .content {
+        padding: 1rem;
+    }
+    .content h4 {
+        font-size: 1.1rem;
+    }
+    .content .row .mb-2 {
+        font-size: 0.85rem;
+    }
+    .rounded-circle {
+        width: 100px !important;
+        height: 100px !important;
+    }
+    .table td, .table th {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    #close-fullscreen {
+        width: 32px;
+        height: 32px;
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+function showFullScreenImage(src) {
+    console.log('Opening full-screen image:', src);
+    const overlay = document.getElementById('fullscreen-image-overlay');
+    const img = document.getElementById('fullscreen-image');
+    img.src = src;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+}
+
+document.getElementById('fullscreen-image-overlay').addEventListener('click', function(e) {
+    if (e.target.id === 'fullscreen-image-overlay' || e.target.id === 'fullscreen-image') {
+        console.log('Closing full-screen image');
+        this.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+});
+
+document.getElementById('close-fullscreen').addEventListener('click', function() {
+    console.log('Close button clicked');
+    const overlay = document.getElementById('fullscreen-image-overlay');
+    overlay.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scrolling
+});
+</script>
+{% endblock %}

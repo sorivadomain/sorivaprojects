@@ -1,0 +1,108 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Header -->
+<div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="{{ finance_home_url }}" class="back-btn" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px; text-decoration: none;">⬅️</a>
+        <h3 class="flex-grow-1" style="margin: 0;">{{ page_title }}</h3>
+    </div>
+</div>
+
+<!-- Confirmation -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="confirmation-card">
+                <p>Are you sure you want to delete <strong>{{ object.name }}</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-delete">Delete</button>
+                    <a href="{% url 'expenditure_category_list' %}" class="btn btn-cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Header */
+.header {
+    margin-bottom: 20px;
+}
+
+/* Confirmation Card */
+.confirmation-card {
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Buttons */
+.btn-delete, .btn-cancel {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    margin: 10px;
+    color: #fff;
+    transition: var(--transition);
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+    border: none;
+}
+
+.btn-delete:hover {
+    transform: scale(1.05);
+}
+
+.btn-cancel {
+    background: var(--gradient-blue);
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .confirmation-card {
+        padding: 15px;
+    }
+    .btn-delete, .btn-cancel {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+    }
+    .header {
+        padding: 15px;
+        margin: 0 5px 15px 5px;
+    }
+    .header h3 {
+        font-size: 1.5rem;
+    }
+    .back-btn {
+        font-size: 20px;
+    }
+}
+</style>
+{% endblock content %}

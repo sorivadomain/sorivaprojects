@@ -1,0 +1,260 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <a href="{% url 'active_students_list' %}" class="nav-btn back-btn" title="Back to Students">⬅️</a>
+    <h3 class="title">{{ title }}</h3>
+    <div class="nav-actions d-flex align-items-center">
+        <a href="{% url 'student_update' pk=student.pk %}" class="nav-btn update-btn" title="Update Student">📝</a>
+        <a href="{% url 'student_delete' pk=student.pk %}" class="nav-btn delete-btn" title="Delete Student">🗑️</a>
+        <a href="{% url 'students_home' %}" class="nav-btn home-btn" title="Students Home">🏠</a>
+    </div>
+</div>
+
+<!-- Student Details -->
+<div class="details-list">
+    <!-- Profile Section -->
+    <div class="detail-item profile-item">
+        <span class="detail-label">Student:</span>
+        <span class="detail-value">
+            <div class="profile-section">
+                <img src="{% if student.passport %}{{ student.passport.url }}{% else %}{% if student.gender == 'male' %}{% static 'images/male.png' %}{% else %}{% static 'images/female.png' %}{% endif %}{% endif %}" alt="Passport">
+                <div>
+                    {{ student.firstname }}
+                    {% if student.middle_name %}{{ student.middle_name }}{% endif %}
+                    {{ student.surname }}
+                    <br>
+                    <span class="registration-number">{{ student.registration_number }}</span>
+                </div>
+            </div>
+        </span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Status:</span>
+        <span class="detail-value">{{ student.current_status|title }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Parent Student ID:</span>
+        <span class="detail-value">{{ student.parent_student_id }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Gender:</span>
+        <span class="detail-value">{{ student.gender|title }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Age:</span>
+        <span class="detail-value">{{ age }} years</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date of Birth:</span>
+        <span class="detail-value">{{ student.date_of_birth|date:"F d, Y" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Current Class:</span>
+        <span class="detail-value">{{ student.current_class|default:"Not assigned" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Date of Admission:</span>
+        <span class="detail-value">{{ student.date_of_admission|date:"F d, Y" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Father's Mobile:</span>
+        <span class="detail-value">{{ student.father_mobile_number|default:"Not provided" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Mother's Mobile:</span>
+        <span class="detail-value">{{ student.mother_mobile_number|default:"Not provided" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Address:</span>
+        <span class="detail-value">{{ student.address|default:"Not provided" }}</span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Other Details:</span>
+        <span class="detail-value">{{ student.other_details|default:"Not provided" }}</span>
+    </div>
+</div>
+
+<style>
+/* CSS Variables */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    overflow-x: hidden;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+    padding: 0 10px;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+.update-btn {
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.delete-btn {
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+/* Details List Styles */
+.details-list {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2%;
+    justify-content: center;
+}
+
+/* Detail Item Styles */
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e9ecef;
+    flex: 0 0 48%;
+    margin: 1%;
+}
+
+.detail-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex: 0 0 40%;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    color: #343a40;
+    flex: 0 0 60%;
+    text-align: right;
+}
+
+/* Profile Section Styles */
+.profile-item .detail-value {
+    text-align: left;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+}
+
+.profile-section img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.profile-section div {
+    font-size: 0.9rem;
+}
+
+.registration-number {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .update-btn, .delete-btn {
+        padding: 0.4rem;
+    }
+    .details-list {
+        padding: 15px;
+        justify-content: flex-start;
+    }
+    .detail-item {
+        flex: 0 0 100%;
+        margin: 0 0 10px 0;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 0;
+    }
+    .detail-label {
+        flex: none;
+        margin-bottom: 5px;
+    }
+    .detail-value {
+        flex: none;
+        text-align: left;
+    }
+    .profile-section img {
+        width: 60px;
+        height: 60px;
+        margin-right: 10px;
+    }
+    .profile-section div {
+        font-size: 0.85rem;
+    }
+    .registration-number {
+        font-size: 0.75rem;
+    }
+}
+</style>
+{% endblock content %}

@@ -1,0 +1,180 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <span class="nav-btn back-btn" onclick="window.history.back()" title="Go Back">⬅️</span>
+    <h3 class="title">{{ page_title }}</h3>
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Form -->
+<div class="form-container mb-4">
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-2">
+            <div class="col-12 mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Category Name:</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger small">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-12 mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description (Optional):</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger small">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-sm btn-submit" title="Save Category">💰 Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+/* CSS Variables (Consistent with fees_invoice_list.html) */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-purple: linear-gradient(45deg, #6f42c1, #007bff);
+    --border-radius: 50px;
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Form Styles */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #343a40;
+    margin-bottom: 0.3rem;
+}
+
+.form-control-sm {
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    border: 1px solid #ced4da;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control-sm:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+textarea.form-control-sm {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.btn-submit {
+    border-radius: 8px;
+    background: var(--gradient-green);
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    color: #fff;
+    transition: var(--transition);
+}
+
+.btn-submit:hover {
+    background: var(--gradient-purple);
+    transform: scale(1.05);
+}
+
+.text-danger {
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+}
+
+@media (max-width: 576px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .form-container {
+        padding: 15px;
+    }
+    .form-label {
+        font-size: 0.85rem;
+    }
+    .form-control-sm {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    .btn-submit {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock content %}

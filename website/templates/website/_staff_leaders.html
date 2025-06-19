@@ -1,0 +1,176 @@
+{% load static %}
+<section class="staff-leaders">
+    <h1 class="staff-leaders-title">Our Leadership Team</h1>
+    <div class="staff-leaders-container">
+        {% for leader in staff_leaders %}
+        <div class="staff-leader-block">
+            <img src="{% static 'images/'|add:leader.image %}" alt="{{ leader.title }} Profile" class="staff-leader-img">
+            <h2 class="staff-leader-title">{{ leader.title }}</h2>
+            <p class="staff-leader-name">{{ leader.name }}</p>
+            {% if leader.phone %}
+            <div class="staff-leader-contact">
+                <a href="https://wa.me/{{ leader.phone }}" target="_blank" class="contact-button whatsapp" title="Contact via WhatsApp">
+                    <span class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.02 14.99c-.3.18-.6.34-1.01.46-.66.21-1.37.31-2.07.25-1.22-.11-2.35-.66-3.24-1.55-.89-.89-1.44-2.02-1.55-3.24-.06-.7.04-1.41.25-2.07.12-.41.28-.71.46-1.01.18-.3.31-.55.4-.78.09-.23.13-.43.13-.62 0-.19-.04-.38-.13-.56-.09-.18-.22-.34-.38-.47-.16-.13-.34-.22-.53-.27-.19-.05-.38-.05-.56 0-.18.05-.34.14-.47.27l-.4.4c-.22.22-.4.47-.53.78-.13.31-.22.66-.27 1.01-.05.35-.05.71 0 1.07.11 1.22.66 2.35 1.55 3.24.89.89 2.02 1.44 3.24 1.55.36.05.71.05 1.07 0 .35-.05.7-.14 1.01-.27.31-.13.56-.31.78-.53l.4-.4c.13-.13.22-.31.27-.47.05-.19.05-.38 0-.56-.05-.19-.14-.34-.27-.53-.13-.19-.29-.34-.47-.38-.18-.04-.38 0-.56.13-.23.13-.48.31-.78.4z"/>
+                        </svg>
+                    </span>
+                    <span class="contact-label">WhatsApp</span>
+                </a>
+                <a href="tel:{{ leader.phone }}" class="contact-button call" title="Call directly">
+                    <span class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                            <path d="M20 22.5l-4.5-4.5c-1.3.7-2.8 1.1-4.5 1.1-4.1 0-7.5-3.4-7.5-7.5s3.4-7.5 7.5-7.5 7.5 3.4 7.5 7.5c0 1.7-.4 3.2-1.1 4.5l4.5 4.5-2.1 2.1zm-8 0c3.3 0 6-2.7 6-6s-2.7-6-6-6-6 2.7-6 6 2.7 6 6 6z"/>
+                        </svg>
+                    </span>
+                    <span class="contact-label">Call</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+.staff-leaders {
+    width: 100vw;
+    padding: 60px 0;
+    background: #F5F5F5;
+    text-align: center;
+}
+.staff-leaders-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #007AFF; /* Blue */
+    margin: 0 auto 40px;
+    border-bottom: 2px solid #007AFF;
+    padding-bottom: 10px;
+    display: block;
+    width: fit-content;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.1s forwards;
+}
+.staff-leaders-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.staff-leader-block {
+    flex: 0 0 calc(33.333% - 20px);
+    margin: 10px;
+    background: rgba(255, 255, 255, 0.1); /* Transparent */
+    border: 2px solid #F28C38; /* Carrot */
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.staff-leader-block:hover {
+    transform: scale(1.05);
+    border-color: #007AFF; /* Blue */
+}
+.staff-leader-img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 2px solid #F28C38;
+}
+.staff-leader-title {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.5rem;
+    color: #007AFF;
+    margin: 0 0 10px;
+}
+.staff-leader-name {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0 0 15px;
+}
+.staff-leader-contact {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.contact-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #007AFF; /* Blue */
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+.contact-button:hover {
+    transform: scale(1.1);
+    background: #005BB5;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+.contact-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+.contact-icon svg {
+    width: 20px;
+    height: 20px;
+}
+.contact-label {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: white;
+}
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+    .staff-leaders {
+        padding: 40px 0;
+    }
+    .staff-leaders-title {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+    .staff-leader-block {
+        flex: 0 0 100%;
+        margin: 10px 0;
+    }
+    .staff-leader-img {
+        width: 120px;
+        height: 120px;
+    }
+    .contact-button {
+        padding: 6px 10px;
+    }
+    .contact-icon {
+        width: 28px;
+        height: 28px;
+    }
+    .contact-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .contact-label {
+        font-size: 0.9rem;
+    }
+}
+</style>

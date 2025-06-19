@@ -1,0 +1,258 @@
+{% load static %}
+<header class="topbar">
+    <div class="topbar-left">
+        <img src="{% static 'images/school.png' %}" alt="Logo" class="logo">
+        <span class="school-name">Manus Dei Secondary</span>
+    </div>
+    <div class="topbar-right">
+        <button class="hamburger" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="#home" class="nav-link">🏠 Home</a></li>
+                <li><a href="#about" class="nav-link">ℹ About Us</a></li>
+                <li><a href="#student-life" class="nav-link">🎓 Student Life</a></li>
+                <li><a href="#gallery" class="nav-link">📸 Gallery</a></li>
+                <li><a href="#staff-leaders" class="nav-link">👩‍🏫 School Leaders & Staffs</a></li>
+                <li><a href="#academics" class="nav-link">📚 Academics</a></li>
+                <li><a href="#faq" class="nav-link">❓ FAQ</a></li>
+                <li><a href="#contacts" class="nav-link">📞 Contact Us</a></li>
+                <li><a href="{% url 'welcome_view' %}" class="nav-link">🚀 Go to System</a></li>
+                <li><a href="{% url 'signup' %}" target="_blank" class="nav-link">🔑 Sign Up</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<button id="back-to-top" aria-label="Back to Top">
+    <svg class="arrow-icon" width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF">
+        <path d="M12 4l-8 8h4v8h8v-8h4l-8-8z"/>
+    </svg>
+</button>
+<style>
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #F28C38, #007AFF);
+    color: #FFFFFF;
+    z-index: 1000;
+}
+.topbar-left {
+    display: flex;
+    align-items: center;
+}
+.logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+.school-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.topbar-right {
+    display: flex;
+    align-items: center;
+    padding-right: 10px;
+}
+.hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    padding: 0;
+    margin-right: 5px;
+}
+.hamburger span {
+    width: 100%;
+    height: 3px;
+    background: #FFFFFF;
+    transition: all 0.3s ease;
+}
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+.nav-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 15px;
+    background: linear-gradient(135deg, #F28C38, #007AFF);
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 200px;
+}
+.nav-menu.active {
+    display: block;
+}
+.nav-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.nav-menu li {
+    margin: 10px 0;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.nav-menu.active li {
+    opacity: 1;
+    transform: translateX(0);
+}
+.nav-menu li:nth-child(1) { transition-delay: 0.1s; }
+.nav-menu li:nth-child(2) { transition-delay: 0.2s; }
+.nav-menu li:nth-child(3) { transition-delay: 0.3s; }
+.nav-menu li:nth-child(4) { transition-delay: 0.4s; }
+.nav-menu li:nth-child(5) { transition-delay: 0.5s; }
+.nav-menu li:nth-child(6) { transition-delay: 0.6s; }
+.nav-menu li:nth-child(7) { transition-delay: 0.7s; }
+.nav-menu li:nth-child(8) { transition-delay: 0.8s; }
+.nav-menu li:nth-child(9) { transition-delay: 0.9s; }
+.nav-menu li:nth-child(10) { transition-delay: 1.0s; }
+.nav-link {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-size: 1rem;
+    display: block;
+    padding: 8px 10px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+#back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #F28C38;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+}
+#back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+#back-to-top:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.arrow-icon {
+    width: 24px;
+    height: 24px;
+}
+@media (max-width: 768px) {
+    .topbar {
+        padding: 10px 10px;
+    }
+    .school-name {
+        font-size: 1rem;
+    }
+    .logo {
+        width: 32px;
+        height: 32px;
+    }
+    .topbar-right {
+        padding-right: 5px;
+    }
+    .nav-menu {
+        right: 10px;
+        min-width: 180px;
+        padding: 15px;
+    }
+    #back-to-top {
+        width: 40px;
+        height: 40px;
+    }
+    .arrow-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const backToTop = document.querySelector('#back-to-top');
+
+    // Toggle hamburger menu
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+
+    // Smooth scroll to sections
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 60,
+                        behavior: 'smooth'
+                    });
+                }
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
+        });
+    });
+
+    // Show/hide back-to-top button
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    });
+
+    // Scroll to top on back-to-top click
+    backToTop.addEventListener('click', () => {
+        const heroSection = document.getElementById('home');
+        if (heroSection) {
+            window.scrollTo({
+                top: heroSection.offsetTop,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+</script>

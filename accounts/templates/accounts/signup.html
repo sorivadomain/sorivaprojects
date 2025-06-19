@@ -1,0 +1,318 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Manus Dei</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, sans-serif;
+            overflow-y: auto; /* Enable vertical scrolling */
+            background: #0d1b2a; /* Dark sky base color */
+        }
+
+        /* Moving stars animation */
+        @keyframes moveStars {
+            from { transform: translateY(100vh); }
+            to { transform: translateY(-10vh); }
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: moveStars linear infinite;
+        }
+
+        /* Generate stars with different sizes and speeds */
+        .star-1 { width: 2px; height: 2px; animation-duration: 5s; }
+        .star-2 { width: 3px; height: 3px; animation-duration: 7s; }
+        .star-3 { width: 4px; height: 4px; animation-duration: 10s; }
+
+        h2 {
+            color: #e0e0e0;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .form-field {
+            margin: 20px 0;
+            position: relative;
+            width: 100vw;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        .form-field input {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            background: #1b263b;
+            border-radius: 50px;
+            font-size: 18px;
+            color: #e0e0e0;
+            outline: none;
+            transition: background 0.3s;
+            box-sizing: border-box;
+        }
+        .form-field input:focus {
+            background: #2a4066;
+        }
+        .form-field label {
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            background: #1b263b;
+            padding: 0 8px;
+            font-size: 16px;
+            color: #b0b0b0;
+            display: flex;
+            align-items: center;
+        }
+        .form-field label .emoji {
+            margin-right: 5px;
+        }
+        .message, .error-message {
+            width: 100vw;
+            padding: 20px 10px;
+            text-align: center;
+            font-size: 18px;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        .message {
+            color: #00cc00;
+        }
+        .error-message {
+            color: #ff3333;
+        }
+        button {
+            width: 100vw;
+            background: linear-gradient(45deg, #4a90e2, #2a69a6);
+            color: #fff;
+            border: none;
+            padding: 20px;
+            border-radius: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-sizing: border-box;
+            margin: 20px 0;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .password-match {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4a90e2;
+            font-size: 24px;
+            display: none;
+        }
+        .eye-icon {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b0b0b0;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .terms-section {
+            width: 100vw;
+            text-align: center;
+            font-size: 18px;
+            color: #e0e0e0;
+            box-sizing: border-box;
+            margin: 20px 0;
+            padding: 0 20px;
+            overflow-wrap: break-word; /* Ensure text wraps within viewport */
+            max-width: 800px; /* Prevent excessive stretching on wide screens */
+            margin-left: auto;
+            margin-right: auto; /* Center the section */
+        }
+        .terms-section h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #b0b0b0;
+            text-align: center;
+        }
+        .terms-section .term {
+            margin-bottom: 15px;
+            color: #e0e0e0;
+            font-size: 18px; /* Match normal text size */
+            text-align: center; /* Center each term */
+        }
+
+        /* Generate stars dynamically with JavaScript */
+        <script>
+            function createStars() {
+                const starCount = 50;
+                for (let i = 0; i < starCount; i++) {
+                    const star = document.createElement('div');
+                    const size = Math.random() * 4 + 2; // 2px to 6px
+                    const duration = Math.random() * 5 + 5; // 5s to 10s
+                    const delay = Math.random() * 10; // 0s to 10s
+                    star.className = `star star-${Math.floor(size)}`;
+                    star.style.left = `${Math.random() * 100}vw`;
+                    star.style.top = `${Math.random() * 100}vh`;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    star.style.animationDuration = `${duration}s`;
+                    star.style.animationDelay = `${delay}s`;
+                    document.body.appendChild(star);
+                }
+            }
+            window.onload = createStars;
+
+            // Toggle password visibility
+            const passwordInputs = document.querySelectorAll('input[type="password"]');
+            const eyeIcons = document.querySelectorAll('.eye-icon');
+
+            eyeIcons.forEach((eye, index) => {
+                eye.addEventListener('click', () => {
+                    const input = passwordInputs[index];
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eye.textContent = '👁️‍🗨️'; // Open eye
+                    } else {
+                        input.type = 'password';
+                        eye.textContent = '👁️'; // Closed eye
+                    }
+                });
+            });
+        </script>
+    </style>
+</head>
+<body>
+    <h2>Sign Up</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == "error" %}
+                <div class="error-message">{{ message }}</div>
+            {% else %}
+                <div class="message">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if step == 'id_input' %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-field">
+                <label for="user_id"><span class="emoji">📝</span>Enter Student or Staff ID</label>
+                <input type="text" id="user_id" name="user_id" required>
+            </div>
+            <button type="submit" name="id_submit">Submit ID</button>
+        </form>
+
+    {% elif step == 'username_password' %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="message">{{ request.session.message }}</div>
+            <div class="form-field">
+                <label for="username"><span class="emoji">👤</span>Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-field">
+                <label for="password"><span class="emoji">🔒</span>Password</label>
+                <input type="password" id="password" name="password" required>
+                <span class="eye-icon">👁️</span>
+            </div>
+            <div class="form-field">
+                <label for="confirm_password"><span class="emoji">🔒</span>Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+                <span class="eye-icon">👁️</span>
+                <span class="password-match" id="passwordMatch">✔</span>
+            </div>
+            <button type="submit" name="username_password_submit" id="confirmButton" disabled>Confirm</button>
+        </form>
+
+    {% elif step == 'confirmation' %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="message">A confirmation code has been sent to your phone number.</div>
+            <div class="form-field">
+                <label for="confirmation_code"><span class="emoji">✅</span>Enter Confirmation Code</label>
+                <input type="text" id="confirmation_code" name="confirmation_code" required>
+            </div>
+            <button type="submit" name="confirmation_submit">Continue to Last Step</button>
+        </form>
+
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="terms-section">
+                <h3>Terms and Conditions</h3>
+                <div class="term">1. You agree to use the Manus Dei application responsibly and in accordance with all applicable laws.</div>
+                <div class="term">2. Your personal information will be handled in accordance with our Privacy Policy.</div>
+                <div class="term">3. You are responsible for maintaining the confidentiality of your account credentials.</div>
+                <div class="term">4. We reserve the right to suspend or terminate accounts that violate these terms.</div>
+                <div class="term">5. By signing up, you agree to receive SMS notifications for account-related activities.</div>
+                <div class="term">6. You must provide accurate and up-to-date information during registration.</div>
+                <div class="term">7. Any misuse of the application may result in legal action or account suspension.</div>
+                <div class="term">8. You are prohibited from sharing your account with others.</div>
+                <div class="term">9. The application’s content is protected by copyright and may not be reproduced without permission.</div>
+                <div class="term">10. You agree to notify us immediately of any security breaches related to your account.</div>
+                <div class="term">11. Fees or charges for services may apply, and you will be notified in advance of any changes.</div>
+                <div class="term">12. The application may collect data for analytics to improve user experience, with your consent.</div>
+                <div class="term">13. You agree to comply with all school policies and regulations when using this platform.</div>
+                <div class="term">14. Failure to comply with these terms may lead to permanent account deletion.</div>
+                <div class="term">15. Support services are available during business hours, and response times may vary.</div>
+            </div>
+            <button type="submit" name="terms_submit">Agree</button>
+        </form>
+    {% endif %}
+
+    <!-- Additional Navigation Buttons -->
+    <a href="{% url 'custom_login' %}"><button>Login</button></a>
+    <a href="{% url 'forgot_password' %}"><button>Change Password</button></a>
+
+    <script>
+        // Password matching validation
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const passwordMatch = document.getElementById('passwordMatch');
+        const confirmButton = document.getElementById('confirmButton');
+
+        function checkPasswords() {
+            if (password.value && confirmPassword.value && password.value === confirmPassword.value) {
+                passwordMatch.style.display = 'block';
+                confirmButton.disabled = false;
+            } else {
+                passwordMatch.style.display = 'none';
+                confirmButton.disabled = true;
+            }
+        }
+
+        if (password && confirmPassword) {
+            password.addEventListener('input', checkPasswords);
+            confirmPassword.addEventListener('input', checkPasswords);
+        }
+
+        // Toggle password visibility
+        const passwordInputs = document.querySelectorAll('input[type="password"]');
+        const eyeIcons = document.querySelectorAll('.eye-icon');
+
+        eyeIcons.forEach((eye, index) => {
+            eye.addEventListener('click', () => {
+                const input = passwordInputs[index];
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eye.textContent = '👁️‍🗨️'; // Open eye
+                } else {
+                    input.type = 'password';
+                    eye.textContent = '👁️'; // Closed eye
+                }
+            });
+        });
+    </script>
+</body>
+</html>

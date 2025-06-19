@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .header-color {
+            background-color: #4E73DF;
+            color: #ffffff;
+        }
+        .btn-success {
+            background-color: #4caf50;
+            border-color: #4caf50;
+        }
+        .btn-primary {
+            background-color: #4E73DF;
+            border-color: #4E73DF;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            border-color: #f44336;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .action-buttons a {
+            margin-right: 5px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .create-account-btn {
+            margin-right: 20px;
+        }
+        .filter-input {
+            margin-left: 20px;
+        }
+        .status-full {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #0f5132;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .table thead {
+            background-color: #1E90FF;
+            color: white;
+        }
+        .table tbody td {
+            background-color: #E6E6FA;
+        }
+        .table-bordered th, .table-bordered td {
+            border: 1px solid #D3D3D3;
+        }
+        h1.h3.mb-0 {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .card-header {
+            background-color: #4E73DF;
+            color: #ffffff;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .table-responsive {
+            padding: 20px;
+        }
+        .filter-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .filter-input {
+            margin-right: 20px;
+        }
+        .total-count {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 16px;
+            color: #4E73DF;
+        }
+        .overall-total {
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #FF4500;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function filterTable(inputId, tableId, colIndex) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            const rows = table.getElementsByTagName('tr');
+
+            let visibleRowCount = 0;
+
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+                const td = rows[i].getElementsByTagName('td')[colIndex];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        rows[i].style.display = '';
+                        visibleRowCount++;
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+
+            // Update the total count for the table
+            const totalCountElement = document.getElementById(tableId + '-count');
+            totalCountElement.textContent = 'Total: ' + visibleRowCount;
+
+            // Update the overall total count
+            updateOverallTotal();
+        }
+
+        function updateOverallTotal() {
+            let total = 0;
+            const totalElements = document.querySelectorAll('.total-count');
+            totalElements.forEach(el => {
+                const count = parseInt(el.textContent.split(': ')[1]);
+                total += count;
+            });
+            document.getElementById('overall-total').textContent = 'Overall Total Users: ' + total;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOverallTotal();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">User List - {{ account_type|title }}</h1>
+            <a href="{% url 'select_user_type' %}" class="btn btn-success create-account-btn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </a>
+        </div>
+
+        {% if parent_users %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Parents</span>
+                <a href="{% url 'toggle_all_parents_status' %}" class="btn {% if parent_users and parent_users.0.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fa {% if parent_users and parent_users.0.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                    {% if parent_users and parent_users.0.is_active %}
+                        Deactivate All
+                    {% else %}
+                        Activate All
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="filter-container">
+                    <input type="text" id="parentNameFilter" class="form-control filter-input" placeholder="Filter by Student Name" onkeyup="filterTable('parentNameFilter', 'parentTable', 4)">
+                    <input type="text" id="parentClassFilter" class="form-control filter-input" placeholder="Filter by Student Class" onkeyup="filterTable('parentClassFilter', 'parentTable', 5)">
+                </div>
+                <div class="table-responsive">
+                    <table id="parentTable" class="table table-hover table-bordered">
+                        <thead class="header-color">
+                            <tr>
+                                <th>S/N</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Student Name</th>
+                                <th>Student Class</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in parent_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.parent_first_name }} {{ user.parent_middle_name }} {{ user.parent_last_name }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <input type="password" class="form-control d-inline" style="width: auto;" value="{{ user.password }}" disabled>
+                                </td>
+                                <td>{{ user.student.firstname }} {{ user.student.middle_name }} {{ user.student.surname }}</td>
+                                <td>{{ user.student.current_class.name }}</td>
+                                <td class="action-buttons">
+                                    <a href="{% url 'update_parent_user' user.pk %}" class="btn btn-primary"><i class="fa fa-edit"></i></a>
+                                    <a href="{% url 'delete_parent_user' user.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'toggle_parent_status' user.pk %}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        <i class="fa {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p id="parentTable-count" class="total-count">Total: {{ parent_users|length }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if teacher_users %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Teachers</span>
+                <a href="{% url 'toggle_all_teachers_status' %}" class="btn {% if teacher_users and teacher_users.0.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fa {% if teacher_users and teacher_users.0.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                    {% if teacher_users and teacher_users.0.is_active %}
+                        Deactivate All
+                    {% else %}
+                        Activate All
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-body">
+                <input type="text" id="teacherNameFilter" class="form-control filter-input" placeholder="Filter by Name" onkeyup="filterTable('teacherNameFilter', 'teacherTable', 1)">
+                <div class="table-responsive">
+                    <table id="teacherTable" class="table table-hover table-bordered">
+                        <thead class="header-color">
+                            <tr>
+                                <th>S/N</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in teacher_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.staff.firstname }} {{ user.staff.middle_name }} {{ user.staff.surname }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <input type="password" class="form-control d-inline" style="width: auto;" value="{{ user.password }}" disabled>
+                                </td>
+                                <td class="action-buttons">
+                                    <a href="{% url 'update_teacher_user' user.pk %}" class="btn btn-primary"><i class="fa fa-edit"></i></a>
+                                    <a href="{% url 'delete_teacher_user' user.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'toggle_teacher_status' user.pk %}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        <i class="fa {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p id="teacherTable-count" class="total-count">Total: {{ teacher_users|length }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if bursor_users %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Bursors</span>
+                <a href="{% url 'toggle_all_bursors_status' %}" class="btn {% if bursor_users and bursor_users.0.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fa {% if bursor_users and bursor_users.0.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                    {% if bursor_users and bursor_users.0.is_active %}
+                        Deactivate All
+                    {% else %}
+                        Activate All
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-body">
+                <input type="text" id="bursorNameFilter" class="form-control filter-input" placeholder="Filter by Name" onkeyup="filterTable('bursorNameFilter', 'bursorTable', 1)">
+                <div class="table-responsive">
+                    <table id="bursorTable" class="table table-hover table-bordered">
+                        <thead class="header-color">
+                            <tr>
+                                <th>S/N</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in bursor_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.staff.firstname }} {{ user.staff.middle_name }} {{ user.staff.surname }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <input type="password" class="form-control d-inline" style="width: auto;" value="{{ user.password }}" disabled>
+                                </td>
+                                <td class="action-buttons">
+                                    <a href="{% url 'update_bursor_user' user.pk %}" class="btn btn-primary"><i class="fa fa-edit"></i></a>
+                                    <a href="{% url 'delete_bursor_user' user.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'toggle_bursor_status' user.pk %}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        <i class="fa {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p id="bursorTable-count" class="total-count">Total: {{ bursor_users|length }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if secretary_users %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Secretaries</span>
+                <a href="{% url 'toggle_all_secretaries_status' %}" class="btn {% if secretary_users and secretary_users.0.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fa {% if secretary_users and secretary_users.0.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                    {% if secretary_users and secretary_users.0.is_active %}
+                        Deactivate All
+                    {% else %}
+                        Activate All
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-body">
+                <input type="text" id="secretaryNameFilter" class="form-control filter-input" placeholder="Filter by Name" onkeyup="filterTable('secretaryNameFilter', 'secretaryTable', 1)">
+                <div class="table-responsive">
+                    <table id="secretaryTable" class="table table-hover table-bordered">
+                        <thead class="header-color">
+                            <tr>
+                                <th>S/N</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in secretary_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.staff.firstname }} {{ user.staff.middle_name }} {{ user.staff.surname }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <input type="password" class="form-control d-inline" style="width: auto;" value="{{ user.password }}" disabled>
+                                </td>
+                                <td class="action-buttons">
+                                    <a href="{% url 'update_secretary_user' user.pk %}" class="btn btn-primary"><i class="fa fa-edit"></i></a>
+                                    <a href="{% url 'delete_secretary_user' user.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'toggle_secretary_status' user.pk %}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        <i class="fa {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p id="secretaryTable-count" class="total-count">Total: {{ secretary_users|length }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if academic_users %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Academics</span>
+                <a href="{% url 'toggle_all_academics_status' %}" class="btn {% if academic_users and academic_users.0.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                    <i class="fa {% if academic_users and academic_users.0.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                    {% if academic_users and academic_users.0.is_active %}
+                        Deactivate All
+                    {% else %}
+                        Activate All
+                    {% endif %}
+                </a>
+            </div>
+            <div class="card-body">
+                <input type="text" id="academicNameFilter" class="form-control filter-input" placeholder="Filter by Name" onkeyup="filterTable('academicNameFilter', 'academicTable', 1)">
+                <div class="table-responsive">
+                    <table id="academicTable" class="table table-hover table-bordered">
+                        <thead class="header-color">
+                            <tr>
+                                <th>S/N</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in academic_users %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ user.staff.firstname }} {{ user.staff.middle_name }} {{ user.staff.surname }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <input type="password" class="form-control d-inline" style="width: auto;" value="{{ user.password }}" disabled>
+                                </td>
+                                <td class="action-buttons">
+                                    <a href="{% url 'update_academic_user' user.pk %}" class="btn btn-primary"><i class="fa fa-edit"></i></a>
+                                    <a href="{% url 'delete_academic_user' user.pk %}" class="btn btn-danger"><i class="fa fa-trash"></i></a>
+                                    <a href="{% url 'toggle_academic_status' user.pk %}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        <i class="fa {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p id="academicTable-count" class="total-count">Total: {{ academic_users|length }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <p id="overall-total" class="overall-total"></p>
+    </div>
+</body>
+</html>
+
+{% endblock content %}

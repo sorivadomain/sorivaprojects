@@ -1,0 +1,64 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <span class="back-btn" onclick="window.history.back()" style="font-size: 24px; color: #007aff; cursor: pointer; padding-left: 10px;">⬅️</span>
+        <h2 class="text-center flex-grow-1" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600; color: #000; margin: 0;">{{ title }}</h2>
+        <a href="{% url 'settings_home' %}" class="home-btn" style="font-size: 24px; color: #007aff; cursor: pointer; padding-right: 10px; text-decoration: none;">🏠</a>
+    </div>
+
+    <div class="form-container">
+        <div class="alert alert-warning" style="border-radius: 10px; background: linear-gradient(45deg, #ffcc00, #ff9500); color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h4 style="margin: 0; font-weight: 600;">Warning</h4>
+            <p style="margin: 5px 0 0;">Are you sure you want to delete the class <strong>{{ object.name }}</strong>? This action cannot be undone.</p>
+        </div>
+
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end gap-3">
+                <button type="button" class="btn btn-lg" onclick="window.history.back()" style="border-radius: 15px; background: linear-gradient(45deg, #6c757d, #adb5bd); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="submit" class="btn btn-lg" style="border-radius: 15px; background: linear-gradient(45deg, #ff3b30, #ff6b6b); border: none; color: #fff; padding: 10px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; font-weight: 600;">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .gap-3 {
+        gap: 1rem;
+    }
+    @media (max-width: 576px) {
+        .btn-lg {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .alert {
+            font-size: 0.9rem;
+            padding: 12px;
+        }
+        .back-btn, .home-btn {
+            font-size: 20px;
+        }
+    }
+</style>
+{% endblock content %}

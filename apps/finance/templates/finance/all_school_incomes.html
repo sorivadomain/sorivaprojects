@@ -1,0 +1,407 @@
+{% extends base_template %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<!-- Header -->
+<div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div class="d-flex align-items-center justify-content-between">
+        <a href="{{ finance_home_url }}" class="back-btn" style="font-size: 24px; color: #fff; cursor: pointer; padding-left: 10px; text-decoration: none;">⬅️</a>
+        <h3 class="flex-grow-1" style="margin: 0;">All School Incomes</h3>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="d-flex flex-row flex-wrap justify-content-center gap-3 mb-4">
+    <div class="filter-item">
+        <label for="category-filter" class="filter-label">Category</label>
+        <select id="category-filter" class="filter-button form-select">
+            <option value="all">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-item">
+        <label for="obtained-from-filter" class="filter-label">Obtained From</label>
+        <input type="text" id="obtained-from-filter" class="filter-button form-control" placeholder="Enter name">
+    </div>
+    <div class="filter-item">
+        <label class="filter-label">Date Provided</label>
+        <div class="d-flex gap-2">
+            <input type="date" id="date-from-filter" class="filter-button form-control" placeholder="From">
+            <input type="date" id="date-to-filter" class="filter-button form-control" placeholder="To">
+        </div>
+    </div>
+    <div class="filter-item">
+        <label for="session-filter" class="filter-label">Session</label>
+        <select id="session-filter" class="filter-button form-select">
+            <option value="all">All Sessions</option>
+            {% for session in sessions %}
+                <option value="{{ session.name }}" {% if session == current_session %}selected{% endif %}>{{ session.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<!-- Overall Total -->
+<div class="mb-4 text-center">
+    <h5>Overall Total Amount: TZS <span id="overall-total">{{ overall_total|floatformat:2 }}</span></h5>
+</div>
+
+<!-- Income Tables -->
+{% for category in categories %}
+    {% if category.incomes.exists %}
+        <div data-category-id="{{ category.id }}">
+            <h4>{{ category.name }}
+                {% if is_authorized_for_actions %}
+                    <a href="{% url 'school_income_create' category_id=category.id %}" class="btn btn-plus" title="Add Income">➕</a>
+                {% endif %}
+            </h4>
+            <p>Total Amount: TZS <span class="category-total">{{ category.total_amount|default:0|floatformat:2 }}</span></p>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Obtained From</th>
+                            <th>Amount (TZS)</th>
+                            <th>Date Provided</th>
+                            <th>Date Created</th>
+                            <th>Date Updated</th>
+                            <th>Attachment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for income in category.incomes.all %}
+                            <tr data-amount="{{ income.amount_obtained }}" data-obtained-from="{{ income.obtained_from|lower }}" data-date-provided="{{ income.date_provided|date:'Y-m-d' }}" data-session="{{ income.session.name|default:'none' }}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ income.obtained_from }}</td>
+                                <td>{{ income.amount_obtained|floatformat:2 }} TZS</td>
+                                <td>{{ income.date_provided|date:"Y-m-d" }}</td>
+                                <td>{{ income.date_created|date:"Y-m-d H:i" }}</td>
+                                <td>{{ income.date_updated|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    {% if income.attachment %}
+                                        <a href="{{ income.attachment.url }}" class="btn btn-sm btn-attachment" title="Download Attachment" download>📥</a>
+                                        <a href="{{ income.attachment.url }}" class="btn btn-sm btn-attachment" title="View Attachment" target="_blank">👁️</a>
+                                    {% else %}
+                                        <span class="no-attachment">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if is_authorized_for_actions %}
+                                        <a href="{% url 'school_income_update' pk=income.pk %}" class="btn btn-sm btn-update" title="Update Income">📝</a>
+                                        <a href="{% url 'school_income_delete' category_id=category.id pk=income.pk %}" class="btn btn-sm btn-delete" title="Delete Income" onclick="return confirm('Are you sure you want to delete this income?')">🗑️</a>
+                                        <a href="{% url 'school_income_detail' category_id=category.id pk=income.pk %}" class="btn btn-sm btn-detail" title="View Details">👀</a>
+                                    {% else %}
+                                        <span class="no-actions">No actions</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% empty %}
+    <p class="no-data">No school incomes found.</p>
+{% endfor %}
+
+<style>
+/* CSS Variables (Consistent with school_income_list.html) */
+:root {
+    --primary-color: #007bff;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-filter: linear-gradient(45deg, #2dd4bf, #1d4ed8);
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    background: #f8f9fa;
+}
+
+/* Header */
+.header {
+    margin-bottom: 20px;
+}
+
+/* Filter Styles */
+.filter-item {
+    flex: 1;
+    min-width: 200px;
+    margin: 5px;
+}
+
+.filter-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    background: var(--gradient-blue);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.filter-button {
+    border-radius: 8px !important;
+    background: var(--gradient-filter);
+    color: #fff !important;
+    border: none;
+    padding: 10px 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.filter-button:hover {
+    transform: scale(1.02);
+    background: linear-gradient(45deg, #3b82f6, #1e3a8a);
+}
+
+.filter-button::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.filter-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(45, 212, 191, 0.5);
+}
+
+/* Plus Button */
+.btn-plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gradient-yellow);
+    color: #fff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+}
+
+.btn-plus:hover {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #fbbf24, #fef08a);
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table th {
+    background: var(--gradient-blue);
+    color: #fff;
+}
+
+.table tbody tr:hover {
+    background: rgba(0,123,255,0.05);
+    transform: scale(1.01);
+    transition: var(--transition);
+}
+
+/* Button Styles */
+.btn-attachment, .btn-update, .btn-delete, .btn-detail {
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    margin: 0 2px;
+    display: inline-block;
+    transition: var(--transition);
+}
+
+.btn-attachment {
+    color: #343a40;
+}
+
+.btn-attachment:hover {
+    background: var(--gradient-blue);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.btn-update {
+    background: var(--gradient-yellow);
+    color: #fff;
+}
+
+.btn-delete {
+    background: var(--gradient-red);
+    color: #fff;
+}
+
+.btn-detail {
+    background: var(--gradient-blue);
+    color: #fff;
+}
+
+.btn-update:hover, .btn-delete:hover, .btn-detail:hover {
+    transform: scale(1.05);
+}
+
+.no-attachment, .no-actions {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.no-data {
+    text-align: center;
+    color: #6c757d;
+    font-size: 1rem;
+    margin: 20px 0;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .filter-item {
+        min-width: 100%;
+    }
+    .filter-button {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    #category-filter,
+    #obtained-from-filter,
+    #session-filter {
+        width: 100%;
+        height: 40px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    .table th, .table td {
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+    .btn-attachment, .btn-update, .btn-delete, .btn-detail {
+        padding: 3px 6px;
+        font-size: 0.7rem;
+        display: block;
+        margin: 2px 0;
+    }
+    .btn-plus {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    .header {
+        padding: 15px;
+        margin: 0 5px 15px 5px;
+    }
+    .header h3 {
+        font-size: 1.5rem;
+    }
+    .back-btn {
+        font-size: 20px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const categoryFilter = document.getElementById('category-filter');
+    const obtainedFromFilter = document.getElementById('obtained-from-filter');
+    const dateFromFilter = document.getElementById('date-from-filter');
+    const dateToFilter = document.getElementById('date-to-filter');
+    const sessionFilter = document.getElementById('session-filter');
+    const overallTotalElement = document.getElementById('overall-total');
+    const categoryTables = document.querySelectorAll('[data-category-id]');
+
+    function updateTotals() {
+        let overallTotal = 0;
+        categoryTables.forEach(table => {
+            const categoryId = table.dataset.categoryId;
+            const rows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
+            let categoryTotal = 0;
+            rows.forEach(row => {
+                categoryTotal += parseFloat(row.dataset.amount);
+            });
+            table.querySelector('.category-total').textContent = categoryTotal.toFixed(2);
+            if (table.style.display !== 'none') {
+                overallTotal += categoryTotal;
+            }
+            // Hide table if no visible rows
+            table.style.display = rows.length > 0 ? '' : 'none';
+        });
+        overallTotalElement.textContent = overallTotal.toFixed(2);
+    }
+
+    function applyFilters() {
+        const selectedCategory = categoryFilter.value;
+        const obtainedFrom = obtainedFromFilter.value.toLowerCase().trim();
+        const dateFrom = dateFromFilter.value ? new Date(dateFromFilter.value) : null;
+        const dateTo = dateToFilter.value ? new Date(dateToFilter.value) : null;
+        const selectedSession = sessionFilter.value;
+
+        categoryTables.forEach(table => {
+            const categoryId = table.dataset.categoryId;
+            if (selectedCategory === 'all' || selectedCategory === categoryId) {
+                table.style.display = '';
+            } else {
+                table.style.display = 'none';
+            }
+
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const rowObtainedFrom = row.dataset.obtainedFrom;
+                const rowDate = new Date(row.dataset.dateProvided);
+                const rowSession = row.dataset.session;
+                let showRow = true;
+
+                if (obtainedFrom && !rowObtainedFrom.includes(obtainedFrom)) {
+                    showRow = false;
+                }
+                if (dateFrom && rowDate < dateFrom) {
+                    showRow = false;
+                }
+                if (dateTo) {
+                    const nextDay = new Date(dateTo);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    if (rowDate >= nextDay) {
+                        showRow = false;
+                    }
+                }
+                if (selectedSession !== 'all' && rowSession !== selectedSession) {
+                    showRow = false;
+                }
+
+                row.style.display = showRow ? '' : 'none';
+            });
+
+            // Update S/N for visible rows
+            const visibleRows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
+            visibleRows.forEach((row, index) => {
+                row.querySelector('td:first-child').textContent = index + 1;
+            });
+        });
+
+        updateTotals();
+    }
+
+    categoryFilter.addEventListener('change', applyFilters);
+    obtainedFromFilter.addEventListener('input', applyFilters);
+    dateFromFilter.addEventListener('change', applyFilters);
+    dateToFilter.addEventListener('change', applyFilters);
+    sessionFilter.addEventListener('change', applyFilters);
+
+    // Initial totals calculation and filter application
+    applyFilters();
+});
+</script>
+{% endblock content %}

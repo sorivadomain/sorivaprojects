@@ -1,0 +1,507 @@
+{% extends base_template %}
+{% block title %}Manage Participants for {{ meeting.title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            <h3>Manage Participants</h3>
+        </div>
+    </div>
+
+    <!-- MEETING INFO -->
+    <div class="meeting-info">
+        <h4>{{ meeting.title }}</h4>
+        <p><strong>Status:</strong> {{ meeting.get_status_display }}</p>
+    </div>
+
+    <!-- MESSAGES -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- FORM -->
+    <form method="post" id="inviteForm">
+        {% csrf_token %}
+        <div class="form-container">
+            <!-- CHECK ALL USERS -->
+            <button type="button" id="check-all-users">Check All Users</button>
+
+            <!-- STUDENTS SECTION -->
+            <h4>Students</h4>
+            <div class="filters">
+                <div class="filter-group">
+                    <input type="text" id="student-name-filter" placeholder="Search by name">
+                    <select id="student-gender-filter">
+                        <option value="">All Genders</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                    <select id="student-class-filter">
+                        <option value="">All Classes</option>
+                        {% for class in classes %}
+                            <option value="{{ class.name|lower }}">{{ class.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="check-all">
+                <label>
+                    <input type="checkbox" id="check-all-students"> Check All Students
+                </label>
+            </div>
+            <div id="student-list">
+                {% for student in students %}
+                    <div class="participant-row" data-name="{{ student.firstname|lower }} {{ student.middle_name|lower }} {{ student.surname|lower }}" data-gender="{{ student.gender|lower }}" data-class="{{ student.current_class.name|lower|default:'none' }}">
+                        <input type="checkbox" name="students" value="{{ student.id }}" {% if student.id in invited_student_ids %}checked{% endif %}>
+                        {% if student.passport and student.passport.url %}
+                            <img src="{{ student.passport.url }}" alt="{{ student.firstname }}" class="participant-img">
+                        {% else %}
+                            <div class="initial-circle">{{ student.firstname|slice:":1" }}</div>
+                        {% endif %}
+                        <div class="participant-details">
+                            <div>{{ student.firstname }} {{ student.middle_name }} {{ student.surname }}</div>
+                            <div>{{ student.current_class|default:'No Class' }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No active students found.</p>
+                {% endfor %}
+            </div>
+
+            <!-- STAFF SECTION -->
+            <h4>Staff</h4>
+            <div class="filters">
+                <div class="filter-group">
+                    <input type="text" id="staff-name-filter" placeholder="Search by name">
+                    <select id="staff-gender-filter">
+                        <option value="">All Genders</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                    <select id="staff-occupation-filter">
+                        <option value="">All Occupations</option>
+                        {% for occ in occupation_choices %}
+                            <option value="{{ occ.0|lower }}">{{ occ.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="check-all">
+                <label>
+                    <input type="checkbox" id="check-all-staff"> Check All Staff
+                </label>
+            </div>
+            <div id="staff-list">
+                {% for staff in staff %}
+                    <div class="participant-row" data-name="{{ staff.firstname|lower }} {{ staff.middle_name|lower }} {{ staff.surname|lower }}" data-gender="{{ staff.gender|lower }}" data-occupation="{{ staff.occupation|lower|default:'none' }}">
+                        <input type="checkbox" name="staff" value="{{ staff.id }}" {% if staff.id in invited_staff_ids %}checked{% endif %}>
+                        {% if staff.passport_photo and staff.passport_photo.url %}
+                            <img src="{{ staff.passport_photo.url }}" alt="{{ staff.firstname }}" class="participant-img">
+                        {% else %}
+                            <div class="initial-circle">{{ staff.firstname|slice:":1" }}</div>
+                        {% endif %}
+                        <div class="participant-details">
+                            <div>{{ staff.firstname }} {{ staff.middle_name }} {{ staff.surname }}</div>
+                            <div>{{ staff.get_occupation_display|default:'No Occupation' }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No active staff found.</p>
+                {% endfor %}
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="submit">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Manage participants JavaScript loaded');
+
+    // Check All Users
+    const checkAllUsers = document.getElementById('check-all-users');
+    const checkAllStudents = document.getElementById('check-all-students');
+    const checkAllStaff = document.getElementById('check-all-staff');
+    const studentCheckboxes = document.querySelectorAll('input[name="students"]');
+    const staffCheckboxes = document.querySelectorAll('input[name="staff"]');
+
+    checkAllUsers.addEventListener('click', function() {
+        console.group('Check All Users clicked');
+        checkAllStudents.checked = true;
+        checkAllStaff.checked = true;
+        studentCheckboxes.forEach((cb, i) => {
+            cb.checked = true;
+            console.log(`Student checkbox ${i} checked: ID=${cb.value}`);
+        });
+        staffCheckboxes.forEach((cb, i) => {
+            cb.checked = true;
+            console.log(`Staff checkbox ${i} checked: ID=${cb.value}`);
+        });
+        console.groupEnd();
+    });
+
+    // Check All Students
+    checkAllStudents.addEventListener('change', function() {
+        console.group('Check All Students toggled');
+        const visibleStudentRows = document.querySelectorAll('#student-list .participant-row:not(.hidden)');
+        visibleStudentRows.forEach((row, i) => {
+            const checkbox = row.querySelector('input[name="students"]');
+            if (checkbox) {
+                checkbox.checked = this.checked;
+                console.log(`Student row ${i} checkbox (ID: ${checkbox.value}) set to ${this.checked}`);
+            }
+        });
+        console.groupEnd();
+    });
+
+    // Check All Staff
+    checkAllStaff.addEventListener('change', function() {
+        console.group('Check All Staff toggled');
+        const visibleStaffRows = document.querySelectorAll('#staff-list .participant-row:not(.hidden)');
+        visibleStaffRows.forEach((row, i) => {
+            const checkbox = row.querySelector('input[name="staff"]');
+            if (checkbox) {
+                checkbox.checked = this.checked;
+                console.log(`Staff row ${i} checkbox (ID: ${checkbox.value}) set to ${this.checked}`);
+            }
+        });
+        console.groupEnd();
+    });
+
+    // Student Filters
+    const studentNameFilter = document.getElementById('student-name-filter');
+    const studentGenderFilter = document.getElementById('student-gender-filter');
+    const studentClassFilter = document.getElementById('student-class-filter');
+    const studentRows = document.querySelectorAll('#student-list .participant-row');
+
+    function filterStudents() {
+        console.group('Filtering students');
+        const name = studentNameFilter.value.toLowerCase().trim();
+        const gender = studentGenderFilter.value.toLowerCase();
+        const className = studentClassFilter.value.toLowerCase();
+        console.log(`Filter criteria: name="${name}", gender="${gender}", class="${className}"`);
+
+        let visibleCount = 0;
+        studentRows.forEach((row, i) => {
+            const rowName = row.dataset.name.toLowerCase().trim();
+            const rowGender = row.dataset.gender.toLowerCase();
+            const rowClass = row.dataset.class.toLowerCase() || 'none';
+            console.log(`Row ${i}: name="${rowName}", gender="${rowGender}", class="${rowClass}"`);
+
+            const nameMatch = !name || rowName.includes(name);
+            const genderMatch = !gender || rowGender === gender;
+            const classMatch = !className || rowClass === className;
+
+            console.log(`Row ${i} matches: name=${nameMatch}, gender=${genderMatch}, class=${classMatch}`);
+
+            if (nameMatch && genderMatch && classMatch) {
+                row.classList.remove('hidden');
+                visibleCount++;
+                console.log(`Row ${i} shown: class=${row.className}`);
+            } else {
+                row.classList.add('hidden');
+                console.log(`Row ${i} hidden: class=${row.className}`);
+            }
+        });
+        console.log(`Visible students: ${visibleCount}`);
+        console.groupEnd();
+    }
+
+    studentNameFilter.addEventListener('input', () => {
+        console.log('Student name filter input changed');
+        filterStudents();
+    });
+    studentGenderFilter.addEventListener('change', () => {
+        console.log('Student gender filter changed');
+        filterStudents();
+    });
+    studentClassFilter.addEventListener('change', () => {
+        console.log('Student class filter changed');
+        filterStudents();
+    });
+
+    // Staff Filters
+    const staffNameFilter = document.getElementById('staff-name-filter');
+    const staffGenderFilter = document.getElementById('staff-gender-filter');
+    const staffOccupationFilter = document.getElementById('staff-occupation-filter');
+    const staffRows = document.querySelectorAll('#staff-list .participant-row');
+
+    function filterStaff() {
+        console.group('Filtering staff');
+        const name = staffNameFilter.value.toLowerCase().trim();
+        const gender = staffGenderFilter.value.toLowerCase();
+        const occupation = staffOccupationFilter.value.toLowerCase();
+        console.log(`Filter criteria: name="${name}", gender="${gender}", occupation="${occupation}"`);
+
+        let visibleCount = 0;
+        staffRows.forEach((row, i) => {
+            const rowName = row.dataset.name.toLowerCase().trim();
+            const rowGender = row.dataset.gender.toLowerCase();
+            const rowOccupation = row.dataset.occupation.toLowerCase() || 'none';
+            console.log(`Row ${i}: name="${rowName}", gender="${rowGender}", occupation="${rowOccupation}"`);
+
+            const nameMatch = !name || rowName.includes(name);
+            const genderMatch = !gender || rowGender === gender;
+            const occupationMatch = !occupation || rowOccupation === occupation;
+
+            console.log(`Row ${i} matches: name=${nameMatch}, gender=${genderMatch}, occupation=${occupationMatch}`);
+
+            if (nameMatch && genderMatch && occupationMatch) {
+                row.classList.remove('hidden');
+                visibleCount++;
+                console.log(`Row ${i} shown: class=${row.className}`);
+            } else {
+                row.classList.add('hidden');
+                console.log(`Row ${i} hidden: class=${row.className}`);
+            }
+        });
+        console.log(`Visible staff: ${visibleCount}`);
+        console.groupEnd();
+    }
+
+    staffNameFilter.addEventListener('input', () => {
+        console.log('Staff name filter input changed');
+        filterStaff();
+    });
+    staffGenderFilter.addEventListener('change', () => {
+        console.log('Staff gender filter changed');
+        filterStaff();
+    });
+    staffOccupationFilter.addEventListener('change', () => {
+        console.log('Staff occupation filter changed');
+        filterStaff();
+    });
+
+    // Log POST data on submit
+    document.querySelector('button[type="submit"]').addEventListener('click', function() {
+        console.group('Submit button clicked');
+        const form = document.getElementById('inviteForm');
+        const formData = new FormData(form);
+        console.log('POST data:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        console.groupEnd();
+    });
+
+    // Initial filter
+    console.group('Initial setup');
+    filterStudents();
+    filterStaff();
+    console.groupEnd();
+});
+</script>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+    .header {
+        background: linear-gradient(135deg, #34c759, #3a86ff);
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        border-radius: 20px;
+        margin-bottom: 15px;
+    }
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .back-btn {
+        font-size: 24px;
+        cursor: pointer;
+        padding-left: 10px;
+    }
+    .header h3 {
+        margin: 0;
+        flex-grow: 1;
+        font-size: 1.5rem;
+    }
+    .meeting-info {
+        padding: 15px;
+        background: linear-gradient(45deg, #e0e0e0, #ffffff);
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+    .meeting-info h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0 0 10px;
+    }
+    .meeting-info p {
+        font-size: 0.875rem;
+        margin: 5px 0;
+    }
+    .messages {
+        margin-bottom: 15px;
+        padding: 0 15px;
+    }
+    .alert {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        color: #fff;
+        padding: 8px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+    }
+    .form-container {
+        padding: 15px;
+    }
+    .form-container h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    .filters {
+        margin-bottom: 15px;
+    }
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .filter-group input, .filter-group select {
+        flex: 1;
+        min-width: 200px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        background: linear-gradient(45deg, #e0e0e0, #ffffff);
+        outline: none;
+    }
+    .filter-group input:focus, .filter-group select:focus {
+        border-color: #3a86ff;
+        box-shadow: 0 0 5px rgba(58, 134, 255, 0.5);
+    }
+    .check-all {
+        margin-bottom: 15px;
+    }
+    .check-all label {
+        font-size: 0.875rem;
+    }
+    .participant-row {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 5px;
+    }
+    .participant-row.hidden {
+        display: none;
+    }
+    .participant-row input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    .participant-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+    .initial-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #34c759, #3a86ff);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-right: 10px;
+    }
+    .participant-details div:first-child {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .participant-details div:last-child {
+        font-size: 0.875rem;
+        color: #666;
+    }
+    button {
+        background: linear-gradient(45deg, #34c759, #3a86ff);
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 15px;
+        transition: transform 0.3s ease;
+    }
+    button:hover {
+        transform: scale(1.02);
+    }
+    @media (max-width: 576px) {
+        .container {
+            padding: 5px;
+        }
+        .header {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .header h3 {
+            font-size: 1.2rem;
+        }
+        .meeting-info, .form-container {
+            padding: 10px;
+        }
+        .filter-group input, .filter-group select {
+            min-width: 100%;
+            padding: 8px;
+            font-size: 0.75rem;
+        }
+        .alert {
+            padding: 6px;
+            font-size: 0.75rem;
+        }
+        button {
+            padding: 10px;
+            font-size: 0.875rem;
+        }
+        .participant-row {
+            padding: 8px;
+        }
+        .participant-img, .initial-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+        .participant-details div:first-child {
+            font-size: 0.875rem;
+        }
+        .participant-details div:last-child {
+            font-size: 0.75rem;
+        }
+        .back-btn {
+            font-size: 18px;
+            padding-left: 5px;
+        }
+    }
+</style>
+{% endblock content %}

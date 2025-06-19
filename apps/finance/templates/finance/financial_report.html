@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Report</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding-top: 70px;
+            color: #1c2526;
+            overflow-x: hidden;
+        }
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, #00509d 0%, #003087 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 600;
+            flex-grow: 1;
+            letter-spacing: 0.5px;
+        }
+        .header a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            margin-right: 20px;
+            transition: transform 0.3s ease;
+        }
+        .header a:hover {
+            transform: scale(1.2);
+        }
+        .content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .filter {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter label {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1c2526;
+        }
+        select {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            color: #1c2526;
+        }
+        select:focus {
+            outline: none;
+            box-shadow: 0 4px 16px rgba(0, 84, 255, 0.2);
+        }
+        select:hover {
+            transform: translateY(-2px);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th {
+            background: linear-gradient(135deg, #f4f4f9 0%, #e2e8f0 100%);
+            font-weight: 600;
+            color: #1c2526;
+        }
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        tr:hover {
+            background: #eff6ff;
+            transition: background 0.2s ease;
+        }
+        .summary {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .summary:hover {
+            transform: translateY(-4px);
+        }
+        .summary h3 {
+            margin: 0 0 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1c2526;
+        }
+        .summary p {
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #4b5563;
+        }
+        .comments {
+            background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.5s ease-out;
+        }
+        .comments h3, .comments h4 {
+            margin: 0 0 10px;
+            font-weight: 600;
+            color: #1c2526;
+        }
+        .comments ul {
+            padding-left: 20px;
+            margin: 0 0 20px;
+        }
+        .comments li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #4b5563;
+        }
+        .comments p {
+            font-size: 0.95rem;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+        .profit {
+            color: #10b981;
+            font-weight: 600;
+        }
+        .loss {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 768px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.4rem;
+            }
+            .filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            select {
+                width: 100%;
+                min-width: unset;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 10px;
+            }
+            .summary {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="{% url 'finance-home' %}" title="Home">🏠</a>
+        <h1>Financial Report</h1>
+    </header>
+    <div class="content">
+        <div class="filter">
+            <label for="session-filter">Select Session: </label>
+            <select id="session-filter">
+                {% if current_session %}
+                <option value="{{ current_session.id }}" selected>{{ current_session.name }}</option>
+                {% endif %}
+                {% for session in sessions %}
+                    {% if session != current_session %}
+                    <option value="{{ session.id }}">{{ session.name }}</option>
+                    {% endif %}
+                {% endfor %}
+                <option value="all">All Sessions</option>
+            </select>
+        </div>
+        <h2>Fees Structure</h2>
+        <table id="fees-structure-table">
+            <thead>
+                <tr>
+                    <th>Class Level</th>
+                    <th>Amount (TZS)</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="summary">
+            <h3>Fees Invoice Report</h3>
+            <p>Total Payable: TZS <span id="total-payable"></span></p>
+            <p>Total Paid: TZS <span id="total-paid"></span></p>
+            <p>Remaining Balance: TZS <span id="remaining-balance"></span></p>
+        </div>
+        <h2>Income Category Report</h2>
+        <table id="income-report-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total Amount (TZS)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h2>Expenditure Category Report</h2>
+        <table id="expenditure-report-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total Amount (TZS)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="summary">
+            <h3>Salary Report</h3>
+            <p>Total Net Salaries: TZS <span id="total-net-salary"></span></p>
+        </div>
+        <div class="summary">
+            <h3>Overall Financial Summary</h3>
+            <p>Total Assets: TZS <span id="total-assets"></span></p>
+            <p>Total Liabilities: TZS <span id="total-liabilities"></span></p>
+            <p>Overall Balance: TZS <span id="overall-balance"></span> (<span id="financial-status"></span>)</p>
+        </div>
+        <div class="comments">
+            <h3>Comments and Advice</h3>
+            <ul id="comments-list"></ul>
+            <h4>Advice for Financial Sustainability</h4>
+            <p id="advice"></p>
+        </div>
+    </div>
+    <script>
+        function updateReport(sessionId) {
+            const url = "{% url 'finance-report-data' %}?session_id=" + (sessionId || '');
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Fees Structure
+                    const feesTableBody = document.querySelector('#fees-structure-table tbody');
+                    feesTableBody.innerHTML = '';
+                    data.fees_structures.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.class_level__name}</td>
+                            <td>${item.amount}</td>
+                            <td>${item.description || ''}</td>
+                        `;
+                        feesTableBody.appendChild(row);
+                    });
+
+                    // Fees Invoice Report
+                    document.querySelector('#total-payable').textContent = data.fees_invoice_report.total_payable;
+                    document.querySelector('#total-paid').textContent = data.fees_invoice_report.total_paid;
+                    document.querySelector('#remaining-balance').textContent = data.fees_invoice_report.remaining_balance;
+
+                    // Income Report
+                    const incomeTableBody = document.querySelector('#income-report-table tbody');
+                    incomeTableBody.innerHTML = '';
+                    data.income_report.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.income_category__name || 'Uncategorized'}</td>
+                            <td>${item.total_amount}</td>
+                        `;
+                        incomeTableBody.appendChild(row);
+                    });
+
+                    // Expenditure Report
+                    const expenditureTableBody = document.querySelector('#expenditure-report-table tbody');
+                    expenditureTableBody.innerHTML = '';
+                    data.expenditure_report.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${item.category__name}</td>
+                            <td>${item.total_amount}</td>
+                        `;
+                        expenditureTableBody.appendChild(row);
+                    });
+
+                    // Salary Report
+                    document.querySelector('#total-net-salary').textContent = data.salary_report.total_net_salary;
+
+                    // Overall Summary
+                    document.querySelector('#total-assets').textContent = data.overall.total_assets;
+                    document.querySelector('#total-liabilities').textContent = data.overall.total_liabilities;
+                    document.querySelector('#overall-balance').textContent = data.overall.overall_balance;
+                    const statusSpan = document.querySelector('#financial-status');
+                    statusSpan.textContent = data.overall.financial_status;
+                    statusSpan.className = data.overall.financial_status === 'Profit' ? 'profit' : 'loss';
+
+                    // Comments and Advice
+                    const commentsList = document.querySelector('#comments-list');
+                    commentsList.innerHTML = '';
+                    data.comments.forEach(comment => {
+                        const li = document.createElement('li');
+                        li.textContent = comment;
+                        commentsList.appendChild(li);
+                    });
+                    document.querySelector('#advice').textContent = data.advice;
+                })
+                .catch(error => console.error('Error fetching report data:', error));
+        }
+
+        document.querySelector('#session-filter').addEventListener('change', (e) => {
+            updateReport(e.target.value);
+        });
+
+        // Initial load
+        updateReport(document.querySelector('#session-filter').value);
+    </script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+{% extends base_template %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header" style="background: linear-gradient(135deg, #34c759, #3a86ff); color: #fff; padding: 20px; text-align: center; margin: 0 10px 20px 10px; border-radius: 15px;">
+        <h3>{{ page_title }}</h3>
+        <span class="time-display" id="time-display"></span>
+        <span class="date-display" id="date-display"></span>
+    </div>
+
+    <!-- BUTTONS CONTAINER -->
+    <div class="buttons-container" style="width: 100%; margin: 0; padding: 0;">
+        {% if is_full_access or user_occupation == 'academic' %}
+            <!-- Create Academic Session -->
+            <a href="{% url 'session_create' %}" class="iphone-button bg-session-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Academic Session</h3>
+                    <p class="desc-info">Add a new session</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📅</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Academic Session List -->
+            <a href="{% url 'session_list' %}" class="iphone-button bg-session-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Academic Session List</h3>
+                    <p class="desc-info">View all sessions</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📋</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Create Academic Term -->
+            <a href="{% url 'term_create' %}" class="iphone-button bg-term-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Academic Term</h3>
+                    <p class="desc-info">Add a new term</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>➕</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Academic Term List -->
+            <a href="{% url 'term_list' %}" class="iphone-button bg-term-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Academic Term List</h3>
+                    <p class="desc-info">View all terms</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>🗓️</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Create Subject -->
+            <a href="{% url 'subject_create' %}" class="iphone-button bg-subject-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Subject</h3>
+                    <p class="desc-info">Add a new subject</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📘</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Subject List -->
+            <a href="{% url 'subject_list' %}" class="iphone-button bg-subject-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Subject List</h3>
+                    <p class="desc-info">View all subjects</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📚</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Create Student Class -->
+            <a href="{% url 'student_class_create' %}" class="iphone-button bg-student-class-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Student Class</h3>
+                    <p class="desc-info">Add a new class</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>🏫</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Student Class List -->
+            <a href="{% url 'student_class_list' %}" class="iphone-button bg-student-class-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Student Class List</h3>
+                    <p class="desc-info">View all classes</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📝</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Create Teacher's Role -->
+            <a href="{% url 'teachersrole_create' %}" class="iphone-button bg-teacher-role-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Teacher's Role</h3>
+                    <p class="desc-info">Add a new teacher role</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>👩‍🏫</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Teacher's Role List -->
+            <a href="{% url 'teachersrole_list' %}" class="iphone-button bg-teacher-role-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Teacher's Role List</h3>
+                    <p class="desc-info">View all teacher roles</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📋</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Location -->
+            <a href="{% url 'location' %}" class="iphone-button bg-location" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Location</h3>
+                    <p class="desc-info">Manage location settings</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>📍</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to manage</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- School Timetable -->
+            <a href="{% url 'schooldays' %}" class="iphone-button bg-school-timetable" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>School Timetable</h3>
+                    <p class="desc-info">View weekly schedule</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>🕒</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+        {% endif %}
+
+        {% if is_full_access or user_occupation == 'bursar' %}
+            <!-- Create Installment -->
+            <a href="{% url 'installment_create' %}" class="iphone-button bg-installment-create" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Create Installment</h3>
+                    <p class="desc-info">Add a new installment</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>➕</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to create</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+
+            <!-- Installment List -->
+            <a href="{% url 'installment_list' %}" class="iphone-button bg-installment-list" style="display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 80px; margin-bottom: 10px; border-radius: 40px; text-decoration: none; color: #fff; transition: transform 0.3s ease; padding: 0 20px;">
+                <div class="button-left" style="text-align: left; flex: 1; margin-right: 10px;">
+                    <h3>Installment List</h3>
+                    <p class="desc-info">View all installments</p>
+                </div>
+                <div class="button-center" style="text-align: center; flex: 1;">
+                    <h3>💳</h3>
+                </div>
+                <div class="button-right" style="text-align: right; flex: 1; margin-left: 10px;">
+                    <p class="desc-info">Tap to view</p>
+                    <p class="desc-info" style="font-size: 20px;">➜</p>
+                </div>
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer" style="text-align: center; margin-top: 30px; font-style: italic; color: #007bff;">
+        <p>Moto: No one should be left behind</p>
+    </div>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+    .iphone-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 80px;
+        margin-bottom: 10px;
+        border-radius: 40px;
+        text-decoration: none;
+        color: #fff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        padding: 0 20px;
+    }
+    .iphone-button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    .button-left, .button-center, .button-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .button-left {
+        text-align: left;
+        flex: 1;
+        margin-right: 10px;
+    }
+    .button-center {
+        text-align: center;
+        flex: 1;
+    }
+    .button-right {
+        text-align: right;
+        flex: 1;
+        margin-left: 10px;
+    }
+    .button-left h3, .button-center h3, .button-right h3 {
+        margin: 3px 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .desc-info {
+        margin: 2px 0;
+        font-size: 13px;
+        line-height: 1.2;
+    }
+    /* Shinier gradient backgrounds for each button */
+    .bg-session-create {
+        background: linear-gradient(45deg, #00ff7f, #00b7eb);
+    }
+    .bg-session-list {
+        background: linear-gradient(45deg, #ffd700, #ff8c00);
+    }
+    .bg-term-create {
+        background: linear-gradient(45deg, #ff00cc, #6600cc);
+    }
+    .bg-term-list {
+        background: linear-gradient(45deg, #9b30ff, #00ffcc);
+    }
+    .bg-installment-create {
+        background: linear-gradient(45deg, #ff6666, #ff99cc);
+    }
+    .bg-installment-list {
+        background: linear-gradient(45deg, #00ffaa, #00b7eb);
+    }
+    .bg-subject-create {
+        background: linear-gradient(45deg, #00e6ff, #ffaa00);
+    }
+    .bg-subject-list {
+        background: linear-gradient(45deg, #ff4500, #ff8c00);
+    }
+    .bg-student-class-create {
+        background: linear-gradient(45deg, #00b7eb, #00ffaa);
+    }
+    .bg-student-class-list {
+        background: linear-gradient(45deg, #ff99cc, #ffccff);
+    }
+    .bg-teacher-role-create {
+        background: linear-gradient(45deg, #ff4040, #ffaa00);
+    }
+    .bg-teacher-role-list {
+        background: linear-gradient(45deg, #00e6ff, #00cc99);
+    }
+    .bg-location {
+        background: linear-gradient(45deg, #00ffcc, #00b7eb);
+    }
+    .bg-school-timetable {
+        background: linear-gradient(45deg, #ff4040, #ffaa00);
+    }
+    @media (max-width: 576px) {
+        .header {
+            padding: 15px;
+            margin: 0 5px 15px 5px;
+        }
+        .header h3 {
+            font-size: 1.5rem;
+        }
+        .time-display, .date-display {
+            font-size: 16px;
+        }
+        .iphone-button {
+            min-height: 70px;
+            padding: 0 15px;
+        }
+        .button-left h3, .button-center h3, .button-right h3 {
+            font-size: 16px;
+        }
+        .desc-info {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<!-- Real-time Clock Display -->
+<script>
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+        document.getElementById('time-display').textContent = timeString;
+
+        const dateString = now.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        const daySuffix = getDaySuffix(now.getDate());
+        document.getElementById('date-display').textContent =
+            dateString.replace(now.getDate(), now.getDate() + daySuffix);
+    }
+
+    function getDaySuffix(day) {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+            default: return 'th';
+        }
+    }
+
+    setInterval(updateTime, 1000);
+    updateTime();
+</script>
+{% endblock content %}

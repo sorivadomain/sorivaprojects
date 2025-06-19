@@ -1,0 +1,593 @@
+{% extends base_template %}
+{% load static humanize %}
+
+{% block title %}Fees Invoices{% endblock title %}
+
+{% block content %}
+<!-- Navigation -->
+<div class="nav-container d-flex align-items-center justify-content-between flex-nowrap mb-4">
+    <span class="nav-btn back-btn" onclick="window.history.back()" title="Go Back">⬅️</span>
+    <h3 class="title">Fees Invoices of {{ student_name|default:"All Students" }}</h3>
+    {% if is_authorized_for_actions %}
+    <a href="{% url 'fees_invoice_create' %}" class="nav-btn add-btn" title="Create New Invoice">➕</a>
+    {% endif %}
+    <a href="{% url 'finance-home' %}" class="nav-btn home-btn" title="Finance Home">🏠</a>
+</div>
+
+<!-- Filters Section -->
+<div class="mb-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-3">
+            <label for="filter-search" class="form-label">Search Name/ID:</label>
+            <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Enter Student Name or Invoice ID...">
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-class" class="form-label">Class:</label>
+            <select id="filter-class" class="form-select form-select-sm">
+                <option value="">All Classes</option>
+                {% for class in all_classes %}
+                    <option value="{{ class.id }}">{{ class.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-session" class="form-label">Session:</label>
+            <select id="filter-session" class="form-select form-select-sm">
+                <option value="">All Sessions</option>
+                {% for session in all_sessions %}
+                    <option value="{{ session.id }}" {% if current_session and session.id == current_session.id %}selected{% endif %}>
+                        {{ session.name }} {% if current_session and session.id == current_session.id %}(Current){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-term" class="form-label">Term:</label>
+            <select id="filter-term" class="form-select form-select-sm">
+                <option value="">All Terms</option>
+                {% for term in all_terms %}
+                    <option value="{{ term.id }}" {% if current_term and term.id == current_term.id %}selected{% endif %}>
+                        {{ term.name }} {% if current_term and term.id == current_term.id %}(Current){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-installment" class="form-label">Installment:</label>
+            <select id="filter-installment" class="form-select form-select-sm">
+                <option value="">All Installments</option>
+                {% for installment in all_installments %}
+                    <option value="{{ installment.id }}" {% if current_installment and installment.id == current_installment.id %}selected{% endif %}>
+                        {{ installment.name }} {% if current_installment and installment.id == current_installment.id %}(Current){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-status" class="form-label">Status:</label>
+            <select id="filter-status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                {% for value, display in all_statuses %}
+                    <option value="{{ value }}">{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-date-from" class="form-label">Date From:</label>
+            <input type="date" id="filter-date-from" class="form-control form-control-sm">
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="filter-date-to" class="form-label">Date To:</label>
+            <input type="date" id="filter-date-to" class="form-control form-control-sm">
+        </div>
+        <div class="col-12 col-md-1">
+            <label for="reset-filters" class="form-label d-none d-md-block"> </label>
+            <button id="reset-filters" class="btn btn-sm btn-secondary w-100" title="Reset Filters">🔄</button>
+        </div>
+    </div>
+</div>
+
+<!-- Totals Display -->
+<div class="totals mb-4 d-flex justify-content-around">
+    <span><strong>Total Payable:</strong> <span id="total-payable">0.00</span> TZS</span>
+    <span><strong>Total Paid:</strong> <span id="total-paid">0.00</span> TZS</span>
+    <span><strong>Total Balance:</strong> <span id="total-balance">0.00</span> TZS</span>
+</div>
+
+<!-- Table -->
+{% if fees_invoices %}
+    <div class="table-scroll-container">
+        <table id="invoices-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>S/N</th>
+                    <th>Invoice ID</th>
+                    <th>Student</th>
+                    <th>Level</th>
+                    <th>Period</th>
+                    <th>Amount Payable</th>
+                    <th>Amount Paid</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Invoice Date</th>
+                    <th>Date Created</th>
+                    <th>Date Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="invoice-table-body">
+                {% for entry in fees_invoices %}
+                    {% with invoice=entry.invoice %}
+                    <tr class="invoice-row"
+                        data-invoice-id="{{ invoice.invoice_id|lower }}"
+                        data-student-name="{{ invoice.student.firstname|lower }} {% if invoice.student.middle_name %}{{ invoice.student.middle_name|lower }} {% endif %}{{ invoice.student.surname|lower }}"
+                        data-class-id="{{ invoice.class_level.id }}"
+                        data-session-id="{{ invoice.session.id }}"
+                        data-term-id="{{ invoice.term.id }}"
+                        data-installment-id="{{ invoice.installment.id }}"
+                        data-status="{{ invoice.status }}"
+                        data-invoice-date="{{ invoice.invoice_date|date:'Y-m-d' }}"
+                        data-payable="{{ invoice.total_invoice_amount }}"
+                        data-paid="{{ entry.total_paid }}"
+                        data-balance="{{ entry.balance }}">
+                        <td class="row-index">{{ forloop.counter }}</td>
+                        <td>{{ invoice.invoice_id }}</td>
+                        <td>{{ invoice.student.firstname }} {% if invoice.student.middle_name %}{{ invoice.student.middle_name }} {% endif %} {{ invoice.student.surname }}</td>
+                        <td>{{ invoice.class_level.name }}</td>
+                        <td>{{ invoice.session.name }}-{{ invoice.term.name }}-{{ invoice.installment.name }}</td>
+                        <td class="text-right">{{ invoice.total_invoice_amount|floatformat:2|intcomma }}</td>
+                        <td class="text-right">{{ entry.total_paid|floatformat:2|intcomma }}</td>
+                        <td class="text-right">{{ entry.balance|floatformat:2|intcomma }}</td>
+                        <td>
+                            {% if invoice.status == 'PAID' %}
+                                <span class="badge bg-success">Paid ✅✅</span>
+                            {% elif invoice.status == 'PARTIAL' %}
+                                <span class="badge bg-warning text-dark">Partial ✅</span>
+                            {% elif invoice.status == 'UNPAID' %}
+                                <span class="badge bg-danger">Unpaid 🔴</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.invoice_date|date:"Y-m-d" }}</td>
+                        <td>{{ invoice.date_created|date:"Y-m-d H:i" }}</td>
+                        <td>{{ invoice.date_updated|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if is_authorized_for_actions %}
+                                <a href="{% url 'fees_invoice_update' pk=invoice.pk %}" class="btn btn-sm" title="Update Invoice">📝 Update invoice</a>
+                                <a href="{% url 'fees_invoice_detail' pk=invoice.pk %}" class="btn btn-sm" title="View Details">🔍 View invoice details</a>
+                                <a href="{% url 'fees_invoice_delete' pk=invoice.pk %}" class="btn btn-sm" title="Delete Invoice">🗑️ Delete invoice</a>
+                                {% if invoice.status == 'PAID' %}
+                                    <a href="{% url 'fees_invoice_receipt' pk=invoice.id %}" class="btn btn-sm" title="View Receipt">🧾 View receipt</a>
+                                {% endif %}
+                                {% if invoice.payments.exists %}
+                                    <a href="{% url 'payment_update' invoice_id=invoice.id pk=invoice.payments.first.id %}" class="btn btn-sm" title="Update Payment">💰 Update payment</a>
+                                {% else %}
+                                    <a href="{% url 'payment_create' invoice_id=invoice.id %}" class="btn btn-sm" title="Create Payment">💸 Create payment</a>
+                                {% endif %}
+                            {% else %}
+                                {% if invoice.status == 'PAID' %}
+                                    <a href="{% url 'fees_invoice_detail' pk=invoice.pk %}" class="btn btn-sm" title="View Details">🔍 View invoice details</a>
+                                    <a href="{% url 'fees_invoice_receipt' pk=invoice.id %}" class="btn btn-sm" title="View Receipt">🧾 View receipt</a>
+                                {% else %}
+                                    <a href="{% url 'fees_invoice_detail' pk=invoice.pk %}" class="btn btn-sm" title="View Details">🔍 View invoice details</a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr id="no-results-row" style="display: none;">
+                    <td colspan="13">No invoices match the current filters.</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+{% else %}
+    <p class="no-data">No invoices found.</p>
+{% endif %}
+
+<style>
+/* CSS Variables for Consistency */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --gradient-blue: linear-gradient(45deg, #00c6ff, #0072ff);
+    --gradient-green: linear-gradient(45deg, #28a745, #20c997);
+    --gradient-red: linear-gradient(45deg, #ff416c, #ff4b2b);
+    --gradient-yellow: linear-gradient(45deg, #f7971e, #ffd200);
+    --gradient-teal: linear-gradient(45deg, #17a2b8, #20c997);
+    --gradient-purple: linear-gradient(45deg, #6f42c1, #007bff);
+    --border-radius: 50px;
+    --transition: all 0.3s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #212529;
+    overflow-x: hidden;
+}
+
+/* Navigation Styles */
+.nav-container {
+    gap: 8px;
+    flex-direction: row !important;
+}
+
+.title {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    margin: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-btn {
+    flex-shrink: 0;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: #343a40;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    min-width: 1.8rem;
+}
+
+.add-btn {
+    background: var(--gradient-green);
+    border-radius: 50%;
+    width: clamp(1.6rem, 4.5vw, 1.8rem);
+    height: clamp(1.6rem, 4.5vw, 1.8rem);
+    color: #fff;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+}
+
+@media (max-width: 576px) {
+    .nav-container {
+        gap: 5px;
+        padding: 0 5px;
+    }
+    .title {
+        font-size: clamp(1rem, 3vw, 1.4rem);
+    }
+    .nav-btn {
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        padding: 0.3rem;
+        min-width: 1.6rem;
+    }
+    .add-btn {
+        width: clamp(1.4rem, 4vw, 1.6rem);
+        height: clamp(1.4rem, 4vw, 1.6rem);
+    }
+}
+
+/* Filters Section */
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #343a40;
+    margin-bottom: 0.3rem;
+}
+
+.form-control-sm,
+.form-select-sm {
+    border-radius: var(--border-radius);
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    border: 1px solid #ced4da;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control-sm:focus,
+.form-select-sm:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+.btn-secondary {
+    border-radius: var(--border-radius);
+    background: var(--gradient-purple);
+    border: none;
+    padding: 8px;
+    font-size: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn-secondary:hover {
+    transform: scale(1.05);
+}
+
+@media (min-width: 768px) {
+    .form-control-sm,
+    .form-select-sm,
+    .btn-secondary {
+        min-width: 80px;
+    }
+    .col-md-3 .form-control-sm {
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .row .col-12 {
+        margin-bottom: 10px;
+    }
+    .form-control-sm,
+    .form-select-sm,
+    .btn-secondary {
+        height: 38px;
+    }
+}
+
+/* Totals Display */
+.totals span {
+    font-size: 1rem;
+}
+
+.totals strong {
+    color: #343a40;
+}
+
+#total-payable {
+    color: var(--primary-color);
+}
+
+#total-paid {
+    color: var(--success-color);
+}
+
+#total-balance {
+    color: var(--danger-color);
+}
+
+@media (max-width: 768px) {
+    .totals {
+        flex-direction: column;
+        align-items: center;
+    }
+    .totals span {
+        margin-bottom: 10px;
+    }
+}
+
+/* Table Styles */
+.table-scroll-container {
+    max-width: 100%;
+    overflow-x: auto;
+    display: block;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+}
+
+.table {
+    width: 100%;
+    min-width: 1600px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th, .table td {
+    border: 1px solid #e0e4e8;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.table th {
+    background: var(--gradient-blue);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.table td.text-right {
+    font-family: monospace;
+    text-align: right;
+}
+
+.table .badge {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
+
+.table .btn-sm {
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin: 2px;
+    font-size: 0.8rem;
+    color: #fff;
+    transition: var(--transition);
+}
+
+.table .btn-sm:hover {
+    transform: scale(1.05);
+}
+
+.table .btn-sm[title="Update Invoice"] { background: var(--gradient-blue); }
+.table .btn-sm[title="View Details"] { background: var(--gradient-yellow); }
+.table .btn-sm[title="Delete Invoice"] { background: var(--gradient-red); }
+.table .btn-sm[title="View Receipt"] { background: var(--gradient-teal); }
+.table .btn-sm[title="Update Payment"] { background: var(--gradient-purple); }
+.table .btn-sm[title="Create Payment"] { background: var(--gradient-green); }
+
+.no-data {
+    text-align: center;
+    color: #6c757d;
+    font-size: 1rem;
+    margin: 20px 0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+    .table th, .table td {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+    .table .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('filter-search');
+    const classFilter = document.getElementById('filter-class');
+    const sessionFilter = document.getElementById('filter-session');
+    const termFilter = document.getElementById('filter-term');
+    const installmentFilter = document.getElementById('filter-installment');
+    const statusFilter = document.getElementById('filter-status');
+    const dateFromFilter = document.getElementById('filter-date-from');
+    const dateToFilter = document.getElementById('filter-date-to');
+    const tableBody = document.getElementById('invoice-table-body');
+    const rows = tableBody.querySelectorAll('tr.invoice-row');
+    const noResultsRow = document.getElementById('no-results-row');
+    const resetFiltersButton = document.getElementById('reset-filters');
+    const tableContainer = document.querySelector('.table-scroll-container');
+
+    const totalPayableEl = document.getElementById('total-payable');
+    const totalPaidEl = document.getElementById('total-paid');
+    const totalBalanceEl = document.getElementById('total-balance');
+
+    function formatCurrency(value) {
+        const number = parseFloat(value) || 0;
+        return number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedClass = classFilter.value;
+        const selectedSession = sessionFilter.value;
+        const selectedTerm = termFilter.value;
+        const selectedInstallment = installmentFilter.value;
+        const selectedStatus = statusFilter.value;
+        const dateFrom = dateFromFilter.value;
+        const dateTo = dateToFilter.value;
+
+        let visibleRows = 0;
+        let currentTotalPayable = 0;
+        let currentTotalPaid = 0;
+        let currentTotalBalance = 0;
+        let visibleIndex = 1;
+
+        rows.forEach(row => {
+            const invoiceId = row.dataset.invoiceId;
+            const studentName = row.dataset.studentName;
+            const classId = row.dataset.classId;
+            const sessionId = row.dataset.sessionId;
+            const termId = row.dataset.termId;
+            const installmentId = row.dataset.installmentId;
+            const status = row.dataset.status;
+            const invoiceDate = row.dataset.invoiceDate;
+            const payable = parseFloat(row.dataset.payable) || 0;
+            const paid = parseFloat(row.dataset.paid) || 0;
+            const balance = parseFloat(row.dataset.balance) || 0;
+
+            let showRow = true;
+
+            if (searchTerm && !(studentName.includes(searchTerm) || invoiceId.includes(searchTerm))) {
+                showRow = false;
+            }
+            if (showRow && selectedClass && classId !== selectedClass) {
+                showRow = false;
+            }
+            if (showRow && selectedSession && sessionId !== selectedSession) {
+                showRow = false;
+            }
+            if (showRow && selectedTerm && termId !== selectedTerm) {
+                showRow = false;
+            }
+            if (showRow && selectedInstallment && installmentId !== selectedInstallment) {
+                showRow = false;
+            }
+            if (showRow && selectedStatus && status !== selectedStatus) {
+                showRow = false;
+            }
+            if (showRow && dateFrom && invoiceDate < dateFrom) {
+                showRow = false;
+            }
+            if (showRow && dateTo && invoiceDate > dateTo) {
+                showRow = false;
+            }
+
+            if (showRow) {
+                row.style.display = '';
+                row.querySelector('.row-index').textContent = visibleIndex++;
+                visibleRows++;
+                currentTotalPayable += payable;
+                currentTotalPaid += paid;
+                currentTotalBalance += balance;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        totalPayableEl.textContent = formatCurrency(currentTotalPayable);
+        totalPaidEl.textContent = formatCurrency(currentTotalPaid);
+        totalBalanceEl.textContent = formatCurrency(currentTotalBalance);
+
+        noResultsRow.style.display = visibleRows === 0 ? '' : 'none';
+    }
+
+    // Handle touch scrolling for table
+    tableContainer.addEventListener('touchmove', function(e) {
+        // Allow scrolling within the table if it has horizontal overflow
+        if (tableContainer.scrollWidth > tableContainer.clientWidth) {
+            // Check if touch is on a link or button; if so, allow default behavior
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return;
+            }
+            // Prevent viewport scrolling
+            e.stopPropagation();
+        }
+    }, { passive: true });
+
+    searchInput.addEventListener('input', applyFilters);
+    classFilter.addEventListener('change', applyFilters);
+    sessionFilter.addEventListener('change', applyFilters);
+    termFilter.addEventListener('change', applyFilters);
+    installmentFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    dateFromFilter.addEventListener('input', applyFilters);
+    dateToFilter.addEventListener('input', applyFilters);
+
+    resetFiltersButton.addEventListener('click', function() {
+        searchInput.value = '';
+        classFilter.value = '';
+        const currentSessionId = "{% if current_session %}{{ current_session.id }}{% endif %}";
+        const currentTermId = "{% if current_term %}{{ current_term.id }}{% endif %}";
+        const currentInstallmentId = "{% if current_installment %}{{ current_installment.id }}{% endif %}";
+
+        sessionFilter.value = currentSessionId || '';
+        termFilter.value = currentTermId || '';
+        installmentFilter.value = currentInstallmentId || '';
+
+        statusFilter.value = '';
+        dateFromFilter.value = '';
+        dateToFilter.value = '';
+
+        applyFilters();
+    });
+
+    applyFilters();
+});
+</script>
+{% endblock content %}

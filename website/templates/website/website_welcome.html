@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title>Welcome to Manus Dei Secondary</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(180deg, #F28C38, #D97A30); /* Carrot sky */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: #FFFFFF;
+            position: relative;
+        }
+        .welcome-container {
+            text-align: center;
+            z-index: 10;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .welcome-title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0 0 20px;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease-out forwards;
+        }
+        .welcome-message {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin: 0 0 30px;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease-out 0.3s forwards;
+        }
+        .countdown {
+            font-size: 1.2rem;
+            margin: 0 0 40px;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease-out 0.6s forwards;
+        }
+        .countdown span {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5rem;
+            color: #007AFF; /* Blue */
+            animation: pulse 0.5s ease-in-out;
+        }
+        .welcome-image {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 2px solid #007AFF;
+            animation: bounce 2s ease-in-out infinite;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease-out 0.9s forwards, bounce 2s ease-in-out infinite;
+        }
+        /* Stars */
+        .star {
+            position: absolute;
+            background: #FFFFFF;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle 5s linear infinite;
+        }
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            animation: drift 30s linear infinite;
+        }
+        @keyframes fadeInDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes twinkle {
+            0% { transform: translate(0, 0); opacity: 0.8; }
+            100% { transform: translate(100vw, 100vh); opacity: 0.2; }
+        }
+        @keyframes drift {
+            0% { transform: translateX(-100vw); }
+            100% { transform: translateX(100vw); }
+        }
+        @media (max-width: 768px) {
+            .welcome-title {
+                font-size: 2rem;
+            }
+            .welcome-message {
+                font-size: 1.2rem;
+            }
+            .countdown {
+                font-size: 1rem;
+            }
+            .countdown span {
+                font-size: 1.2rem;
+            }
+            .welcome-image {
+                width: 120px;
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1 class="welcome-title">Welcome to Manus Dei</h1>
+        <p class="welcome-message">We are so glad to have you, A school driven by the glory and wisdom of God</p>
+        <p class="countdown">You gonna be directed to the website page in <span id="countdown">3</span> seconds</p>
+        <img src="{% static 'images/school.png' %}" alt="Manus Dei Logo" class="welcome-image">
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Generate stars
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.width = star.style.height = `${Math.random() * 3 + 1}px`;
+                star.style.left = `${Math.random() * 100}vw`;
+                star.style.top = `${Math.random() * 100}vh`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(star);
+            }
+            // Generate clouds
+            for (let i = 0; i < 5; i++) {
+                const cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                cloud.style.width = `${Math.random() * 100 + 50}px`;
+                cloud.style.height = `${Math.random() * 30 + 20}px`;
+                cloud.style.top = `${Math.random() * 50}vh`;
+                cloud.style.animationDelay = `${Math.random() * 10}s`;
+                document.body.appendChild(cloud);
+            }
+            // Countdown
+            let count = 3;
+            const countdownElement = document.getElementById('countdown');
+            const countdownInterval = setInterval(() => {
+                count--;
+                countdownElement.textContent = count;
+                countdownElement.style.animation = 'pulse 0.5s ease-in-out';
+                if (count === 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = "{% url 'website_home' %}";
+                }
+            }, 1000);
+            // Reset pulse animation
+            countdownElement.addEventListener('animationend', () => {
+                countdownElement.style.animation = '';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+{% extends base_template %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="back-btn" onclick="window.history.back()">⬅️</span>
+            <h3 class="flex-grow-1">{{ title }}</h3>
+            <span class="spacer"> </span>
+        </div>
+    </div>
+
+    <!-- Error Message or Result Details -->
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% else %}
+        <!-- School Header -->
+        <div class="school-header text-center mb-5">
+            <h4 class="mb-1">PRESIDENT'S OFFICE - REGIONAL ADMINISTRATION AND LOCAL GOVERNMENT</h4>
+            <h5 class="mb-1">BUHIGWE DISTRICT COUNCIL</h5>
+            <h5 class="mb-1">MANUS DEI SECONDARY SCHOOL</h5>
+            <h5 class="mb-0">{{ student_class.name|upper }} {{ exam.name }} RESULTS - {{ session.name|slice:"0:4" }}</h5>
+        </div>
+
+        <!-- Student Information -->
+        <div class="student-info mb-5">
+            <h5 class="section-title mb-3">Student Information</h5>
+            <p><strong>Name:</strong> {{ student.firstname }} {% if student.middle_name %}{{ student.middle_name }}{% endif %} {{ student.surname }}</p>
+            <p><strong>Registration Number:</strong> {{ student.registration_number }}</p>
+            <p><strong>Gender:</strong> {% if student.gender == 'female' %}Female{% else %}Male{% endif %}</p>
+            <p><strong>Class:</strong> {{ student_class.name }}</p>
+            <p><strong>Session:</strong> {{ session.name }}</p>
+            <p><strong>Term:</strong> {{ term.name }}</p>
+            <p><strong>Exam:</strong> {{ exam.name }}</p>
+        </div>
+
+        <!-- Subject Results -->
+        <h5 class="section-title mt-5 mb-3">Subject Results</h5>
+        <div class="table-container mb-5">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sr in student_data.subject_results %}
+                        <tr>
+                            <td>{{ sr.subject.name }}</td>
+                            <td>{{ sr.marks }}</td>
+                            <td>{{ sr.grade }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Overall Performance -->
+        <h5 class="section-title mt-5 mb-3">Overall Performance</h5>
+        <div class="table-container mb-5">
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Average</td>
+                        <td>{{ student_data.average }}</td>
+                    </tr>
+                    <tr>
+                        <td>Average Grade</td>
+                        <td>{{ student_data.average_grade }}</td>
+                    </tr>
+                    <tr>
+                        <td>Position</td>
+                        <td>{{ student_data.position }}</td>
+                    </tr>
+                    <tr>
+                        <td>Points</td>
+                        <td>{{ student_data.points }}</td>
+                    </tr>
+                    <tr>
+                        <td>Division</td>
+                        <td>{{ student_data.division }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Student Informations Button -->
+        {% if show_student_info_button %}
+        <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+            <a href="{% url 'student_information' student.id %}" style="background-color: #007aff; color: white; padding: 12px 24px; border: none; border-radius: 25px; font-size: 16px; text-decoration: none; display: inline-block; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">Student Informations</a>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        overflow-x: hidden;
+    }
+
+    /* Header Styling */
+    .header {
+        background: linear-gradient(135deg, #2b6cb0, #4299e1);
+        color: #ffffff;
+        padding: 25px;
+        text-align: center;
+        margin: 0 15px 30px 15px;
+        border-radius: 12px;
+    }
+
+    .header h3 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .back-btn, .spacer {
+        font-size: 28px;
+        color: #ffffff;
+        cursor: pointer;
+        padding: 0 15px;
+    }
+
+    /* School Header */
+    .school-header h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .school-header h5 {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    /* Student Info */
+    .student-info p {
+        font-size: 16px;
+        margin: 5px 0;
+    }
+
+    /* Section Titles */
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 8px;
+    }
+
+    /* Tables */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    .result-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .result-table th, .result-table td {
+        padding: 12px 15px;
+        text-align: center;
+        font-size: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        border: 1px solid #d1d1d6; /* Added to match class_results.html styling */
+    }
+
+    .result-table th {
+        font-weight: 600;
+        color: #2d3748;
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .result-table tbody tr:hover {
+        transition: background-color 0.3s ease;
+    }
+
+    /* Error Message */
+    .error-message {
+        color: #e53e3e;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 20px 0;
+    }
+
+    /* Button Styling */
+    a[style*="Student Informations"] {
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    a[style*="Student Informations"]:hover {
+        background-color: #005bb5;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 576px) {
+        .container {
+            padding: 15px;
+        }
+
+        .header {
+            padding: 20px;
+            margin: 0 10px 20px 10px;
+        }
+
+        .header h3 {
+            font-size: 1.5rem;
+        }
+
+        .back-btn, .spacer {
+            font-size: 24px;
+            padding: 0 10px;
+        }
+
+        .school-header h4 {
+            font-size: 1.1rem;
+        }
+
+        .school-header h5 {
+            font-size: 0.95rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+        }
+
+        .student-info p {
+            font-size: 14px;
+        }
+
+        .result-table th, .result-table td {
+            font-size: 13px;
+            padding: 8px 10px;
+        }
+
+        a[style*="Student Informations"] {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock content %}
